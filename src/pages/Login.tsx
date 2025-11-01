@@ -17,8 +17,6 @@ export function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [phone, setPhone] = useState('')
-  const [otp, setOtp] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
@@ -66,43 +64,6 @@ export function Login() {
       if (error) throw error
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
-      setLoading(false)
-    }
-  }
-
-  const handleSendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone,
-      })
-      if (error) throw error
-      setOtpSent(true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        phone,
-        token: otp,
-        type: 'sms',
-      })
-      if (error) throw error
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    } finally {
       setLoading(false)
     }
   }

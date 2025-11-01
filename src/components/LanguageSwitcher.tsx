@@ -2,7 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 import { Languages } from "lucide-react";
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  inline?: boolean;
+}
+
+export function LanguageSwitcher({ inline = false }: LanguageSwitcherProps) {
   const { i18n } = useTranslation();
 
   const languages = [
@@ -25,7 +29,7 @@ export function LanguageSwitcher() {
       onClick={toggleLanguage}
       variant="outline"
       size="sm"
-      className="fixed top-4 right-4 z-50 gap-2"
+      className={`gap-2 ${inline ? '' : 'fixed top-4 right-4 z-50'}`}
       title={`Switch to ${
         languages.find((l) => l.code !== i18n.language)?.label
       }`}

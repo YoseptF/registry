@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -7,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { ArrowLeft, Calendar, TrendingUp, Award, Download, Search, Filter } from 'lucide-react'
+import { Navigation } from '@/components/Navigation'
+import { Calendar, TrendingUp, Award, Download, Search, Filter } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { CheckIn, Class } from '@/types'
 import { format, startOfWeek, startOfMonth, isAfter, isBefore, differenceInDays } from 'date-fns'
@@ -211,15 +210,9 @@ export function CheckInsHistory() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <LanguageSwitcher />
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <Link to="/user">
-            <Button variant="ghost" className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t('common.back')}
-            </Button>
-          </Link>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
             {t('user.checkInHistory')}
           </h1>

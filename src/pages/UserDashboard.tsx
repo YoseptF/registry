@@ -6,9 +6,9 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Drawer } from '@/components/ui/drawer'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { Navigation } from '@/components/Navigation'
 import { QRCodeSVG } from 'qrcode.react'
-import { LogOut, User, Mail, Phone, MapPin, ChevronRight } from 'lucide-react'
+import { User, Mail, Phone, MapPin, ChevronRight } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, CheckIn, User as UserType } from '@/types'
 import { format } from 'date-fns'
@@ -118,7 +118,7 @@ function ClassDrawer({
 export function UserDashboard() {
   const { t } = useTranslation()
   usePageTitle('pages.userDashboard')
-  const { profile, signOut } = useAuth()
+  const { profile } = useAuth()
   const [classes, setClasses] = useState<Class[]>([])
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [loading, setLoading] = useState(true)
@@ -242,16 +242,12 @@ export function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <LanguageSwitcher />
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
             {t('user.dashboard')}
           </h1>
-          <Button onClick={signOut} variant="outline">
-            <LogOut className="w-4 h-4 mr-2" />
-            {t('auth.signOut')}
-          </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">

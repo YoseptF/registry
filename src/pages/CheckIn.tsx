@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { Navigation } from '@/components/Navigation'
 import { QrCode, UserPlus } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class } from '@/types'
@@ -224,7 +224,7 @@ export function CheckIn() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <LanguageSwitcher />
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-2 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">

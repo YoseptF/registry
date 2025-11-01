@@ -5,11 +5,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Drawer } from '@/components/ui/drawer'
+import { ClassForm } from '@/components/ClassForm'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { LogOut, Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight } from 'lucide-react'
+import { LogOut, Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit } from 'lucide-react'
 import type { User, Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
 
@@ -17,17 +17,20 @@ function ClassDrawer({
   open,
   onClose,
   classInfo,
-  users
+  users,
+  onClassUpdated
 }: {
   open: boolean
   onClose: () => void
   classInfo: Class | null
   users: User[]
+  onClassUpdated: () => void
 }) {
   const { t } = useTranslation()
   const [members, setMembers] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUserId, setSelectedUserId] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     if (classInfo && open) {
@@ -95,28 +98,70 @@ function ClassDrawer({
   const availableUsers = users.filter((u) => !members.includes(u.id) && u.role !== 'admin')
 
   return (
-    <Drawer open={open} onClose={onClose} title={classInfo.name}>
-      <div className="space-y-6">
-        {classInfo.description && (
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
-            <p className="text-sm">{classInfo.description}</p>
+    <Drawer open={open} onClose={onClose} title={isEditing ? t('admin.editClass') : classInfo.name}>
+      {isEditing ? (
+        <ClassForm
+          initialData={classInfo}
+          onSuccess={() => {
+            setIsEditing(false)
+            onClassUpdated()
+          }}
+          onCancel={() => setIsEditing(false)}
+        />
+      ) : (
+        <div className="space-y-6">
+          <div className="flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Edit className="w-4 h-4 mr-2" />
+              {t('admin.editClass')}
+            </Button>
           </div>
-        )}
 
-        {classInfo.instructor && (
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
-            <p className="text-sm">{classInfo.instructor}</p>
-          </div>
-        )}
+          {classInfo.banner_url && (
+            <div>
+              <img
+                src={classInfo.banner_url}
+                alt={classInfo.name}
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            </div>
+          )}
 
-        {classInfo.schedule && (
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
-            <p className="text-sm">{classInfo.schedule}</p>
-          </div>
-        )}
+          {classInfo.description && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
+              <p className="text-sm">{classInfo.description}</p>
+            </div>
+          )}
+
+          {classInfo.instructor && (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
+              <p className="text-sm">{classInfo.instructor}</p>
+            </div>
+          )}
+
+          {(classInfo.schedule_days && classInfo.schedule_days.length > 0) || classInfo.schedule_time || classInfo.duration_minutes ? (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
+              <p className="text-sm">
+                {classInfo.schedule_days && classInfo.schedule_days.length > 0 && (
+                  <span>{classInfo.schedule_days.map(day => t(`admin.${day}`)).join(', ')}</span>
+                )}
+                {classInfo.schedule_time && (
+                  <span> {t('admin.at')} {classInfo.schedule_time}</span>
+                )}
+                {classInfo.duration_minutes && (
+                  <span> ({classInfo.duration_minutes} {t('admin.minutes')})</span>
+                )}
+              </p>
+            </div>
+          ) : classInfo.schedule ? (
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
+              <p className="text-sm">{classInfo.schedule}</p>
+            </div>
+          ) : null}
 
         <div className="border-t pt-6 pb-6">
           <Link to={`/checkin/${classInfo.id}`}>
@@ -185,7 +230,8 @@ function ClassDrawer({
             </div>
           )}
         </div>
-      </div>
+        </div>
+      )}
     </Drawer>
   )
 }
@@ -197,10 +243,6 @@ export function AdminDashboard() {
   const [classes, setClasses] = useState<Class[]>([])
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([])
   const [showCreateClass, setShowCreateClass] = useState(false)
-  const [newClassName, setNewClassName] = useState('')
-  const [newClassDescription, setNewClassDescription] = useState('')
-  const [newClassInstructor, setNewClassInstructor] = useState('')
-  const [newClassSchedule, setNewClassSchedule] = useState('')
   const [loading, setLoading] = useState(true)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -246,33 +288,6 @@ export function AdminDashboard() {
 
     return () => {
       supabase.removeChannel(channel)
-    }
-  }
-
-  const handleCreateClass = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    try {
-      const { error } = await supabase.from('classes').insert({
-        name: newClassName,
-        description: newClassDescription || null,
-        instructor: newClassInstructor || null,
-        schedule: newClassSchedule || null,
-        created_by: user.id,
-      })
-
-      if (error) throw error
-
-      setNewClassName('')
-      setNewClassDescription('')
-      setNewClassInstructor('')
-      setNewClassSchedule('')
-      setShowCreateClass(false)
-      fetchAdminData()
-    } catch (error) {
-      console.error('Error creating class:', error)
     }
   }
 
@@ -355,48 +370,15 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               {showCreateClass && (
-                <form onSubmit={handleCreateClass} className="space-y-4 mb-4 p-4 border rounded-lg">
-                  <div className="space-y-2">
-                    <Label htmlFor="className">{t('admin.className')} *</Label>
-                    <Input
-                      id="className"
-                      value={newClassName}
-                      onChange={(e) => setNewClassName(e.target.value)}
-                      placeholder="Yoga 101"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="classDescription">{t('admin.description')}</Label>
-                    <Input
-                      id="classDescription"
-                      value={newClassDescription}
-                      onChange={(e) => setNewClassDescription(e.target.value)}
-                      placeholder={t('admin.description')}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="classInstructor">{t('admin.instructor')}</Label>
-                    <Input
-                      id="classInstructor"
-                      value={newClassInstructor}
-                      onChange={(e) => setNewClassInstructor(e.target.value)}
-                      placeholder="Jane Doe"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="classSchedule">{t('admin.schedule')}</Label>
-                    <Input
-                      id="classSchedule"
-                      value={newClassSchedule}
-                      onChange={(e) => setNewClassSchedule(e.target.value)}
-                      placeholder="Mon/Wed 6pm"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">
-                    {t('admin.createClass')}
-                  </Button>
-                </form>
+                <div className="mb-4 p-4 border rounded-lg">
+                  <ClassForm
+                    onSuccess={() => {
+                      setShowCreateClass(false)
+                      fetchAdminData()
+                    }}
+                    onCancel={() => setShowCreateClass(false)}
+                  />
+                </div>
               )}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {classes.length === 0 ? (
@@ -431,9 +413,17 @@ export function AdminDashboard() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>{t('admin.recentCheckIns')}</CardTitle>
-              <CardDescription>{t('admin.liveUpdates')}</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <div>
+                <CardTitle>{t('admin.recentCheckIns')}</CardTitle>
+                <CardDescription>{t('admin.liveUpdates')}</CardDescription>
+              </div>
+              <Link to="/check-ins-history">
+                <Button variant="outline" size="sm">
+                  {t('user.viewAll')}
+                  <ChevronRight className="ml-1 w-4 h-4" />
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -495,6 +485,7 @@ export function AdminDashboard() {
           onClose={() => setIsDrawerOpen(false)}
           classInfo={selectedClass}
           users={users}
+          onClassUpdated={fetchAdminData}
         />
       </div>
     </div>

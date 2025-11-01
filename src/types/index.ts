@@ -15,6 +15,10 @@ export interface Class {
   description?: string | null
   instructor?: string | null
   schedule?: string | null
+  banner_url?: string | null
+  schedule_days?: string[] | null
+  schedule_time?: string | null
+  duration_minutes?: number | null
   created_by: string
   created_at: string
 }

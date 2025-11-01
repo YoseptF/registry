@@ -192,10 +192,13 @@ export function Register() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleOAuthRegister('apple')}
-              disabled={loading}
+              disabled={true}
+              className="relative"
             >
               Apple
+              <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                Soon
+              </span>
             </Button>
           </div>
         </CardContent>

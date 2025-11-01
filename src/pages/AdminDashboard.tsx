@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar } from '@/components/ui/avatar'
 import { ClassForm } from '@/components/ClassForm'
 import { Navigation } from '@/components/Navigation'
-import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit, Upload, X, User as UserIcon } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit, Upload, X } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useAuth } from '@/contexts/AuthContext'
 import type { User, Class, CheckIn } from '@/types'
@@ -525,7 +525,7 @@ export function AdminDashboard() {
           .limit(20),
       ])
 
-      setUsers(usersResult.data || [])
+      setUsers((usersResult.data as User[]) || [])
       setClasses(classesResult.data || [])
       setRecentCheckIns(checkInsResult.data || [])
     } catch (error) {
@@ -778,7 +778,7 @@ export function AdminDashboard() {
                     <div className="flex-shrink-0 w-32">
                       <Select
                         value={user.role}
-                        onValueChange={(value: 'admin' | 'instructor' | 'user') => updateUserRole(user.id, value)}
+                        onValueChange={(value) => updateUserRole(user.id, value as 'admin' | 'instructor' | 'user')}
                         disabled={user.id === currentUser?.id}
                       >
                         <SelectTrigger className="h-8 text-xs">

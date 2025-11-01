@@ -56,6 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) throw error
+      if (!data) {
+        setProfile(null)
+        return
+      }
 
       if (!data.avatar_url && user?.user_metadata?.avatar_url) {
         const googleAvatarUrl = user.user_metadata.avatar_url

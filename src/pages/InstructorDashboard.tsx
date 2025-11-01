@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar } from '@/components/ui/avatar'
 import { Navigation } from '@/components/Navigation'
-import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, Upload, X, Edit, User as UserIcon } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, X, Edit, User as UserIcon } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, CheckIn, User } from '@/types'
 import { format } from 'date-fns'
@@ -21,13 +21,11 @@ function ClassDrawer({
   onClose,
   classInfo,
   users,
-  onClassUpdated
 }: {
   open: boolean
   onClose: () => void
   classInfo: Class | null
   users: User[]
-  onClassUpdated: () => void
 }) {
   const { t } = useTranslation()
   const [members, setMembers] = useState<string[]>([])
@@ -664,7 +662,6 @@ export function InstructorDashboard() {
           onClose={() => setIsDrawerOpen(false)}
           classInfo={selectedClass}
           users={users}
-          onClassUpdated={fetchInstructorData}
         />
 
         <ProfileEditDrawer

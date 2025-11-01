@@ -220,9 +220,10 @@ export function Classes() {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, name, email, role, avatar_url')
+        .select('id, name, email, role, avatar_url, created_at')
         .in('role', ['instructor', 'admin'])
         .order('name')
+        .returns<UserType[]>()
 
       setInstructors(data || [])
     } catch (error) {

@@ -30,6 +30,7 @@ export function Instructors() {
         .select('*')
         .in('role', ['instructor', 'admin'])
         .order('name')
+        .returns<User[]>()
 
       if (error) throw error
 

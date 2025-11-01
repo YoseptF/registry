@@ -16,7 +16,8 @@ export type Database = {
           email: string
           phone: string | null
           address: string | null
-          role: 'admin' | 'user'
+          role: 'admin' | 'instructor' | 'user'
+          bio: string | null
           avatar_url: string | null
           created_at: string
         }
@@ -26,7 +27,8 @@ export type Database = {
           email: string
           phone?: string | null
           address?: string | null
-          role?: 'admin' | 'user'
+          role?: 'admin' | 'instructor' | 'user'
+          bio?: string | null
           avatar_url?: string | null
           created_at?: string
         }
@@ -36,7 +38,8 @@ export type Database = {
           email?: string
           phone?: string | null
           address?: string | null
-          role?: 'admin' | 'user'
+          role?: 'admin' | 'instructor' | 'user'
+          bio?: string | null
           avatar_url?: string | null
           created_at?: string
         }
@@ -48,7 +51,12 @@ export type Database = {
           name: string
           description: string | null
           instructor: string | null
+          instructor_id: string | null
           schedule: string | null
+          banner_url: string | null
+          schedule_days: string[] | null
+          schedule_time: string | null
+          duration_minutes: number | null
           created_by: string
           created_at: string
         }
@@ -57,7 +65,12 @@ export type Database = {
           name: string
           description?: string | null
           instructor?: string | null
+          instructor_id?: string | null
           schedule?: string | null
+          banner_url?: string | null
+          schedule_days?: string[] | null
+          schedule_time?: string | null
+          duration_minutes?: number | null
           created_by: string
           created_at?: string
         }
@@ -66,7 +79,12 @@ export type Database = {
           name?: string
           description?: string | null
           instructor?: string | null
+          instructor_id?: string | null
           schedule?: string | null
+          banner_url?: string | null
+          schedule_days?: string[] | null
+          schedule_time?: string | null
+          duration_minutes?: number | null
           created_by?: string
           created_at?: string
         }

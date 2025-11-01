@@ -54,9 +54,10 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, name, email, role')
+        .select('id, name, email, role, created_at')
         .in('role', ['instructor', 'admin'])
         .order('name')
+        .returns<User[]>()
 
       if (error) throw error
       setInstructors(data || [])

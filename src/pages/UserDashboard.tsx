@@ -1,21 +1,37 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Drawer } from '@/components/ui/drawer'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Avatar } from '@/components/ui/avatar'
-import { Navigation } from '@/components/Navigation'
-import { QRCodeSVG } from 'qrcode.react'
-import { User, Mail, Phone, MapPin, ChevronRight, Edit, Upload, X } from 'lucide-react'
-import { usePageTitle } from '@/hooks/usePageTitle'
-import type { Class, CheckIn, User as UserType } from '@/types'
-import { format } from 'date-fns'
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Drawer } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar } from "@/components/ui/avatar";
+import { Navigation } from "@/components/Navigation";
+import { QRCodeSVG } from "qrcode.react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  ChevronRight,
+  Edit,
+  Upload,
+  X,
+  Clock,
+} from "lucide-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import type { Class, CheckIn, User as UserType } from "@/types";
+import { format } from "date-fns";
 
 function ProfileEditDrawer({
   open,
@@ -23,120 +39,122 @@ function ProfileEditDrawer({
   profile,
   onProfileUpdated,
 }: {
-  open: boolean
-  onClose: () => void
-  profile: UserType | null
-  onProfileUpdated: () => void
+  open: boolean;
+  onClose: () => void;
+  profile: UserType | null;
+  onProfileUpdated: () => void;
 }) {
-  const { t } = useTranslation()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [name, setName] = useState(profile?.name || '')
-  const [phone, setPhone] = useState(profile?.phone || '')
-  const [address, setAddress] = useState(profile?.address || '')
-  const [bio, setBio] = useState(profile?.bio || '')
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null)
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPasswordSection, setShowPasswordSection] = useState(false)
+  const [name, setName] = useState(profile?.name || "");
+  const [phone, setPhone] = useState(profile?.phone || "");
+  const [address, setAddress] = useState(profile?.address || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(
+    profile?.avatar_url || null
+  );
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPasswordSection, setShowPasswordSection] = useState(false);
 
   useEffect(() => {
     if (profile && open) {
-      setName(profile.name || '')
-      setPhone(profile.phone || '')
-      setAddress(profile.address || '')
-      setBio(profile.bio || '')
-      setAvatarPreview(profile.avatar_url || null)
-      setNewPassword('')
-      setConfirmPassword('')
-      setShowPasswordSection(false)
+      setName(profile.name || "");
+      setPhone(profile.phone || "");
+      setAddress(profile.address || "");
+      setBio(profile.bio || "");
+      setAvatarPreview(profile.avatar_url || null);
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowPasswordSection(false);
     }
-  }, [profile, open])
+  }, [profile, open]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setError('Avatar image must be less than 5MB')
-        return
+        setError("Avatar image must be less than 5MB");
+        return;
       }
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload an image file')
-        return
+      if (!file.type.startsWith("image/")) {
+        setError("Please upload an image file");
+        return;
       }
-      setAvatarFile(file)
-      setAvatarPreview(URL.createObjectURL(file))
-      setError(null)
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+      setError(null);
     }
-  }
+  };
 
   const removeAvatar = () => {
-    setAvatarFile(null)
-    setAvatarPreview(null)
-  }
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
 
   const uploadAvatar = async (): Promise<string | null> => {
-    if (!avatarFile || !profile) return avatarPreview
+    if (!avatarFile || !profile) return avatarPreview;
 
-    const fileExt = avatarFile.name.split('.').pop()
-    const fileName = `${profile.id}-${Date.now()}.${fileExt}`
-    const filePath = `${fileName}`
+    const fileExt = avatarFile.name.split(".").pop();
+    const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
+    const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, avatarFile, { upsert: true })
+      .from("avatars")
+      .upload(filePath, avatarFile, { upsert: true });
 
     if (uploadError) {
-      console.error('Error uploading avatar:', uploadError)
-      throw new Error('Failed to upload avatar image')
+      console.error("Error uploading avatar:", uploadError);
+      throw new Error("Failed to upload avatar image");
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath)
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-    return publicUrl
-  }
+    return publicUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!profile) return
+    e.preventDefault();
+    if (!profile) return;
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
     try {
       // Validate password if provided
       if (newPassword) {
         if (newPassword !== confirmPassword) {
-          setError(t('errors.passwordsDontMatch'))
-          setLoading(false)
-          return
+          setError(t("errors.passwordsDontMatch"));
+          setLoading(false);
+          return;
         }
         if (newPassword.length < 6) {
-          setError(t('errors.passwordTooShort'))
-          setLoading(false)
-          return
+          setError(t("errors.passwordTooShort"));
+          setLoading(false);
+          return;
         }
       }
 
-      let avatarUrl = avatarPreview
+      let avatarUrl = avatarPreview;
       if (avatarFile) {
-        avatarUrl = await uploadAvatar()
+        avatarUrl = await uploadAvatar();
       }
 
       // Update password if provided
       if (newPassword) {
         const { error: passwordError } = await supabase.auth.updateUser({
-          password: newPassword
-        })
-        if (passwordError) throw passwordError
+          password: newPassword,
+        });
+        if (passwordError) throw passwordError;
       }
 
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
           name,
           phone: phone || null,
@@ -144,27 +162,27 @@ function ProfileEditDrawer({
           bio: bio || null,
           avatar_url: avatarUrl,
         })
-        .eq('id', profile.id)
+        .eq("id", profile.id);
 
-      if (updateError) throw updateError
+      if (updateError) throw updateError;
 
-      onProfileUpdated()
-      onClose()
+      onProfileUpdated();
+      onClose();
     } catch (err) {
-      console.error('Error updating profile:', err)
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error("Error updating profile:", err);
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  if (!profile) return null
+  if (!profile) return null;
 
   return (
-    <Drawer open={open} onClose={onClose} title={t('user.editProfile')}>
+    <Drawer open={open} onClose={onClose} title={t("user.editProfile")}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="avatar">{t('user.profilePicture')}</Label>
+          <Label htmlFor="avatar">{t("user.profilePicture")}</Label>
           {avatarPreview ? (
             <div className="relative w-32 h-32 mx-auto">
               <img
@@ -189,7 +207,7 @@ function ProfileEditDrawer({
                 htmlFor="avatar"
                 className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
               >
-                {t('user.uploadAvatar')}
+                {t("user.uploadAvatar")}
               </Label>
               <Input
                 id="avatar"
@@ -203,7 +221,7 @@ function ProfileEditDrawer({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name">{t('auth.name')} *</Label>
+          <Label htmlFor="name">{t("auth.name")} *</Label>
           <Input
             id="name"
             value={name}
@@ -213,7 +231,7 @@ function ProfileEditDrawer({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">{t('auth.phone')}</Label>
+          <Label htmlFor="phone">{t("auth.phone")}</Label>
           <Input
             id="phone"
             type="tel"
@@ -223,7 +241,7 @@ function ProfileEditDrawer({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="address">{t('auth.address')}</Label>
+          <Label htmlFor="address">{t("auth.address")}</Label>
           <Input
             id="address"
             value={address}
@@ -232,12 +250,12 @@ function ProfileEditDrawer({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="bio">{t('user.bio')}</Label>
+          <Label htmlFor="bio">{t("user.bio")}</Label>
           <Textarea
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder={t('user.bioPlaceholder')}
+            placeholder={t("user.bioPlaceholder")}
             rows={4}
           />
         </div>
@@ -249,35 +267,39 @@ function ProfileEditDrawer({
             onClick={() => setShowPasswordSection(!showPasswordSection)}
             className="w-full"
           >
-            {showPasswordSection ? t('user.hidePasswordSection') : t('user.changePassword')}
+            {showPasswordSection
+              ? t("user.hidePasswordSection")
+              : t("user.changePassword")}
           </Button>
 
           {showPasswordSection && (
             <div className="mt-4 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="newPassword">{t('user.newPassword')}</Label>
+                <Label htmlFor="newPassword">{t("user.newPassword")}</Label>
                 <Input
                   id="newPassword"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t('user.enterNewPassword')}
+                  placeholder={t("user.enterNewPassword")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">{t('user.confirmNewPassword')}</Label>
+                <Label htmlFor="confirmPassword">
+                  {t("user.confirmNewPassword")}
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder={t('user.confirmPasswordPlaceholder')}
+                  placeholder={t("user.confirmPasswordPlaceholder")}
                 />
               </div>
 
               <p className="text-xs text-muted-foreground">
-                {t('user.passwordRequirement')}
+                {t("user.passwordRequirement")}
               </p>
             </div>
           )}
@@ -291,15 +313,20 @@ function ProfileEditDrawer({
 
         <div className="flex gap-3 pt-4">
           <Button type="submit" className="flex-1" disabled={loading}>
-            {loading ? t('common.loading') : t('user.saveChanges')}
+            {loading ? t("common.loading") : t("user.saveChanges")}
           </Button>
-          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-            {t('admin.cancel')}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+          >
+            {t("admin.cancel")}
           </Button>
         </div>
       </form>
     </Drawer>
-  )
+  );
 }
 
 function ClassDrawer({
@@ -307,227 +334,277 @@ function ClassDrawer({
   onClose,
   classInfo,
 }: {
-  open: boolean
-  onClose: () => void
-  classInfo: Class | null
+  open: boolean;
+  onClose: () => void;
+  classInfo: Class | null;
 }) {
-  const { t } = useTranslation()
-  const [members, setMembers] = useState<UserType[]>([])
-  const [loading, setLoading] = useState(true)
+  const { t } = useTranslation();
+  const [instructor, setInstructor] = useState<UserType | null>(null);
+  const [loadingInstructor, setLoadingInstructor] = useState(false);
 
   useEffect(() => {
-    if (classInfo && open) {
-      fetchMembers()
+    if (classInfo?.instructor_id && open) {
+      fetchInstructor();
     }
-  }, [classInfo?.id, open])
+  }, [classInfo?.instructor_id, open]);
 
-  const fetchMembers = async () => {
-    if (!classInfo) return
+  const fetchInstructor = async () => {
+    if (!classInfo?.instructor_id) return;
 
-    setLoading(true)
+    setLoadingInstructor(true);
     try {
-      const { data: memberships } = await supabase
-        .from('class_memberships')
-        .select('user_id')
-        .eq('class_id', classInfo.id)
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, name, email, avatar_url, role, created_at")
+        .eq("id", classInfo.instructor_id)
+        .single();
 
-      if (memberships && memberships.length > 0) {
-        const userIds = memberships.map((m) => m.user_id)
-        const { data: usersData } = await supabase
-          .from('profiles')
-          .select('*')
-          .in('id', userIds)
-
-        setMembers(usersData || [])
-      } else {
-        setMembers([])
-      }
+      if (error) throw error;
+      setInstructor(data as UserType);
     } catch (error) {
-      console.error('Error fetching members:', error)
+      console.error("Error fetching instructor:", error);
     } finally {
-      setLoading(false)
+      setLoadingInstructor(false);
     }
-  }
+  };
 
-  if (!classInfo) return null
+  if (!classInfo) return null;
 
   return (
     <Drawer open={open} onClose={onClose} title={classInfo.name}>
       <div className="space-y-6">
+        {classInfo.banner_url && (
+          <div>
+            <img
+              src={classInfo.banner_url}
+              alt={classInfo.name}
+              className="w-full h-48 object-cover rounded-lg"
+            />
+          </div>
+        )}
+
         {classInfo.description && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
-            <p className="text-sm">{classInfo.description}</p>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+              {t("admin.description")}
+            </h3>
+            <p className="text-base leading-relaxed">{classInfo.description}</p>
           </div>
         )}
 
-        {classInfo.instructor && (
+        {(instructor || classInfo.instructor) && (
           <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
-            <p className="text-sm">{classInfo.instructor}</p>
-          </div>
-        )}
-
-        {classInfo.schedule && (
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
-            <p className="text-sm">{classInfo.schedule}</p>
-          </div>
-        )}
-
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold mb-4">
-            {t('admin.enrolledUsers')} ({members.length})
-          </h3>
-          {loading ? (
-            <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
-          ) : members.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t('admin.noUsersEnrolled')}</p>
-          ) : (
-            <div className="space-y-2">
-              {members.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
-                >
-                  <div>
-                    <div className="font-medium">{user.name}</div>
-                    <div className="text-xs text-muted-foreground">{user.email}</div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+              {t("admin.instructor")}
+            </h3>
+            {instructor ? (
+              <Link to={`/instructor/${instructor.id}`} onClick={onClose}>
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
+                  <Avatar
+                    src={instructor.avatar_url}
+                    alt={instructor.name}
+                    fallbackText={instructor.name}
+                    size="md"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-base group-hover:text-primary transition-colors">
+                      {instructor.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {instructor.role}
+                    </p>
                   </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </div>
-              ))}
+              </Link>
+            ) : loadingInstructor ? (
+              <div className="text-sm text-muted-foreground">
+                {t("common.loading")}
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 text-base">
+                <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                  <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                </div>
+                <span className="font-semibold">{classInfo.instructor}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {((classInfo.schedule_days && classInfo.schedule_days.length > 0) ||
+          classInfo.schedule_time ||
+          classInfo.schedule) && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">
+              {t("admin.schedule")}
+            </h3>
+            <div className="flex items-center gap-3 text-base">
+              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <span className="font-medium">
+                {(classInfo.schedule_days &&
+                  classInfo.schedule_days.length > 0) ||
+                classInfo.schedule_time ? (
+                  <>
+                    {classInfo.schedule_days &&
+                      classInfo.schedule_days.length > 0 && (
+                        <>
+                          {classInfo.schedule_days
+                            .map((day) => t(`admin.${day}`))
+                            .join(", ")}
+                          {classInfo.schedule_time && " "}
+                        </>
+                      )}
+                    {classInfo.schedule_time &&
+                      `${
+                        classInfo.schedule_days &&
+                        classInfo.schedule_days.length > 0
+                          ? t("admin.at") + " "
+                          : ""
+                      }${classInfo.schedule_time}`}
+                    {classInfo.duration_minutes &&
+                      ` (${classInfo.duration_minutes} ${t("admin.minutes")})`}
+                  </>
+                ) : (
+                  classInfo.schedule
+                )}
+              </span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </Drawer>
-  )
+  );
 }
 
 export function UserDashboard() {
-  const { t } = useTranslation()
-  usePageTitle('pages.userDashboard')
-  const { profile, refreshProfile } = useAuth()
-  const [classes, setClasses] = useState<Class[]>([])
-  const [checkIns, setCheckIns] = useState<CheckIn[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedClass, setSelectedClass] = useState<Class | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false)
-  const [classMap, setClassMap] = useState<Record<string, string>>({})
+  const { t } = useTranslation();
+  usePageTitle("pages.userDashboard");
+  const { profile, refreshProfile } = useAuth();
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
+  const [classMap, setClassMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (profile) {
-      fetchUserData()
-      subscribeToCheckIns()
+      fetchUserData();
+      subscribeToCheckIns();
     }
-  }, [profile])
+  }, [profile]);
 
   const fetchUserData = async () => {
-    if (!profile) return
+    if (!profile) return;
 
     try {
       const { data: memberships } = await supabase
-        .from('class_memberships')
-        .select('class_id')
-        .eq('user_id', profile.id)
+        .from("class_memberships")
+        .select("class_id")
+        .eq("user_id", profile.id);
 
       if (memberships && memberships.length > 0) {
-        const classIds = memberships.map((m) => m.class_id)
+        const classIds = memberships.map((m) => m.class_id);
         const { data: classData } = await supabase
-          .from('classes')
-          .select('*')
-          .in('id', classIds)
-        setClasses(classData || [])
+          .from("classes")
+          .select("*")
+          .in("id", classIds);
+        setClasses(classData || []);
       }
 
       const { data: checkInData } = await supabase
-        .from('check_ins')
-        .select('*')
-        .eq('user_id', profile.id)
-        .order('checked_in_at', { ascending: false })
-        .limit(10)
-      setCheckIns(checkInData || [])
+        .from("check_ins")
+        .select("*")
+        .eq("user_id", profile.id)
+        .order("checked_in_at", { ascending: false })
+        .limit(10);
+      setCheckIns(checkInData || []);
 
-      const uniqueClassIds = [...new Set(checkInData?.map((ci) => ci.class_id) || [])]
+      const uniqueClassIds = [
+        ...new Set(checkInData?.map((ci) => ci.class_id) || []),
+      ];
       if (uniqueClassIds.length > 0) {
         const { data: allClasses } = await supabase
-          .from('classes')
-          .select('id, name')
-          .in('id', uniqueClassIds)
+          .from("classes")
+          .select("id, name")
+          .in("id", uniqueClassIds);
 
-        const map: Record<string, string> = {}
+        const map: Record<string, string> = {};
         allClasses?.forEach((cls) => {
-          map[cls.id] = cls.name
-        })
-        setClassMap(map)
+          map[cls.id] = cls.name;
+        });
+        setClassMap(map);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error("Error fetching user data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const subscribeToCheckIns = () => {
-    if (!profile) return
+    if (!profile) return;
 
     const channel = supabase
-      .channel('user_check_ins_dashboard')
+      .channel("user_check_ins_dashboard")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'check_ins',
+          event: "INSERT",
+          schema: "public",
+          table: "check_ins",
           filter: `user_id=eq.${profile.id}`,
         },
         async (payload) => {
-          const newCheckIn = payload.new as CheckIn
+          const newCheckIn = payload.new as CheckIn;
 
           const { data: classData } = await supabase
-            .from('classes')
-            .select('name')
-            .eq('id', newCheckIn.class_id)
-            .single()
+            .from("classes")
+            .select("name")
+            .eq("id", newCheckIn.class_id)
+            .single();
 
-          setCheckIns((prev) => [newCheckIn, ...prev].slice(0, 10))
+          setCheckIns((prev) => [newCheckIn, ...prev].slice(0, 10));
 
           if (classData) {
             setClassMap((prev) => ({
               ...prev,
               [newCheckIn.class_id]: classData.name,
-            }))
+            }));
           }
         }
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
-  }
+      supabase.removeChannel(channel);
+    };
+  };
 
   const generateQRData = () => {
-    if (!profile) return ''
+    if (!profile) return "";
     return JSON.stringify({
       userId: profile.id,
       name: profile.name,
       timestamp: Date.now(),
-    })
-  }
+    });
+  };
 
   const handleClassClick = (cls: Class) => {
-    setSelectedClass(cls)
-    setIsDrawerOpen(true)
-  }
+    setSelectedClass(cls);
+    setIsDrawerOpen(true);
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -536,7 +613,7 @@ export function UserDashboard() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            {t('user.dashboard')}
+            {t("user.dashboard")}
           </h1>
         </div>
 
@@ -544,20 +621,24 @@ export function UserDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
-                <CardTitle>{t('user.profile')}</CardTitle>
-                <CardDescription>{t('user.myProfile')}</CardDescription>
+                <CardTitle>{t("user.profile")}</CardTitle>
+                <CardDescription>{t("user.myProfile")}</CardDescription>
               </div>
-              <Button variant="outline" size="sm" onClick={() => setIsProfileEditOpen(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsProfileEditOpen(true)}
+              >
                 <Edit className="w-4 h-4 mr-2" />
-                {t('user.edit')}
+                {t("user.edit")}
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-center mb-4">
                 <Avatar
                   src={profile?.avatar_url}
-                  alt={profile?.name || 'User'}
-                  fallbackText={profile?.name || profile?.email || 'User'}
+                  alt={profile?.name || "User"}
+                  fallbackText={profile?.name || profile?.email || "User"}
                   size="lg"
                   className="border-4 border-primary/20"
                 />
@@ -592,8 +673,8 @@ export function UserDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{t('user.myQrCode')}</CardTitle>
-              <CardDescription>{t('user.qrCodeDesc')}</CardDescription>
+              <CardTitle>{t("user.myQrCode")}</CardTitle>
+              <CardDescription>{t("user.qrCodeDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center">
               <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -603,7 +684,7 @@ export function UserDashboard() {
                   level="H"
                   includeMargin
                   imageSettings={{
-                    src: '/qr-center.png',
+                    src: "/qr-center.png",
                     height: 40,
                     width: 40,
                     excavate: true,
@@ -617,12 +698,14 @@ export function UserDashboard() {
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t('user.myClasses')}</CardTitle>
-              <CardDescription>{t('user.myClassesDesc')}</CardDescription>
+              <CardTitle>{t("user.myClasses")}</CardTitle>
+              <CardDescription>{t("user.myClassesDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               {classes.length === 0 ? (
-                <p className="text-muted-foreground text-sm">{t('user.noClasses')}</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("user.noClasses")}
+                </p>
               ) : (
                 <div className="space-y-2">
                   {classes.map((cls) => (
@@ -635,10 +718,14 @@ export function UserDashboard() {
                         <div className="flex-1">
                           <div className="font-semibold">{cls.name}</div>
                           {cls.description && (
-                            <div className="text-sm text-muted-foreground">{cls.description}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {cls.description}
+                            </div>
                           )}
                           {cls.schedule && (
-                            <div className="text-xs text-muted-foreground mt-1">{cls.schedule}</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {cls.schedule}
+                            </div>
                           )}
                         </div>
                         <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -653,19 +740,21 @@ export function UserDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <div>
-                <CardTitle>{t('user.recentCheckIns')}</CardTitle>
-                <CardDescription>{t('user.checkInsDesc')}</CardDescription>
+                <CardTitle>{t("user.recentCheckIns")}</CardTitle>
+                <CardDescription>{t("user.checkInsDesc")}</CardDescription>
               </div>
               <Link to="/check-ins-history">
                 <Button variant="outline" size="sm">
-                  {t('user.viewAll')}
+                  {t("user.viewAll")}
                   <ChevronRight className="ml-1 w-4 h-4" />
                 </Button>
               </Link>
             </CardHeader>
             <CardContent>
               {checkIns.length === 0 ? (
-                <p className="text-muted-foreground text-sm">{t('user.noCheckIns')}</p>
+                <p className="text-muted-foreground text-sm">
+                  {t("user.noCheckIns")}
+                </p>
               ) : (
                 <div className="space-y-2">
                   {checkIns.map((checkIn) => (
@@ -674,10 +763,10 @@ export function UserDashboard() {
                       className="p-3 border rounded-lg hover:bg-accent transition-colors"
                     >
                       <div className="text-sm font-medium">
-                        {format(new Date(checkIn.checked_in_at), 'PPp')}
+                        {format(new Date(checkIn.checked_in_at), "PPp")}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {classMap[checkIn.class_id] || t('user.unknownClass')}
+                        {classMap[checkIn.class_id] || t("user.unknownClass")}
                       </div>
                     </div>
                   ))}
@@ -701,5 +790,5 @@ export function UserDashboard() {
         />
       </div>
     </div>
-  )
+  );
 }

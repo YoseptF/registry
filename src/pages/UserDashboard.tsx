@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { QRCodeSVG } from 'qrcode.react'
 import { LogOut, User, Mail, Phone, MapPin } from 'lucide-react'
-import type { Class, ClassMembership, CheckIn } from '@/types'
+import type { Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
 
 export function UserDashboard() {
@@ -33,7 +33,7 @@ export function UserDashboard() {
         .eq('user_id', profile.id)
 
       if (memberships && memberships.length > 0) {
-        const classIds = memberships.map((m: ClassMembership) => m.class_id)
+        const classIds = memberships.map((m) => m.class_id)
         const { data: classData } = await supabase
           .from('classes')
           .select('*')

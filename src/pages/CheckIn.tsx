@@ -21,12 +21,21 @@ export function CheckIn() {
   const [tempUserPhone, setTempUserPhone] = useState('')
   const [lastCheckIn, setLastCheckIn] = useState<{ name: string; time: Date } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [codeReader, setCodeReader] = useState<BrowserMultiFormatReader | null>(null)
 
   useEffect(() => {
     if (classId) {
       fetchClassInfo()
     }
   }, [classId])
+
+  useEffect(() => {
+    return () => {
+      if (codeReader) {
+        codeReader.reset()
+      }
+    }
+  }, [codeReader])
 
   const fetchClassInfo = async () => {
     if (!classId) return
@@ -50,38 +59,72 @@ export function CheckIn() {
     setScanning(true)
     setError(null)
 
-    const codeReader = new BrowserMultiFormatReader()
+    const reader = new BrowserMultiFormatReader()
+    setCodeReader(reader)
 
     try {
-      const videoElement = document.getElementById('video') as HTMLVideoElement
+      console.debug('Requesting camera access...')
 
-      await codeReader.decodeFromVideoDevice(
-        undefined,
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoDevices = devices.filter(device => device.kind === 'videoinput')
+
+      console.debug('Available video devices:', videoDevices.length)
+
+      if (videoDevices.length === 0) {
+        throw new Error('No camera found')
+      }
+
+      const videoElement = document.getElementById('video') as HTMLVideoElement
+      if (!videoElement) {
+        throw new Error('Video element not found')
+      }
+
+      console.debug('Starting camera with device:', videoDevices[0].label || 'Default camera')
+
+      await reader.decodeFromVideoDevice(
+        videoDevices[0].deviceId,
         videoElement,
         async (result, error) => {
           if (result) {
+            console.debug('QR code detected:', result.getText())
             const qrData = result.getText()
             await handleQRCode(qrData)
             stopScanning()
           }
           if (error && !(error.name === 'NotFoundException')) {
-            console.error(error)
+            console.debug('Scanner error:', error.name, error.message)
           }
         }
       )
+
+      console.debug('Camera started successfully')
     } catch (err) {
       console.error('Error starting scanner:', err)
-      setError(t('errors.cameraPermission'))
+
+      let errorMessage = t('errors.cameraPermission')
+
+      if (err instanceof Error) {
+        if (err.name === 'NotAllowedError' || err.message.includes('Permission denied')) {
+          errorMessage = 'Camera permission denied. Please allow camera access and try again.'
+        } else if (err.name === 'NotFoundError' || err.message === 'No camera found') {
+          errorMessage = 'No camera found. Please connect a camera and try again.'
+        } else if (err.name === 'NotReadableError') {
+          errorMessage = 'Camera is already in use by another application.'
+        } else if (err.name === 'SecurityError') {
+          errorMessage = 'Camera access requires HTTPS. Please use HTTPS or localhost.'
+        }
+      }
+
+      setError(errorMessage)
       setScanning(false)
     }
   }
 
   const stopScanning = () => {
     setScanning(false)
-    const videoElement = document.getElementById('video') as HTMLVideoElement
-    if (videoElement && videoElement.srcObject) {
-      const stream = videoElement.srcObject as MediaStream
-      stream.getTracks().forEach((track) => track.stop())
+    if (codeReader) {
+      codeReader.reset()
+      setCodeReader(null)
     }
   }
 

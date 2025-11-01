@@ -85,7 +85,8 @@
     "addUser": "Add User",
     "enrolledUsers": "Enrolled Users",
     "noUsersEnrolled": "No users enrolled yet",
-    "removeFromClass": "Remove from class"
+    "removeFromClass": "Remove from class",
+    "startCheckIn": "Start Check In"
   },
   "checkIn": {
     "checkIn": "Check-In",

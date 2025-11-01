@@ -34,7 +34,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/checkin/:classId" element={<CheckIn />} />
+          <Route
+            path="/checkin/:classId"
+            element={
+              <ProtectedRoute requireAdmin>
+                <CheckIn />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

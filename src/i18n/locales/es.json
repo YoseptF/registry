@@ -85,7 +85,8 @@
     "addUser": "Agregar Usuario",
     "enrolledUsers": "Usuarios Inscritos",
     "noUsersEnrolled": "Aún no hay usuarios inscritos",
-    "removeFromClass": "Eliminar de la clase"
+    "removeFromClass": "Eliminar de la clase",
+    "startCheckIn": "Iniciar Registro"
   },
   "checkIn": {
     "checkIn": "Registro",

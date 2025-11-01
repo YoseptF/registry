@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Drawer } from '@/components/ui/drawer'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { LogOut, Users, GraduationCap, UserCheck, Trash2, ChevronRight } from 'lucide-react'
+import { LogOut, Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight } from 'lucide-react'
 import type { User, Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
 
@@ -116,6 +117,16 @@ function ClassDrawer({
             <p className="text-sm">{classInfo.schedule}</p>
           </div>
         )}
+
+        <div className="border-t pt-6 pb-6">
+          <Link to={`/checkin/${classInfo.id}`}>
+            <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-full py-6 text-lg font-semibold shadow-lg group">
+              <QrCode className="mr-2 w-5 h-5" />
+              {t('admin.startCheckIn')}
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            </Button>
+          </Link>
+        </div>
 
         <div className="border-t pt-6">
           <h3 className="text-lg font-semibold mb-4">{t('admin.addUserToClass')}</h3>

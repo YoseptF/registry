@@ -4,16 +4,235 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Drawer } from '@/components/ui/drawer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Avatar } from '@/components/ui/avatar'
 import { ClassForm } from '@/components/ClassForm'
 import { Navigation } from '@/components/Navigation'
-import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit, Upload, X, User as UserIcon } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useAuth } from '@/contexts/AuthContext'
 import type { User, Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
+
+function ProfileEditDrawer({
+  open,
+  onClose,
+  profile,
+  onProfileUpdated,
+}: {
+  open: boolean
+  onClose: () => void
+  profile: User | null
+  onProfileUpdated: () => void
+}) {
+  const { t } = useTranslation()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [name, setName] = useState(profile?.name || '')
+  const [phone, setPhone] = useState(profile?.phone || '')
+  const [address, setAddress] = useState(profile?.address || '')
+  const [bio, setBio] = useState(profile?.bio || '')
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null)
+
+  useEffect(() => {
+    if (profile && open) {
+      setName(profile.name || '')
+      setPhone(profile.phone || '')
+      setAddress(profile.address || '')
+      setBio(profile.bio || '')
+      setAvatarPreview(profile.avatar_url || null)
+    }
+  }, [profile, open])
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Avatar image must be less than 5MB')
+        return
+      }
+      if (!file.type.startsWith('image/')) {
+        setError('Please upload an image file')
+        return
+      }
+      setAvatarFile(file)
+      setAvatarPreview(URL.createObjectURL(file))
+      setError(null)
+    }
+  }
+
+  const removeAvatar = () => {
+    setAvatarFile(null)
+    setAvatarPreview(null)
+  }
+
+  const uploadAvatar = async (): Promise<string | null> => {
+    if (!avatarFile || !profile) return avatarPreview
+
+    const fileExt = avatarFile.name.split('.').pop()
+    const fileName = `${profile.id}-${Date.now()}.${fileExt}`
+    const filePath = `${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, avatarFile, { upsert: true })
+
+    if (uploadError) {
+      console.error('Error uploading avatar:', uploadError)
+      throw new Error('Failed to upload avatar image')
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath)
+
+    return publicUrl
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!profile) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      let avatarUrl = avatarPreview
+      if (avatarFile) {
+        avatarUrl = await uploadAvatar()
+      }
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          name,
+          phone: phone || null,
+          address: address || null,
+          bio: bio || null,
+          avatar_url: avatarUrl,
+        })
+        .eq('id', profile.id)
+
+      if (updateError) throw updateError
+
+      onProfileUpdated()
+      onClose()
+    } catch (err) {
+      console.error('Error updating profile:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!profile) return null
+
+  return (
+    <Drawer open={open} onClose={onClose} title={t('user.editProfile')}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="avatar">{t('user.profilePicture')}</Label>
+          {avatarPreview ? (
+            <div className="relative w-32 h-32 mx-auto">
+              <img
+                src={avatarPreview}
+                alt="Avatar preview"
+                className="w-full h-full object-cover rounded-full"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -top-2 -right-2"
+                onClick={removeAvatar}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <Label
+                htmlFor="avatar"
+                className="cursor-pointer text-sm text-muted-foreground hover:text-foreground"
+              >
+                {t('user.uploadAvatar')}
+              </Label>
+              <Input
+                id="avatar"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="name">{t('auth.name')} *</Label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">{t('auth.phone')}</Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address">{t('auth.address')}</Label>
+          <Input
+            id="address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bio">{t('user.bio')}</Label>
+          <Textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder={t('user.bioPlaceholder')}
+            rows={4}
+          />
+        </div>
+
+        {error && (
+          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-4">
+          <Button type="submit" className="flex-1" disabled={loading}>
+            {loading ? t('common.loading') : t('user.saveChanges')}
+          </Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            {t('admin.cancel')}
+          </Button>
+        </div>
+      </form>
+    </Drawer>
+  )
+}
 
 function ClassDrawer({
   open,
@@ -279,7 +498,7 @@ function ClassDrawer({
 export function AdminDashboard() {
   const { t } = useTranslation()
   usePageTitle('pages.adminDashboard')
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, profile, refreshProfile } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [classes, setClasses] = useState<Class[]>([])
   const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([])
@@ -287,6 +506,7 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false)
 
   useEffect(() => {
     fetchAdminData()
@@ -369,11 +589,39 @@ export function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div className="mb-8 flex justify-between items-start">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
             {t('admin.dashboard')}
           </h1>
+          <Button variant="outline" onClick={() => setIsProfileEditOpen(true)}>
+            <Edit className="w-4 h-4 mr-2" />
+            {t('user.editProfile')}
+          </Button>
         </div>
+
+        {profile && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>{t('user.profile')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Avatar
+                  src={profile.avatar_url}
+                  alt={profile.name}
+                  fallbackText={profile.name || profile.email}
+                  size="lg"
+                  className="border-4 border-primary/20"
+                />
+                <div>
+                  <h3 className="text-xl font-semibold">{profile.name}</h3>
+                  <p className="text-sm text-muted-foreground">{profile.email}</p>
+                  <p className="text-xs text-primary font-medium mt-1 capitalize">{profile.role}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
@@ -559,6 +807,13 @@ export function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <ProfileEditDrawer
+          open={isProfileEditOpen}
+          onClose={() => setIsProfileEditOpen(false)}
+          profile={profile}
+          onProfileUpdated={refreshProfile}
+        />
 
         <ClassDrawer
           open={isDrawerOpen}

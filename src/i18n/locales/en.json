@@ -63,7 +63,15 @@
     "liveUpdates": "Live attendance updates",
     "allUsers": "All Users",
     "userManagement": "User management",
-    "guestUser": "Guest User"
+    "guestUser": "Guest User",
+    "classDetails": "Class Details",
+    "addUserToClass": "Add User to Class",
+    "selectUser": "Select User",
+    "chooseUser": "Choose a user...",
+    "addUser": "Add User",
+    "enrolledUsers": "Enrolled Users",
+    "noUsersEnrolled": "No users enrolled yet",
+    "removeFromClass": "Remove from class"
   },
   "checkIn": {
     "checkIn": "Check-In",

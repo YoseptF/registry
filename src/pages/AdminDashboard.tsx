@@ -6,10 +6,178 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Drawer } from '@/components/ui/drawer'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { LogOut, Users, GraduationCap, UserCheck } from 'lucide-react'
+import { LogOut, Users, GraduationCap, UserCheck, Trash2, ChevronRight } from 'lucide-react'
 import type { User, Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
+
+function ClassDrawer({
+  open,
+  onClose,
+  classInfo,
+  users
+}: {
+  open: boolean
+  onClose: () => void
+  classInfo: Class | null
+  users: User[]
+}) {
+  const { t } = useTranslation()
+  const [members, setMembers] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedUserId, setSelectedUserId] = useState('')
+
+  useEffect(() => {
+    if (classInfo && open) {
+      fetchMembers()
+    }
+  }, [classInfo?.id, open])
+
+  const fetchMembers = async () => {
+    if (!classInfo) return
+
+    setLoading(true)
+    try {
+      const { data } = await supabase
+        .from('class_memberships')
+        .select('user_id')
+        .eq('class_id', classInfo.id)
+
+      setMembers(data?.map((m) => m.user_id) || [])
+    } catch (error) {
+      console.error('Error fetching members:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const addMember = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!classInfo || !selectedUserId) return
+
+    try {
+      const { error } = await supabase.from('class_memberships').insert({
+        class_id: classInfo.id,
+        user_id: selectedUserId,
+      })
+
+      if (error) throw error
+
+      setSelectedUserId('')
+      fetchMembers()
+    } catch (error) {
+      console.error('Error adding user:', error)
+    }
+  }
+
+  const removeMember = async (userId: string) => {
+    if (!classInfo || !confirm('Remove this user from the class?')) return
+
+    try {
+      const { error } = await supabase
+        .from('class_memberships')
+        .delete()
+        .eq('class_id', classInfo.id)
+        .eq('user_id', userId)
+
+      if (error) throw error
+      fetchMembers()
+    } catch (error) {
+      console.error('Error removing member:', error)
+    }
+  }
+
+  if (!classInfo) return null
+
+  const enrolledUsers = users.filter((u) => members.includes(u.id))
+  const availableUsers = users.filter((u) => !members.includes(u.id) && u.role !== 'admin')
+
+  return (
+    <Drawer open={open} onClose={onClose} title={classInfo.name}>
+      <div className="space-y-6">
+        {classInfo.description && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
+            <p className="text-sm">{classInfo.description}</p>
+          </div>
+        )}
+
+        {classInfo.instructor && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
+            <p className="text-sm">{classInfo.instructor}</p>
+          </div>
+        )}
+
+        {classInfo.schedule && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
+            <p className="text-sm">{classInfo.schedule}</p>
+          </div>
+        )}
+
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">{t('admin.addUserToClass')}</h3>
+          <form onSubmit={addMember} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="selectUser">{t('admin.selectUser')}</Label>
+              <select
+                id="selectUser"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                required
+              >
+                <option value="">{t('admin.chooseUser')}</option>
+                {availableUsers.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button type="submit" className="w-full">
+              {t('admin.addUser')}
+            </Button>
+          </form>
+        </div>
+
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">
+            {t('admin.enrolledUsers')} ({enrolledUsers.length})
+          </h3>
+          {loading ? (
+            <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+          ) : enrolledUsers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('admin.noUsersEnrolled')}</p>
+          ) : (
+            <div className="space-y-2">
+              {enrolledUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
+                >
+                  <div>
+                    <div className="font-medium">{user.name}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </div>
+                  <button
+                    onClick={() => removeMember(user.id)}
+                    className="text-destructive hover:text-destructive/80 p-2 rounded-md hover:bg-destructive/10"
+                    title={t('admin.removeFromClass')}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Drawer>
+  )
+}
 
 export function AdminDashboard() {
   const { t } = useTranslation()
@@ -23,6 +191,8 @@ export function AdminDashboard() {
   const [newClassInstructor, setNewClassInstructor] = useState('')
   const [newClassSchedule, setNewClassSchedule] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     fetchAdminData()
@@ -93,6 +263,11 @@ export function AdminDashboard() {
     } catch (error) {
       console.error('Error creating class:', error)
     }
+  }
+
+  const handleClassClick = (cls: Class) => {
+    setSelectedClass(cls)
+    setIsDrawerOpen(true)
   }
 
   if (loading) {
@@ -217,18 +392,27 @@ export function AdminDashboard() {
                   <p className="text-muted-foreground text-sm">{t('user.noClasses')}</p>
                 ) : (
                   classes.map((cls) => (
-                    <div key={cls.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                      <div className="font-semibold">{cls.name}</div>
-                      {cls.description && (
-                        <div className="text-sm text-muted-foreground">{cls.description}</div>
-                      )}
-                      {cls.instructor && (
-                        <div className="text-xs text-muted-foreground">{t('admin.instructor')}: {cls.instructor}</div>
-                      )}
-                      {cls.schedule && (
-                        <div className="text-xs text-muted-foreground">{cls.schedule}</div>
-                      )}
-                    </div>
+                    <button
+                      key={cls.id}
+                      onClick={() => handleClassClick(cls)}
+                      className="w-full text-left p-3 border rounded-lg hover:bg-accent transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold">{cls.name}</div>
+                          {cls.description && (
+                            <div className="text-sm text-muted-foreground">{cls.description}</div>
+                          )}
+                          {cls.instructor && (
+                            <div className="text-xs text-muted-foreground">{t('admin.instructor')}: {cls.instructor}</div>
+                          )}
+                          {cls.schedule && (
+                            <div className="text-xs text-muted-foreground">{cls.schedule}</div>
+                          )}
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      </div>
+                    </button>
                   ))
                 )}
               </div>
@@ -294,6 +478,13 @@ export function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <ClassDrawer
+          open={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          classInfo={selectedClass}
+          users={users}
+        />
       </div>
     </div>
   )

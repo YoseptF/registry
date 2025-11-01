@@ -4,11 +4,114 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Drawer } from '@/components/ui/drawer'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { QRCodeSVG } from 'qrcode.react'
-import { LogOut, User, Mail, Phone, MapPin } from 'lucide-react'
-import type { Class, CheckIn } from '@/types'
+import { LogOut, User, Mail, Phone, MapPin, ChevronRight } from 'lucide-react'
+import type { Class, CheckIn, User as UserType } from '@/types'
 import { format } from 'date-fns'
+
+function ClassDrawer({
+  open,
+  onClose,
+  classInfo,
+}: {
+  open: boolean
+  onClose: () => void
+  classInfo: Class | null
+}) {
+  const { t } = useTranslation()
+  const [members, setMembers] = useState<UserType[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (classInfo && open) {
+      fetchMembers()
+    }
+  }, [classInfo?.id, open])
+
+  const fetchMembers = async () => {
+    if (!classInfo) return
+
+    setLoading(true)
+    try {
+      const { data: memberships } = await supabase
+        .from('class_memberships')
+        .select('user_id')
+        .eq('class_id', classInfo.id)
+
+      if (memberships && memberships.length > 0) {
+        const userIds = memberships.map((m) => m.user_id)
+        const { data: usersData } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', userIds)
+
+        setMembers(usersData || [])
+      } else {
+        setMembers([])
+      }
+    } catch (error) {
+      console.error('Error fetching members:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!classInfo) return null
+
+  return (
+    <Drawer open={open} onClose={onClose} title={classInfo.name}>
+      <div className="space-y-6">
+        {classInfo.description && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
+            <p className="text-sm">{classInfo.description}</p>
+          </div>
+        )}
+
+        {classInfo.instructor && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
+            <p className="text-sm">{classInfo.instructor}</p>
+          </div>
+        )}
+
+        {classInfo.schedule && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
+            <p className="text-sm">{classInfo.schedule}</p>
+          </div>
+        )}
+
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">
+            {t('admin.enrolledUsers')} ({members.length})
+          </h3>
+          {loading ? (
+            <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+          ) : members.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t('admin.noUsersEnrolled')}</p>
+          ) : (
+            <div className="space-y-2">
+              {members.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors"
+                >
+                  <div>
+                    <div className="font-medium">{user.name}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Drawer>
+  )
+}
 
 export function UserDashboard() {
   const { t } = useTranslation()
@@ -16,6 +119,8 @@ export function UserDashboard() {
   const [classes, setClasses] = useState<Class[]>([])
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedClass, setSelectedClass] = useState<Class | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     if (profile) {
@@ -62,6 +167,11 @@ export function UserDashboard() {
       name: profile.name,
       timestamp: Date.now(),
     })
+  }
+
+  const handleClassClick = (cls: Class) => {
+    setSelectedClass(cls)
+    setIsDrawerOpen(true)
   }
 
   if (loading) {
@@ -152,18 +262,24 @@ export function UserDashboard() {
               ) : (
                 <div className="space-y-2">
                   {classes.map((cls) => (
-                    <div
+                    <button
                       key={cls.id}
-                      className="p-3 border rounded-lg hover:bg-accent transition-colors"
+                      onClick={() => handleClassClick(cls)}
+                      className="w-full text-left p-3 border rounded-lg hover:bg-accent transition-colors cursor-pointer group"
                     >
-                      <div className="font-semibold">{cls.name}</div>
-                      {cls.description && (
-                        <div className="text-sm text-muted-foreground">{cls.description}</div>
-                      )}
-                      {cls.schedule && (
-                        <div className="text-xs text-muted-foreground mt-1">{cls.schedule}</div>
-                      )}
-                    </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold">{cls.name}</div>
+                          {cls.description && (
+                            <div className="text-sm text-muted-foreground">{cls.description}</div>
+                          )}
+                          {cls.schedule && (
+                            <div className="text-xs text-muted-foreground mt-1">{cls.schedule}</div>
+                          )}
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -196,6 +312,12 @@ export function UserDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <ClassDrawer
+          open={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          classInfo={selectedClass}
+        />
       </div>
     </div>
   )

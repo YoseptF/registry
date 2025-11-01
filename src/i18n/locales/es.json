@@ -42,7 +42,7 @@
     "myClassesDesc": "Clases en las que estás inscrito",
     "recentCheckIns": "Registros Recientes",
     "checkInsDesc": "Tu historial de asistencia",
-    "noClasses": "Aún no hay clases",
+    "noClasses": "Aún no tienes clases",
     "noCheckIns": "Aún no hay registros"
   },
   "admin": {
@@ -63,7 +63,15 @@
     "liveUpdates": "Actualizaciones en vivo de asistencia",
     "allUsers": "Todos los Usuarios",
     "userManagement": "Gestión de usuarios",
-    "guestUser": "Usuario Invitado"
+    "guestUser": "Usuario Invitado",
+    "classDetails": "Detalles de la Clase",
+    "addUserToClass": "Agregar Usuario a la Clase",
+    "selectUser": "Seleccionar Usuario",
+    "chooseUser": "Elige un usuario...",
+    "addUser": "Agregar Usuario",
+    "enrolledUsers": "Usuarios Inscritos",
+    "noUsersEnrolled": "Aún no hay usuarios inscritos",
+    "removeFromClass": "Eliminar de la clase"
   },
   "checkIn": {
     "checkIn": "Registro",

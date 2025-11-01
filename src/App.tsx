@@ -7,6 +7,7 @@ import { Classes } from './pages/Classes'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { UserDashboard } from './pages/UserDashboard'
+import { CheckInsHistory } from './pages/CheckInsHistory'
 import { AdminDashboard } from './pages/AdminDashboard'
 import { CheckIn } from './pages/CheckIn'
 
@@ -24,6 +25,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/check-ins-history"
+            element={
+              <ProtectedRoute>
+                <CheckInsHistory />
               </ProtectedRoute>
             }
           />

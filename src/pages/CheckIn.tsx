@@ -98,23 +98,16 @@ export function CheckIn() {
         throw new Error('Video element not found')
       }
 
-      await reader.decodeFromVideoDevice(
-        selectedDevice.deviceId,
-        videoElement,
-        async (result, error) => {
-          if (result) {
-            console.debug('QR code detected:', result.getText())
-            const qrData = result.getText()
-            await handleQRCode(qrData)
-            stopScanning()
-          }
-          if (error && !(error.name === 'NotFoundException')) {
-            console.debug('Scanner error:', error.name, error.message)
-          }
-        }
-      )
+      console.debug('Starting scan...')
+      const result = await reader.decodeOnceFromVideoDevice(selectedDevice.deviceId, videoElement)
 
-      console.debug('Camera started successfully')
+      console.debug('QR code detected:', result.getText())
+      const qrData = result.getText()
+
+      stopScanning()
+      await handleQRCode(qrData)
+
+      console.debug('Scan completed successfully')
     } catch (err) {
       console.error('Error starting scanner:', err)
 

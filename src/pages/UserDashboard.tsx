@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -349,9 +350,17 @@ export function UserDashboard() {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>{t('user.recentCheckIns')}</CardTitle>
-              <CardDescription>{t('user.checkInsDesc')}</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <div>
+                <CardTitle>{t('user.recentCheckIns')}</CardTitle>
+                <CardDescription>{t('user.checkInsDesc')}</CardDescription>
+              </div>
+              <Link to="/check-ins-history">
+                <Button variant="outline" size="sm">
+                  {t('user.viewAll')}
+                  <ChevronRight className="ml-1 w-4 h-4" />
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               {checkIns.length === 0 ? (

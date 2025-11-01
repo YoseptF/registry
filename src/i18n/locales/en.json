@@ -60,6 +60,7 @@
     "noCheckIns": "No check-ins yet",
     "checkedInTo": "Checked in to",
     "unknownClass": "Unknown class",
+    "attendanceRecorded": "Your attendance has been recorded",
     "viewAll": "View All",
     "checkInHistory": "Check-In History",
     "checkInHistoryDesc": "View and analyze your complete attendance history",
@@ -127,6 +128,7 @@
     "guestName": "Guest name",
     "checkInGuest": "Check In Guest",
     "checkedInSuccess": "checked in successfully!",
+    "attendanceRecorded": "Attendance recorded successfully",
     "clickStart": "Click Start Scanning to begin"
   },
   "common": {

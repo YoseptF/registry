@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -182,7 +181,7 @@ export function UserDashboard() {
     if (!profile) return
 
     const channel = supabase
-      .channel('user_check_ins')
+      .channel('user_check_ins_dashboard')
       .on(
         'postgres_changes',
         {
@@ -199,12 +198,6 @@ export function UserDashboard() {
             .select('name')
             .eq('id', newCheckIn.class_id)
             .single()
-
-          const className = classData?.name || t('user.unknownClass')
-
-          toast.success(`${t('user.checkedInTo')} ${className}!`, {
-            duration: 5000,
-          })
 
           setCheckIns((prev) => [newCheckIn, ...prev].slice(0, 10))
 

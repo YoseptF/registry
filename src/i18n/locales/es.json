@@ -60,6 +60,7 @@
     "noCheckIns": "Aún no hay registros",
     "checkedInTo": "Registrado en",
     "unknownClass": "Clase desconocida",
+    "attendanceRecorded": "Tu asistencia ha sido registrada",
     "viewAll": "Ver Todos",
     "checkInHistory": "Historial de Registros",
     "checkInHistoryDesc": "Ver y analizar tu historial completo de asistencia",
@@ -127,6 +128,7 @@
     "guestName": "Nombre del invitado",
     "checkInGuest": "Registrar Invitado",
     "checkedInSuccess": "se registró exitosamente!",
+    "attendanceRecorded": "Asistencia registrada exitosamente",
     "clickStart": "Haz clic en Iniciar Escaneo para comenzar"
   },
   "common": {

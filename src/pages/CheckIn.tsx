@@ -172,8 +172,9 @@ export function CheckIn() {
 
       if (checkInError) throw checkInError
 
-      toast.success(`${name} ${t('checkIn.checkedInSuccess')}`, {
+      toast.success(`✓ ${name} ${t('checkIn.checkedInSuccess')}`, {
         duration: 3000,
+        description: t('checkIn.attendanceRecorded'),
       })
       setError(null)
     } catch (err) {
@@ -205,8 +206,9 @@ export function CheckIn() {
 
       if (checkInError) throw checkInError
 
-      toast.success(`${tempUserName} ${t('checkIn.checkedInSuccess')}`, {
+      toast.success(`✓ ${tempUserName} ${t('checkIn.checkedInSuccess')}`, {
         duration: 3000,
+        description: t('checkIn.attendanceRecorded'),
       })
       setTempUserName('')
       setTempUserPhone('')

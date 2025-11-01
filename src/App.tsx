@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'sonner'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { CheckInNotifications } from './components/CheckInNotifications'
 import { Landing } from './pages/Landing'
 import { Classes } from './pages/Classes'
 import { Login } from './pages/Login'
@@ -15,6 +16,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <CheckInNotifications />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/classes" element={<Classes />} />
@@ -55,7 +57,19 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
-      <Toaster position="top-center" richColors />
+      <Toaster
+        position="top-center"
+        richColors
+        expand={true}
+        toastOptions={{
+          style: {
+            padding: '20px 24px',
+            fontSize: '16px',
+            minHeight: '80px',
+          },
+          className: 'text-lg font-medium',
+        }}
+      />
     </AuthProvider>
   )
 }

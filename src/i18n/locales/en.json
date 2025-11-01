@@ -4,6 +4,16 @@
     "welcome": "Welcome to Class Check-In",
     "subtitle": "Easy class attendance tracking with QR codes"
   },
+  "pages": {
+    "landing": "Welcome",
+    "classes": "Our Classes",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "userDashboard": "My Dashboard",
+    "checkInsHistory": "Check-In History",
+    "adminDashboard": "Admin Dashboard",
+    "checkIn": "Check-In Scanner"
+  },
   "auth": {
     "signIn": "Sign In",
     "signOut": "Sign Out",
@@ -170,7 +180,9 @@
     "close": "Close",
     "back": "Back",
     "next": "Next",
-    "required": "required"
+    "required": "required",
+    "soon": "Soon",
+    "home": "Home"
   },
   "errors": {
     "passwordsDontMatch": "Passwords do not match",

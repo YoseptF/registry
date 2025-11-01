@@ -10,10 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { QrCode, UserPlus } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class } from '@/types'
 
 export function CheckIn() {
   const { t } = useTranslation()
+  usePageTitle('pages.checkIn')
   const { classId } = useParams<{ classId: string }>()
   const [classInfo, setClassInfo] = useState<Class | null>(null)
   const [scanning, setScanning] = useState(false)

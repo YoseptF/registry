@@ -9,6 +9,7 @@ import { Drawer } from '@/components/ui/drawer'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { QRCodeSVG } from 'qrcode.react'
 import { LogOut, User, Mail, Phone, MapPin, ChevronRight } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, CheckIn, User as UserType } from '@/types'
 import { format } from 'date-fns'
 
@@ -116,6 +117,7 @@ function ClassDrawer({
 
 export function UserDashboard() {
   const { t } = useTranslation()
+  usePageTitle('pages.userDashboard')
   const { profile, signOut } = useAuth()
   const [classes, setClasses] = useState<Class[]>([])
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])

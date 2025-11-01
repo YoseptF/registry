@@ -10,6 +10,7 @@ import { Drawer } from '@/components/ui/drawer'
 import { ClassForm } from '@/components/ClassForm'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { LogOut, Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import type { User, Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
 
@@ -238,6 +239,7 @@ function ClassDrawer({
 
 export function AdminDashboard() {
   const { t } = useTranslation()
+  usePageTitle('pages.adminDashboard')
   const { signOut } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [classes, setClasses] = useState<Class[]>([])

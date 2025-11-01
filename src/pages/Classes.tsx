@@ -8,6 +8,7 @@ import { Drawer } from '@/components/ui/drawer'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Clock, User, ArrowRight, ArrowLeft, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class } from '@/types'
 
 function ClassDrawer({
@@ -100,6 +101,7 @@ function ClassDrawer({
 
 export function Classes() {
   const { t } = useTranslation()
+  usePageTitle('pages.classes')
   const [searchParams, setSearchParams] = useSearchParams()
   const [classes, setClasses] = useState<Class[]>([])
   const [filteredClasses, setFilteredClasses] = useState<Class[]>([])

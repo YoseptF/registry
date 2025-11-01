@@ -4,6 +4,16 @@
     "welcome": "Bienvenido al Registro de Clases",
     "subtitle": "Seguimiento fácil de asistencia a clases con códigos QR"
   },
+  "pages": {
+    "landing": "Bienvenido",
+    "classes": "Nuestras Clases",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "userDashboard": "Mi Panel",
+    "checkInsHistory": "Historial de Registros",
+    "adminDashboard": "Panel de Administrador",
+    "checkIn": "Escáner de Registro"
+  },
   "auth": {
     "signIn": "Iniciar Sesión",
     "signOut": "Cerrar Sesión",
@@ -170,7 +180,9 @@
     "close": "Cerrar",
     "back": "Atrás",
     "next": "Siguiente",
-    "required": "requerido"
+    "required": "requerido",
+    "soon": "Pronto",
+    "home": "Inicio"
   },
   "errors": {
     "passwordsDontMatch": "Las contraseñas no coinciden",

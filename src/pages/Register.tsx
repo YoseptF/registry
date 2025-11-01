@@ -8,10 +8,12 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { PhoneInput } from '@/components/ui/phone-input'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function Register() {
   const { t } = useTranslation()
+  usePageTitle('pages.register')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -238,7 +240,7 @@ export function Register() {
             >
               Apple
               <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-                Soon
+                {t('common.soon')}
               </span>
             </Button>
           </div>
@@ -252,55 +254,24 @@ export function Register() {
             </div>
           </div>
 
-          {!otpSent ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
+          <div className="relative opacity-50 pointer-events-none">
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="phone-register">{t('auth.phoneNumber')}</Label>
                 <PhoneInput
                   value={phoneAuth}
                   onChange={setPhoneAuth}
-                  disabled={loading}
+                  disabled={true}
                 />
               </div>
-              <Button type="submit" variant="outline" className="w-full" disabled={loading}>
-                {loading ? t('auth.sendingCode') : t('auth.sendCode')}
+              <Button type="button" variant="outline" className="w-full relative" disabled={true}>
+                {t('auth.sendCode')}
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                  {t('common.soon')}
+                </span>
               </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">{t('auth.verificationCode')}</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="123456"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                  maxLength={6}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('auth.codeSentTo')} {phoneAuth}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button type="submit" className="flex-1" disabled={loading}>
-                  {loading ? t('auth.verifying') : t('auth.verify')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setOtpSent(false)
-                    setOtp('')
-                  }}
-                  disabled={loading}
-                >
-                  {t('auth.changeNumber')}
-                </Button>
-              </div>
-            </form>
-          )}
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">

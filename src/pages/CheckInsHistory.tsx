@@ -9,11 +9,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ArrowLeft, Calendar, TrendingUp, Award, Download, Search, Filter } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import type { CheckIn, Class } from '@/types'
 import { format, startOfWeek, startOfMonth, isAfter, isBefore, differenceInDays } from 'date-fns'
 
 export function CheckInsHistory() {
   const { t } = useTranslation()
+  usePageTitle('pages.checkInsHistory')
   const { profile } = useAuth()
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [filteredCheckIns, setFilteredCheckIns] = useState<CheckIn[]>([])

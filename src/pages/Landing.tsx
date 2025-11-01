@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Clock, User, ArrowRight, Sparkles, LogIn } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class } from '@/types'
 
 export function Landing() {
   const { t } = useTranslation()
+  usePageTitle('pages.landing')
   const [classes, setClasses] = useState<Class[]>([])
   const [loading, setLoading] = useState(true)
 

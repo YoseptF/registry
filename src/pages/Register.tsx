@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { useAuth } from '@/contexts/AuthContext'
-import { useEffect } from 'react'
 
 export function Register() {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -32,13 +34,13 @@ export function Register() {
     setError(null)
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('errors.passwordsDontMatch'))
       setLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError(t('errors.passwordTooShort'))
       setLoading(false)
       return
     }
@@ -85,28 +87,29 @@ export function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800 px-4 py-8">
+      <LanguageSwitcher />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            Create Account
+            {t('auth.createAccount')}
           </CardTitle>
-          <CardDescription>Sign up to get started</CardDescription>
+          <CardDescription>{t('auth.signInToAccount')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">{t('auth.name')} *</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Your full name"
+                placeholder={t('auth.name')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">{t('auth.email')} *</Label>
               <Input
                 id="email"
                 type="email"
@@ -117,7 +120,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone (optional)</Label>
+              <Label htmlFor="phone">{t('auth.phone')} ({t('auth.optional')})</Label>
               <Input
                 id="phone"
                 type="tel"
@@ -127,7 +130,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="address">Address (optional)</Label>
+              <Label htmlFor="address">{t('auth.address')} ({t('auth.optional')})</Label>
               <Input
                 id="address"
                 type="text"
@@ -137,7 +140,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="password">{t('auth.password')} *</Label>
               <Input
                 id="password"
                 type="password"
@@ -148,7 +151,7 @@ export function Register() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password *</Label>
+              <Label htmlFor="confirmPassword">{t('auth.confirmPassword')} *</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -164,7 +167,7 @@ export function Register() {
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
             </Button>
           </form>
 
@@ -173,7 +176,7 @@ export function Register() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">{t('auth.orContinueWith')}</span>
             </div>
           </div>
 
@@ -198,9 +201,9 @@ export function Register() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Link to="/login" className="text-primary hover:underline">
-              Sign in
+              {t('auth.signIn')}
             </Link>
           </p>
         </CardFooter>

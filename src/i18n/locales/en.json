@@ -1,0 +1,102 @@
+{
+  "app": {
+    "title": "Class Check-In",
+    "welcome": "Welcome to Class Check-In",
+    "subtitle": "Easy class attendance tracking with QR codes"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "register": "Register",
+    "createAccount": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "phone": "Phone",
+    "address": "Address",
+    "optional": "optional",
+    "welcomeBack": "Welcome Back",
+    "signInToAccount": "Sign in to your account",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signingIn": "Signing in...",
+    "creatingAccount": "Creating account...",
+    "orContinueWith": "Or continue with"
+  },
+  "landing": {
+    "qrCheckIn": "QR Code Check-In",
+    "qrCheckInDesc": "Quick and easy attendance tracking with personalized QR codes",
+    "userManagement": "User Management",
+    "userManagementDesc": "Admins can manage users, create classes, and track attendance",
+    "classScheduling": "Class Scheduling",
+    "classSchedulingDesc": "Organize classes and track who attended each session"
+  },
+  "user": {
+    "dashboard": "My Dashboard",
+    "profile": "My Profile",
+    "myProfile": "Your account information",
+    "myQrCode": "My QR Code",
+    "qrCodeDesc": "Use this to check in to classes",
+    "myClasses": "My Classes",
+    "myClassesDesc": "Classes you're enrolled in",
+    "recentCheckIns": "Recent Check-ins",
+    "checkInsDesc": "Your attendance history",
+    "noClasses": "No classes yet",
+    "noCheckIns": "No check-ins yet"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "totalUsers": "Total Users",
+    "totalClasses": "Total Classes",
+    "todaysCheckIns": "Today's Check-ins",
+    "classes": "Classes",
+    "manageClasses": "Manage your classes",
+    "newClass": "New Class",
+    "cancel": "Cancel",
+    "createClass": "Create Class",
+    "className": "Class Name",
+    "description": "Description",
+    "instructor": "Instructor",
+    "schedule": "Schedule",
+    "recentCheckIns": "Recent Check-ins",
+    "liveUpdates": "Live attendance updates",
+    "allUsers": "All Users",
+    "userManagement": "User management",
+    "guestUser": "Guest User"
+  },
+  "checkIn": {
+    "checkIn": "Check-In",
+    "scanQrCode": "Scan QR Code",
+    "scanDesc": "Position the QR code within the camera frame",
+    "startScanning": "Start Scanning",
+    "stopScanning": "Stop Scanning",
+    "guestCheckIn": "Guest Check-In",
+    "guestDesc": "For walk-in attendees without an account",
+    "addGuest": "Add Guest User",
+    "guestName": "Guest name",
+    "checkInGuest": "Check In Guest",
+    "checkedInSuccess": "checked in successfully!",
+    "clickStart": "Click Start Scanning to begin"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "required": "required"
+  },
+  "errors": {
+    "passwordsDontMatch": "Passwords do not match",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "invalidQrCode": "Invalid QR code or check-in failed",
+    "notEnrolled": "User is not enrolled in this class",
+    "classNotFound": "Class not found",
+    "cameraPermission": "Failed to start camera. Please check permissions."
+  }
+}

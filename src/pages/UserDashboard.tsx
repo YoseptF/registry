@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { QRCodeSVG } from 'qrcode.react'
 import { LogOut, User, Mail, Phone, MapPin } from 'lucide-react'
 import type { Class, ClassMembership, CheckIn } from '@/types'
 import { format } from 'date-fns'
 
 export function UserDashboard() {
+  const { t } = useTranslation()
   const { profile, signOut } = useAuth()
   const [classes, setClasses] = useState<Class[]>([])
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
@@ -71,22 +74,23 @@ export function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <LanguageSwitcher />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            My Dashboard
+            {t('user.dashboard')}
           </h1>
           <Button onClick={signOut} variant="outline">
             <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
+            {t('auth.signOut')}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>My Profile</CardTitle>
-              <CardDescription>Your account information</CardDescription>
+              <CardTitle>{t('user.profile')}</CardTitle>
+              <CardDescription>{t('user.myProfile')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
@@ -114,8 +118,8 @@ export function UserDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>My QR Code</CardTitle>
-              <CardDescription>Use this to check in to classes</CardDescription>
+              <CardTitle>{t('user.myQrCode')}</CardTitle>
+              <CardDescription>{t('user.qrCodeDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center">
               <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -139,12 +143,12 @@ export function UserDashboard() {
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>My Classes</CardTitle>
-              <CardDescription>Classes you're enrolled in</CardDescription>
+              <CardTitle>{t('user.myClasses')}</CardTitle>
+              <CardDescription>{t('user.myClassesDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {classes.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No classes yet</p>
+                <p className="text-muted-foreground text-sm">{t('user.noClasses')}</p>
               ) : (
                 <div className="space-y-2">
                   {classes.map((cls) => (
@@ -168,12 +172,12 @@ export function UserDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Check-ins</CardTitle>
-              <CardDescription>Your attendance history</CardDescription>
+              <CardTitle>{t('user.recentCheckIns')}</CardTitle>
+              <CardDescription>{t('user.checkInsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {checkIns.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No check-ins yet</p>
+                <p className="text-muted-foreground text-sm">{t('user.noCheckIns')}</p>
               ) : (
                 <div className="space-y-2">
                   {checkIns.map((checkIn) => (

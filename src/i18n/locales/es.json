@@ -1,0 +1,102 @@
+{
+  "app": {
+    "title": "Registro de Clases",
+    "welcome": "Bienvenido al Registro de Clases",
+    "subtitle": "Seguimiento fácil de asistencia a clases con códigos QR"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "register": "Registrarse",
+    "createAccount": "Crear Cuenta",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "address": "Dirección",
+    "optional": "opcional",
+    "welcomeBack": "Bienvenido de Nuevo",
+    "signInToAccount": "Inicia sesión en tu cuenta",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "signingIn": "Iniciando sesión...",
+    "creatingAccount": "Creando cuenta...",
+    "orContinueWith": "O continuar con"
+  },
+  "landing": {
+    "qrCheckIn": "Registro con Código QR",
+    "qrCheckInDesc": "Seguimiento de asistencia rápido y fácil con códigos QR personalizados",
+    "userManagement": "Gestión de Usuarios",
+    "userManagementDesc": "Los administradores pueden gestionar usuarios, crear clases y hacer seguimiento de asistencia",
+    "classScheduling": "Programación de Clases",
+    "classSchedulingDesc": "Organiza clases y rastrea quién asistió a cada sesión"
+  },
+  "user": {
+    "dashboard": "Mi Panel",
+    "profile": "Mi Perfil",
+    "myProfile": "Información de tu cuenta",
+    "myQrCode": "Mi Código QR",
+    "qrCodeDesc": "Usa esto para registrarte en las clases",
+    "myClasses": "Mis Clases",
+    "myClassesDesc": "Clases en las que estás inscrito",
+    "recentCheckIns": "Registros Recientes",
+    "checkInsDesc": "Tu historial de asistencia",
+    "noClasses": "Aún no hay clases",
+    "noCheckIns": "Aún no hay registros"
+  },
+  "admin": {
+    "dashboard": "Panel de Administrador",
+    "totalUsers": "Total de Usuarios",
+    "totalClasses": "Total de Clases",
+    "todaysCheckIns": "Registros de Hoy",
+    "classes": "Clases",
+    "manageClasses": "Gestiona tus clases",
+    "newClass": "Nueva Clase",
+    "cancel": "Cancelar",
+    "createClass": "Crear Clase",
+    "className": "Nombre de la Clase",
+    "description": "Descripción",
+    "instructor": "Instructor",
+    "schedule": "Horario",
+    "recentCheckIns": "Registros Recientes",
+    "liveUpdates": "Actualizaciones en vivo de asistencia",
+    "allUsers": "Todos los Usuarios",
+    "userManagement": "Gestión de usuarios",
+    "guestUser": "Usuario Invitado"
+  },
+  "checkIn": {
+    "checkIn": "Registro",
+    "scanQrCode": "Escanear Código QR",
+    "scanDesc": "Posiciona el código QR dentro del marco de la cámara",
+    "startScanning": "Iniciar Escaneo",
+    "stopScanning": "Detener Escaneo",
+    "guestCheckIn": "Registro de Invitados",
+    "guestDesc": "Para asistentes sin cuenta",
+    "addGuest": "Agregar Usuario Invitado",
+    "guestName": "Nombre del invitado",
+    "checkInGuest": "Registrar Invitado",
+    "checkedInSuccess": "se registró exitosamente!",
+    "clickStart": "Haz clic en Iniciar Escaneo para comenzar"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "required": "requerido"
+  },
+  "errors": {
+    "passwordsDontMatch": "Las contraseñas no coinciden",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
+    "invalidQrCode": "Código QR inválido o registro fallido",
+    "notEnrolled": "El usuario no está inscrito en esta clase",
+    "classNotFound": "Clase no encontrada",
+    "cameraPermission": "No se pudo iniciar la cámara. Por favor verifica los permisos."
+  }
+}

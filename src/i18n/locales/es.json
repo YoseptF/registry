@@ -25,12 +25,26 @@
     "orContinueWith": "O continuar con"
   },
   "landing": {
-    "qrCheckIn": "Registro con Código QR",
-    "qrCheckInDesc": "Seguimiento de asistencia rápido y fácil con códigos QR personalizados",
-    "userManagement": "Gestión de Usuarios",
-    "userManagementDesc": "Los administradores pueden gestionar usuarios, crear clases y hacer seguimiento de asistencia",
-    "classScheduling": "Programación de Clases",
-    "classSchedulingDesc": "Organiza clases y rastrea quién asistió a cada sesión"
+    "heroTitle": "Transforma Tu Cuerpo y Mente",
+    "heroSubtitle": "Únete a nuestra comunidad de fitness de clase mundial",
+    "exploreClasses": "Explorar Clases",
+    "memberLogin": "Acceso Miembros",
+    "discoverClasses": "Descubre Nuestras Clases",
+    "ourClasses": "Nuestras Clases",
+    "classesSubtitle": "Encuentra la clase perfecta para tu viaje fitness",
+    "noClasses": "No hay clases disponibles en este momento",
+    "noDescription": "Sin descripción disponible",
+    "viewClass": "Ver Clase",
+    "viewAllClasses": "Ver Todas las Clases",
+    "signUpToJoin": "Regístrate para Unirte",
+    "alreadyMember": "¿Ya eres Miembro? Inicia Sesión",
+    "readyToStart": "¿Listo para Comenzar Tu Viaje?",
+    "ctaSubtitle": "Comienza tu transformación hoy con nuestros instructores expertos",
+    "getStarted": "Comienza Ahora",
+    "searchClasses": "Buscar clases por nombre, instructor o descripción...",
+    "noResultsFound": "No se encontraron clases que coincidan con tu búsqueda",
+    "clearSearch": "Limpiar Búsqueda",
+    "showingClasses": "Mostrando {{count}} clases"
   },
   "user": {
     "dashboard": "Mi Panel",

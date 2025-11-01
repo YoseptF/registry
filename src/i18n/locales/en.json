@@ -25,12 +25,26 @@
     "orContinueWith": "Or continue with"
   },
   "landing": {
-    "qrCheckIn": "QR Code Check-In",
-    "qrCheckInDesc": "Quick and easy attendance tracking with personalized QR codes",
-    "userManagement": "User Management",
-    "userManagementDesc": "Admins can manage users, create classes, and track attendance",
-    "classScheduling": "Class Scheduling",
-    "classSchedulingDesc": "Organize classes and track who attended each session"
+    "heroTitle": "Transform Your Body & Mind",
+    "heroSubtitle": "Join our world-class fitness community",
+    "exploreClasses": "Explore Classes",
+    "memberLogin": "Member Login",
+    "discoverClasses": "Discover Our Classes",
+    "ourClasses": "Our Classes",
+    "classesSubtitle": "Find the perfect class for your fitness journey",
+    "noClasses": "No classes available at the moment",
+    "noDescription": "No description available",
+    "viewClass": "View Class",
+    "viewAllClasses": "View All Classes",
+    "signUpToJoin": "Sign Up to Join",
+    "alreadyMember": "Already a Member? Sign In",
+    "readyToStart": "Ready to Begin Your Journey?",
+    "ctaSubtitle": "Start your transformation today with our expert instructors",
+    "getStarted": "Get Started Now",
+    "searchClasses": "Search classes by name, instructor, or description...",
+    "noResultsFound": "No classes found matching your search",
+    "clearSearch": "Clear Search",
+    "showingClasses": "Showing {{count}} classes"
   },
   "user": {
     "dashboard": "My Dashboard",

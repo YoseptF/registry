@@ -75,7 +75,7 @@ export function Register() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${window.location.origin}/user`,
         },
       })
       if (error) throw error

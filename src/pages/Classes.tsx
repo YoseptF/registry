@@ -26,6 +26,14 @@ function ClassDrawer({
   return (
     <Drawer open={open} onClose={onClose} title={classInfo.name}>
       <div className="space-y-6">
+        <div>
+          <img
+            src={classInfo.banner_url || "/class-default.jpg"}
+            alt={classInfo.name}
+            className="w-full h-48 object-cover rounded-lg"
+          />
+        </div>
+
         {classInfo.description && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
@@ -45,14 +53,29 @@ function ClassDrawer({
           </div>
         )}
 
-        {classInfo.schedule && (
+        {((classInfo.schedule_days && classInfo.schedule_days.length > 0) || classInfo.schedule_time || classInfo.schedule) && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
             <div className="flex items-center gap-3 text-base">
               <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                 <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
-              <span className="font-medium">{classInfo.schedule}</span>
+              <span className="font-medium">
+                {(classInfo.schedule_days && classInfo.schedule_days.length > 0) || classInfo.schedule_time ? (
+                  <>
+                    {classInfo.schedule_days && classInfo.schedule_days.length > 0 && (
+                      <>
+                        {classInfo.schedule_days.map(day => t(`admin.${day}`)).join(', ')}
+                        {classInfo.schedule_time && ' '}
+                      </>
+                    )}
+                    {classInfo.schedule_time && `${classInfo.schedule_days && classInfo.schedule_days.length > 0 ? t('admin.at') + ' ' : ''}${classInfo.schedule_time}`}
+                    {classInfo.duration_minutes && ` (${classInfo.duration_minutes} ${t('admin.minutes')})`}
+                  </>
+                ) : (
+                  classInfo.schedule
+                )}
+              </span>
             </div>
           </div>
         )}
@@ -213,7 +236,7 @@ export function Classes() {
                   <Card className="hover:shadow-2xl transition-all duration-300 overflow-hidden border-0 shadow-lg hover:-translate-y-2 cursor-pointer h-full">
                     <div className="relative h-48 overflow-hidden bg-gradient-to-br from-pink-400 to-purple-600">
                       <img
-                        src="/class-default.jpg"
+                        src={cls.banner_url || "/class-default.jpg"}
                         alt={cls.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -236,10 +259,20 @@ export function Classes() {
                           <span className="font-medium">{cls.instructor}</span>
                         </div>
                       )}
-                      {cls.schedule && (
+                      {((cls.schedule_days && cls.schedule_days.length > 0) || cls.schedule_time || cls.schedule) && (
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                           <Clock className="w-4 h-4 text-purple-600" />
-                          <span>{cls.schedule}</span>
+                          <span>
+                            {cls.schedule_days && cls.schedule_days.length > 0 ? (
+                              <>
+                                {cls.schedule_days.map(day => t(`admin.${day}`)).join(', ')}
+                                {cls.schedule_time && ` ${t('admin.at')} ${cls.schedule_time}`}
+                                {cls.duration_minutes && ` (${cls.duration_minutes} ${t('admin.minutes')})`}
+                              </>
+                            ) : (
+                              cls.schedule
+                            )}
+                          </span>
                         </div>
                       )}
                     </CardContent>

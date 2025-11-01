@@ -120,7 +120,7 @@ export function Landing() {
               >
                 <div className="relative h-56 overflow-hidden bg-gradient-to-br from-pink-400 to-purple-600">
                   <img
-                    src="/class-default.jpg"
+                    src={cls.banner_url || "/class-default.jpg"}
                     alt={cls.name}
                     className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700"
                   />
@@ -145,12 +145,22 @@ export function Landing() {
                       <span className="font-semibold">{cls.instructor}</span>
                     </div>
                   )}
-                  {cls.schedule && (
+                  {((cls.schedule_days && cls.schedule_days.length > 0) || cls.schedule_time || cls.schedule) && (
                     <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
                       <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
                         <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <span className="font-medium">{cls.schedule}</span>
+                      <span className="font-medium">
+                        {cls.schedule_days && cls.schedule_days.length > 0 ? (
+                          <>
+                            {cls.schedule_days.map(day => t(`admin.${day}`)).join(', ')}
+                            {cls.schedule_time && ` ${t('admin.at')} ${cls.schedule_time}`}
+                            {cls.duration_minutes && ` (${cls.duration_minutes} ${t('admin.minutes')})`}
+                          </>
+                        ) : (
+                          cls.schedule
+                        )}
+                      </span>
                     </div>
                   )}
                   <Link to={`/classes?classId=${cls.id}`} className="block">

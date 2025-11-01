@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { QrCode, UserPlus, CheckCircle } from 'lucide-react'
 import type { Class } from '@/types'
 
 export function CheckIn() {
+  const { t } = useTranslation()
   const { classId } = useParams<{ classId: string }>()
   const [classInfo, setClassInfo] = useState<Class | null>(null)
   const [scanning, setScanning] = useState(false)
@@ -39,7 +42,7 @@ export function CheckIn() {
       setClassInfo(data)
     } catch (err) {
       console.error('Error fetching class:', err)
-      setError('Class not found')
+      setError(t('errors.classNotFound'))
     }
   }
 
@@ -68,7 +71,7 @@ export function CheckIn() {
       )
     } catch (err) {
       console.error('Error starting scanner:', err)
-      setError('Failed to start camera. Please check permissions.')
+      setError(t('errors.cameraPermission'))
       setScanning(false)
     }
   }
@@ -97,7 +100,7 @@ export function CheckIn() {
         .single()
 
       if (!membership) {
-        setError('User is not enrolled in this class')
+        setError(t('errors.notEnrolled'))
         return
       }
 
@@ -113,7 +116,7 @@ export function CheckIn() {
       setError(null)
     } catch (err) {
       console.error('Error processing QR code:', err)
-      setError('Invalid QR code or check-in failed')
+      setError(t('errors.invalidQrCode'))
     }
   }
 
@@ -147,22 +150,23 @@ export function CheckIn() {
       setError(null)
     } catch (err) {
       console.error('Error creating temporary user:', err)
-      setError('Failed to check in guest user')
+      setError(t('errors.invalidQrCode'))
     }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <LanguageSwitcher />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-2 bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            Check-In
+            {t('checkIn.checkIn')}
           </h1>
           {classInfo && (
             <div className="text-center mb-8">
               <h2 className="text-2xl font-semibold">{classInfo.name}</h2>
               {classInfo.instructor && (
-                <p className="text-muted-foreground">Instructor: {classInfo.instructor}</p>
+                <p className="text-muted-foreground">{t('admin.instructor')}: {classInfo.instructor}</p>
               )}
             </div>
           )}
@@ -177,7 +181,7 @@ export function CheckIn() {
             <div className="mb-4 p-4 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded-lg flex items-center gap-2 justify-center">
               <CheckCircle className="w-5 h-5" />
               <span>
-                <strong>{lastCheckIn.name}</strong> checked in successfully!
+                <strong>{lastCheckIn.name}</strong> {t('checkIn.checkedInSuccess')}
               </span>
             </div>
           )}
@@ -188,8 +192,8 @@ export function CheckIn() {
                 <div className="mx-auto mb-4 w-16 h-16 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center">
                   <QrCode className="w-8 h-8 text-pink-600 dark:text-pink-400" />
                 </div>
-                <CardTitle>Scan QR Code</CardTitle>
-                <CardDescription>Position the QR code within the camera frame</CardDescription>
+                <CardTitle>{t('checkIn.scanQrCode')}</CardTitle>
+                <CardDescription>{t('checkIn.scanDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
@@ -202,7 +206,7 @@ export function CheckIn() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-white text-center">
                         <QrCode className="w-16 h-16 mx-auto mb-2 opacity-50" />
-                        <p>Click Start Scanning to begin</p>
+                        <p>{t('checkIn.clickStart')}</p>
                       </div>
                     </div>
                   )}
@@ -210,11 +214,11 @@ export function CheckIn() {
                 <div className="flex gap-2">
                   {!scanning ? (
                     <Button onClick={startScanning} className="flex-1">
-                      Start Scanning
+                      {t('checkIn.startScanning')}
                     </Button>
                   ) : (
                     <Button onClick={stopScanning} variant="destructive" className="flex-1">
-                      Stop Scanning
+                      {t('checkIn.stopScanning')}
                     </Button>
                   )}
                 </div>
@@ -226,8 +230,8 @@ export function CheckIn() {
                 <div className="mx-auto mb-4 w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
                   <UserPlus className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <CardTitle>Guest Check-In</CardTitle>
-                <CardDescription>For walk-in attendees without an account</CardDescription>
+                <CardTitle>{t('checkIn.guestCheckIn')}</CardTitle>
+                <CardDescription>{t('checkIn.guestDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {!showTempUserForm ? (
@@ -236,22 +240,22 @@ export function CheckIn() {
                     variant="outline"
                     className="w-full"
                   >
-                    Add Guest User
+                    {t('checkIn.addGuest')}
                   </Button>
                 ) : (
                   <form onSubmit={handleTempUserCheckIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="guestName">Name *</Label>
+                      <Label htmlFor="guestName">{t('auth.name')} *</Label>
                       <Input
                         id="guestName"
                         value={tempUserName}
                         onChange={(e) => setTempUserName(e.target.value)}
-                        placeholder="Guest name"
+                        placeholder={t('checkIn.guestName')}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="guestPhone">Phone (optional)</Label>
+                      <Label htmlFor="guestPhone">{t('auth.phone')} ({t('auth.optional')})</Label>
                       <Input
                         id="guestPhone"
                         type="tel"
@@ -262,14 +266,14 @@ export function CheckIn() {
                     </div>
                     <div className="flex gap-2">
                       <Button type="submit" className="flex-1">
-                        Check In Guest
+                        {t('checkIn.checkInGuest')}
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => setShowTempUserForm(false)}
                       >
-                        Cancel
+                        {t('admin.cancel')}
                       </Button>
                     </div>
                   </form>

@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { LogOut, Users, GraduationCap, UserCheck } from 'lucide-react'
 import type { User, Class, CheckIn } from '@/types'
 import { format } from 'date-fns'
 
 export function AdminDashboard() {
+  const { t } = useTranslation()
   const { signOut } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [classes, setClasses] = useState<Class[]>([])
@@ -102,21 +105,22 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <LanguageSwitcher />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            Admin Dashboard
+            {t('admin.dashboard')}
           </h1>
           <Button onClick={signOut} variant="outline">
             <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
+            {t('auth.signOut')}
           </Button>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('admin.totalUsers')}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -126,7 +130,7 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Classes</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('admin.totalClasses')}</CardTitle>
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -136,7 +140,7 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Check-ins</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('admin.todaysCheckIns')}</CardTitle>
               <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -156,18 +160,18 @@ export function AdminDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Classes</CardTitle>
-                <CardDescription>Manage your classes</CardDescription>
+                <CardTitle>{t('admin.classes')}</CardTitle>
+                <CardDescription>{t('admin.manageClasses')}</CardDescription>
               </div>
               <Button onClick={() => setShowCreateClass(!showCreateClass)} size="sm">
-                {showCreateClass ? 'Cancel' : 'New Class'}
+                {showCreateClass ? t('admin.cancel') : t('admin.newClass')}
               </Button>
             </CardHeader>
             <CardContent>
               {showCreateClass && (
                 <form onSubmit={handleCreateClass} className="space-y-4 mb-4 p-4 border rounded-lg">
                   <div className="space-y-2">
-                    <Label htmlFor="className">Class Name *</Label>
+                    <Label htmlFor="className">{t('admin.className')} *</Label>
                     <Input
                       id="className"
                       value={newClassName}
@@ -177,16 +181,16 @@ export function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="classDescription">Description</Label>
+                    <Label htmlFor="classDescription">{t('admin.description')}</Label>
                     <Input
                       id="classDescription"
                       value={newClassDescription}
                       onChange={(e) => setNewClassDescription(e.target.value)}
-                      placeholder="Beginner-friendly yoga class"
+                      placeholder={t('admin.description')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="classInstructor">Instructor</Label>
+                    <Label htmlFor="classInstructor">{t('admin.instructor')}</Label>
                     <Input
                       id="classInstructor"
                       value={newClassInstructor}
@@ -195,7 +199,7 @@ export function AdminDashboard() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="classSchedule">Schedule</Label>
+                    <Label htmlFor="classSchedule">{t('admin.schedule')}</Label>
                     <Input
                       id="classSchedule"
                       value={newClassSchedule}
@@ -204,13 +208,13 @@ export function AdminDashboard() {
                     />
                   </div>
                   <Button type="submit" className="w-full">
-                    Create Class
+                    {t('admin.createClass')}
                   </Button>
                 </form>
               )}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {classes.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">No classes yet</p>
+                  <p className="text-muted-foreground text-sm">{t('user.noClasses')}</p>
                 ) : (
                   classes.map((cls) => (
                     <div key={cls.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
@@ -219,7 +223,7 @@ export function AdminDashboard() {
                         <div className="text-sm text-muted-foreground">{cls.description}</div>
                       )}
                       {cls.instructor && (
-                        <div className="text-xs text-muted-foreground">Instructor: {cls.instructor}</div>
+                        <div className="text-xs text-muted-foreground">{t('admin.instructor')}: {cls.instructor}</div>
                       )}
                       {cls.schedule && (
                         <div className="text-xs text-muted-foreground">{cls.schedule}</div>
@@ -233,20 +237,20 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Check-ins</CardTitle>
-              <CardDescription>Live attendance updates</CardDescription>
+              <CardTitle>{t('admin.recentCheckIns')}</CardTitle>
+              <CardDescription>{t('admin.liveUpdates')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {recentCheckIns.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">No check-ins yet</p>
+                  <p className="text-muted-foreground text-sm">{t('user.noCheckIns')}</p>
                 ) : (
                   recentCheckIns.map((checkIn) => (
                     <div key={checkIn.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="text-sm font-medium">
-                            {checkIn.is_temporary_user ? 'Guest User' : `User ID: ${checkIn.user_id}`}
+                            {checkIn.is_temporary_user ? t('admin.guestUser') : `User ID: ${checkIn.user_id}`}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             Class ID: {checkIn.class_id}
@@ -266,8 +270,8 @@ export function AdminDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>All Users</CardTitle>
-            <CardDescription>User management</CardDescription>
+            <CardTitle>{t('admin.allUsers')}</CardTitle>
+            <CardDescription>{t('admin.userManagement')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 max-h-96 overflow-y-auto">

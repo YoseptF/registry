@@ -59,16 +59,16 @@ export function Landing() {
             <p className="text-2xl md:text-3xl text-pink-100 mb-12 font-light">
               {t('landing.heroSubtitle')}
             </p>
-            <div className="flex gap-6 justify-center flex-wrap">
-              <Link to="/classes">
-                <Button size="lg" className="bg-white text-purple-900 hover:bg-pink-50 text-xl px-12 py-8 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 font-semibold">
+            <div className="flex gap-4 md:gap-6 justify-center flex-wrap px-4">
+              <Link to="/classes" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-white text-purple-900 hover:bg-pink-50 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 font-semibold">
                   {t('landing.exploreClasses')}
-                  <Sparkles className="ml-3 w-6 h-6" />
+                  <Sparkles className="ml-2 md:ml-3 w-5 md:w-6 h-5 md:h-6" />
                 </Button>
               </Link>
-              <Link to="/login">
-                <Button size="lg" variant="outline" className="border-3 border-white bg-white/20 text-white hover:bg-white hover:text-purple-900 text-xl px-12 py-8 rounded-full backdrop-blur-md transition-all duration-300 font-semibold">
-                  <LogIn className="mr-3 w-6 h-6" />
+              <Link to="/login" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto border-3 border-white bg-white/20 text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-full backdrop-blur-md transition-all duration-300 font-semibold">
+                  <LogIn className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
                   {t('landing.memberLogin')}
                 </Button>
               </Link>

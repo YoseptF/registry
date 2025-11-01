@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -121,10 +122,12 @@ export function UserDashboard() {
   const [loading, setLoading] = useState(true)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [classMap, setClassMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (profile) {
       fetchUserData()
+      subscribeToCheckIns()
     }
   }, [profile])
 
@@ -153,10 +156,69 @@ export function UserDashboard() {
         .order('checked_in_at', { ascending: false })
         .limit(10)
       setCheckIns(checkInData || [])
+
+      const uniqueClassIds = [...new Set(checkInData?.map((ci) => ci.class_id) || [])]
+      if (uniqueClassIds.length > 0) {
+        const { data: allClasses } = await supabase
+          .from('classes')
+          .select('id, name')
+          .in('id', uniqueClassIds)
+
+        const map: Record<string, string> = {}
+        allClasses?.forEach((cls) => {
+          map[cls.id] = cls.name
+        })
+        setClassMap(map)
+      }
     } catch (error) {
       console.error('Error fetching user data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const subscribeToCheckIns = () => {
+    if (!profile) return
+
+    const channel = supabase
+      .channel('user_check_ins')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'check_ins',
+          filter: `user_id=eq.${profile.id}`,
+        },
+        async (payload) => {
+          const newCheckIn = payload.new as CheckIn
+
+          const { data: classData } = await supabase
+            .from('classes')
+            .select('name')
+            .eq('id', newCheckIn.class_id)
+            .single()
+
+          const className = classData?.name || t('user.unknownClass')
+
+          toast.success(`${t('user.checkedInTo')} ${className}!`, {
+            duration: 5000,
+          })
+
+          setCheckIns((prev) => [newCheckIn, ...prev].slice(0, 10))
+
+          if (classData) {
+            setClassMap((prev) => ({
+              ...prev,
+              [newCheckIn.class_id]: classData.name,
+            }))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
     }
   }
 
@@ -239,7 +301,7 @@ export function UserDashboard() {
                   level="H"
                   includeMargin
                   imageSettings={{
-                    src: '/logo.svg',
+                    src: '/qr-center.png',
                     height: 40,
                     width: 40,
                     excavate: true,
@@ -304,7 +366,9 @@ export function UserDashboard() {
                       <div className="text-sm font-medium">
                         {format(new Date(checkIn.checked_in_at), 'PPp')}
                       </div>
-                      <div className="text-xs text-muted-foreground">Class ID: {checkIn.class_id}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {classMap[checkIn.class_id] || t('user.unknownClass')}
+                      </div>
                     </div>
                   ))}
                 </div>

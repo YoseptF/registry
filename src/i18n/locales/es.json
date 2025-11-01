@@ -57,7 +57,9 @@
     "recentCheckIns": "Registros Recientes",
     "checkInsDesc": "Tu historial de asistencia",
     "noClasses": "Aún no tienes clases",
-    "noCheckIns": "Aún no hay registros"
+    "noCheckIns": "Aún no hay registros",
+    "checkedInTo": "Registrado en",
+    "unknownClass": "Clase desconocida"
   },
   "admin": {
     "dashboard": "Panel de Administrador",

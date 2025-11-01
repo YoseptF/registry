@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import { Button } from '@/components/ui/button'
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { QrCode, UserPlus, CheckCircle } from 'lucide-react'
+import { QrCode, UserPlus } from 'lucide-react'
 import type { Class } from '@/types'
 
 export function CheckIn() {
@@ -19,7 +20,6 @@ export function CheckIn() {
   const [showTempUserForm, setShowTempUserForm] = useState(false)
   const [tempUserName, setTempUserName] = useState('')
   const [tempUserPhone, setTempUserPhone] = useState('')
-  const [lastCheckIn, setLastCheckIn] = useState<{ name: string; time: Date } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [codeReader, setCodeReader] = useState<BrowserMultiFormatReader | null>(null)
 
@@ -78,15 +78,28 @@ export function CheckIn() {
         throw new Error('No camera found')
       }
 
+      let selectedDevice = videoDevices[0]
+
+      const backCamera = videoDevices.find(device =>
+        device.label.toLowerCase().includes('back') ||
+        device.label.toLowerCase().includes('rear') ||
+        device.label.toLowerCase().includes('environment')
+      )
+
+      if (backCamera) {
+        selectedDevice = backCamera
+        console.debug('Using back camera:', backCamera.label)
+      } else {
+        console.debug('Using default camera:', selectedDevice.label || 'Default camera')
+      }
+
       const videoElement = document.getElementById('video') as HTMLVideoElement
       if (!videoElement) {
         throw new Error('Video element not found')
       }
 
-      console.debug('Starting camera with device:', videoDevices[0].label || 'Default camera')
-
       await reader.decodeFromVideoDevice(
-        videoDevices[0].deviceId,
+        selectedDevice.deviceId,
         videoElement,
         async (result, error) => {
           if (result) {
@@ -166,7 +179,9 @@ export function CheckIn() {
 
       if (checkInError) throw checkInError
 
-      setLastCheckIn({ name, time: new Date() })
+      toast.success(`${name} ${t('checkIn.checkedInSuccess')}`, {
+        duration: 3000,
+      })
       setError(null)
     } catch (err) {
       console.error('Error processing QR code:', err)
@@ -197,7 +212,9 @@ export function CheckIn() {
 
       if (checkInError) throw checkInError
 
-      setLastCheckIn({ name: tempUserName, time: new Date() })
+      toast.success(`${tempUserName} ${t('checkIn.checkedInSuccess')}`, {
+        duration: 3000,
+      })
       setTempUserName('')
       setTempUserPhone('')
       setShowTempUserForm(false)
@@ -231,15 +248,6 @@ export function CheckIn() {
             </div>
           )}
 
-          {lastCheckIn && (
-            <div className="mb-4 p-4 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 rounded-lg flex items-center gap-2 justify-center">
-              <CheckCircle className="w-5 h-5" />
-              <span>
-                <strong>{lastCheckIn.name}</strong> {t('checkIn.checkedInSuccess')}
-              </span>
-            </div>
-          )}
-
           <div className="space-y-4">
             <Card>
               <CardHeader className="text-center">
@@ -250,7 +258,7 @@ export function CheckIn() {
                 <CardDescription>{t('checkIn.scanDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+                <div className="relative aspect-square max-w-md mx-auto bg-black rounded-lg overflow-hidden">
                   <video
                     id="video"
                     className="w-full h-full object-cover"

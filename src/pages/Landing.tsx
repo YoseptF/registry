@@ -5,18 +5,21 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { Avatar } from '@/components/ui/avatar'
 import { Clock, User, ArrowRight, Sparkles, LogIn } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import type { Class } from '@/types'
+import type { Class, User as UserType } from '@/types'
 
 export function Landing() {
   const { t } = useTranslation()
   usePageTitle('pages.landing')
   const [classes, setClasses] = useState<Class[]>([])
+  const [instructors, setInstructors] = useState<UserType[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchClasses()
+    fetchInstructors()
   }, [])
 
   const fetchClasses = async () => {
@@ -33,6 +36,27 @@ export function Landing() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchInstructors = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name, email, role, avatar_url')
+        .in('role', ['instructor', 'admin'])
+        .order('name')
+
+      setInstructors(data || [])
+    } catch (error) {
+      console.error('Error fetching instructors:', error)
+    }
+  }
+
+  const getInstructorForClass = (cls: Class) => {
+    if (cls.instructor_id) {
+      return instructors.find(i => i.id === cls.instructor_id)
+    }
+    return null
   }
 
   return (
@@ -139,14 +163,32 @@ export function Landing() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {cls.instructor && (
-                    <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
-                      <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                        <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-                      </div>
-                      <span className="font-semibold">{cls.instructor}</span>
-                    </div>
-                  )}
+                  {(() => {
+                    const instructor = getInstructorForClass(cls)
+                    if (instructor) {
+                      return (
+                        <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
+                          <Avatar
+                            src={instructor.avatar_url}
+                            alt={instructor.name}
+                            fallbackText={instructor.name}
+                            size="md"
+                          />
+                          <span className="font-semibold">{instructor.name}</span>
+                        </div>
+                      )
+                    } else if (cls.instructor) {
+                      return (
+                        <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
+                          <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                            <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                          </div>
+                          <span className="font-semibold">{cls.instructor}</span>
+                        </div>
+                      )
+                    }
+                    return null
+                  })()}
                   {((cls.schedule_days && cls.schedule_days.length > 0) || cls.schedule_time || cls.schedule) && (
                     <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
                       <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">

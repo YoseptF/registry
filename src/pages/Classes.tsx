@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Drawer } from '@/components/ui/drawer'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Avatar } from '@/components/ui/avatar'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Clock, User, ArrowRight, ArrowLeft, Search, Filter } from 'lucide-react'
+import { Clock, User, ArrowRight, ArrowLeft, Search, Filter, ChevronRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, User as UserType } from '@/types'
@@ -22,6 +23,34 @@ function ClassDrawer({
   classInfo: Class | null
 }) {
   const { t } = useTranslation()
+  const [instructor, setInstructor] = useState<UserType | null>(null)
+  const [loadingInstructor, setLoadingInstructor] = useState(false)
+
+  useEffect(() => {
+    if (classInfo?.instructor_id && open) {
+      fetchInstructor()
+    }
+  }, [classInfo?.instructor_id, open])
+
+  const fetchInstructor = async () => {
+    if (!classInfo?.instructor_id) return
+
+    setLoadingInstructor(true)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, email, avatar_url, role')
+        .eq('id', classInfo.instructor_id)
+        .single()
+
+      if (error) throw error
+      setInstructor(data as UserType)
+    } catch (error) {
+      console.error('Error fetching instructor:', error)
+    } finally {
+      setLoadingInstructor(false)
+    }
+  }
 
   if (!classInfo) return null
 
@@ -43,15 +72,37 @@ function ClassDrawer({
           </div>
         )}
 
-        {classInfo.instructor && (
+        {(instructor || classInfo.instructor) && (
           <div>
             <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
-            <div className="flex items-center gap-3 text-base">
-              <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+            {instructor ? (
+              <Link to={`/instructor/${instructor.id}`} onClick={onClose}>
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
+                  <Avatar
+                    src={instructor.avatar_url}
+                    alt={instructor.name}
+                    fallbackText={instructor.name}
+                    size="md"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-base group-hover:text-primary transition-colors">
+                      {instructor.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize">{instructor.role}</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+              </Link>
+            ) : loadingInstructor ? (
+              <div className="text-sm text-muted-foreground">{t('common.loading')}</div>
+            ) : (
+              <div className="flex items-center gap-3 text-base">
+                <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                  <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                </div>
+                <span className="font-semibold">{classInfo.instructor}</span>
               </div>
-              <span className="font-semibold">{classInfo.instructor}</span>
-            </div>
+            )}
           </div>
         )}
 
@@ -169,7 +220,7 @@ export function Classes() {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, name, email, role')
+        .select('id, name, email, role, avatar_url')
         .in('role', ['instructor', 'admin'])
         .order('name')
 
@@ -188,6 +239,13 @@ export function Classes() {
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false)
     setSearchParams({})
+  }
+
+  const getInstructorForClass = (cls: Class) => {
+    if (cls.instructor_id) {
+      return instructors.find(i => i.id === cls.instructor_id)
+    }
+    return null
   }
 
   return (
@@ -310,12 +368,30 @@ export function Classes() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      {cls.instructor && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <User className="w-4 h-4 text-pink-600" />
-                          <span className="font-medium">{cls.instructor}</span>
-                        </div>
-                      )}
+                      {(() => {
+                        const instructor = getInstructorForClass(cls)
+                        if (instructor) {
+                          return (
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                              <Avatar
+                                src={instructor.avatar_url}
+                                alt={instructor.name}
+                                fallbackText={instructor.name}
+                                size="sm"
+                              />
+                              <span className="font-medium">{instructor.name}</span>
+                            </div>
+                          )
+                        } else if (cls.instructor) {
+                          return (
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                              <User className="w-4 h-4 text-pink-600" />
+                              <span className="font-medium">{cls.instructor}</span>
+                            </div>
+                          )
+                        }
+                        return null
+                      })()}
                       {((cls.schedule_days && cls.schedule_days.length > 0) || cls.schedule_time || cls.schedule) && (
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                           <Clock className="w-4 h-4 text-purple-600" />

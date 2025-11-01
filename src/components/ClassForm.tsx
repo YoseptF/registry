@@ -135,7 +135,7 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
       const classData = {
         name,
         description: description || null,
-        instructor_id: instructorId || null,
+        instructor_id: instructorId && instructorId !== 'none' ? instructorId : null,
         schedule_days: selectedDays.length > 0 ? selectedDays : null,
         schedule_time: selectedTime || null,
         duration_minutes: duration ? parseInt(duration) : null,
@@ -234,12 +234,12 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
 
       <div className="space-y-2">
         <Label htmlFor="instructor">{t('admin.instructor')}</Label>
-        <Select value={instructorId} onValueChange={setInstructorId}>
+        <Select value={instructorId || 'none'} onValueChange={setInstructorId}>
           <SelectTrigger>
             <SelectValue placeholder={t('admin.selectInstructor')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">{t('admin.noInstructor')}</SelectItem>
+            <SelectItem value="none">{t('admin.noInstructor')}</SelectItem>
             {instructors.map((instructor) => (
               <SelectItem key={instructor.id} value={instructor.id}>
                 {instructor.name} ({instructor.role})

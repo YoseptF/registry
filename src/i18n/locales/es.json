@@ -22,7 +22,17 @@
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "signingIn": "Iniciando sesión...",
     "creatingAccount": "Creando cuenta...",
-    "orContinueWith": "O continuar con"
+    "orContinueWith": "O continuar con",
+    "orUsePhone": "O iniciar sesión con teléfono",
+    "phoneNumber": "Número de Teléfono",
+    "phoneFormat": "Incluye código de país (ej., +1 para EE.UU.)",
+    "sendCode": "Enviar Código de Verificación",
+    "sendingCode": "Enviando código...",
+    "verificationCode": "Código de Verificación",
+    "codeSentTo": "Código enviado a",
+    "verify": "Verificar",
+    "verifying": "Verificando...",
+    "changeNumber": "Cambiar Número"
   },
   "landing": {
     "heroTitle": "Transforma Tu Cuerpo y Mente",

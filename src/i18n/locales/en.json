@@ -22,7 +22,17 @@
     "alreadyHaveAccount": "Already have an account?",
     "signingIn": "Signing in...",
     "creatingAccount": "Creating account...",
-    "orContinueWith": "Or continue with"
+    "orContinueWith": "Or continue with",
+    "orUsePhone": "Or sign in with phone",
+    "phoneNumber": "Phone Number",
+    "phoneFormat": "Include country code (e.g., +1 for US)",
+    "sendCode": "Send Verification Code",
+    "sendingCode": "Sending code...",
+    "verificationCode": "Verification Code",
+    "codeSentTo": "Code sent to",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "changeNumber": "Change Number"
   },
   "landing": {
     "heroTitle": "Transform Your Body & Mind",

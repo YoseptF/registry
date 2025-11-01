@@ -32,7 +32,11 @@ export function CheckIn() {
   useEffect(() => {
     return () => {
       if (codeReader) {
-        codeReader.reset()
+        const videoElement = document.getElementById('video') as HTMLVideoElement
+        if (videoElement && videoElement.srcObject) {
+          const stream = videoElement.srcObject as MediaStream
+          stream.getTracks().forEach((track) => track.stop())
+        }
       }
     }
   }, [codeReader])
@@ -122,8 +126,15 @@ export function CheckIn() {
 
   const stopScanning = () => {
     setScanning(false)
+
+    const videoElement = document.getElementById('video') as HTMLVideoElement
+    if (videoElement && videoElement.srcObject) {
+      const stream = videoElement.srcObject as MediaStream
+      stream.getTracks().forEach((track) => track.stop())
+      videoElement.srcObject = null
+    }
+
     if (codeReader) {
-      codeReader.reset()
       setCodeReader(null)
     }
   }

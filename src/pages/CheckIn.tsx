@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { QrCode, UserPlus, CheckCircle } from 'lucide-react'
-import type { Class, User } from '@/types'
+import type { Class } from '@/types'
 
 export function CheckIn() {
   const { classId } = useParams<{ classId: string }>()
@@ -59,8 +59,7 @@ export function CheckIn() {
           if (result) {
             const qrData = result.getText()
             await handleQRCode(qrData)
-            codeReader.reset()
-            setScanning(false)
+            stopScanning()
           }
           if (error && !(error.name === 'NotFoundException')) {
             console.error(error)
@@ -123,15 +122,13 @@ export function CheckIn() {
     if (!classId) return
 
     try {
-      const { data: tempUser, error: tempUserError } = await supabase
+      const { error: tempUserError } = await supabase
         .from('temporary_users')
         .insert({
           name: tempUserName,
           phone: tempUserPhone || null,
           class_id: classId,
         })
-        .select()
-        .single()
 
       if (tempUserError) throw tempUserError
 

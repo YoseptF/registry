@@ -16,17 +16,27 @@ export function Navigation() {
   if (!profile) return null
 
   const isAdmin = profile.role === 'admin'
+  const isInstructor = profile.role === 'instructor'
   const isActive = (path: string) => location.pathname === path
 
   const navLinks = isAdmin
     ? [
         { path: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard },
+        { path: '/instructors', label: t('instructor.instructors'), icon: GraduationCap },
+        { path: '/', label: t('common.home'), icon: Home },
+      ]
+    : isInstructor
+    ? [
+        { path: '/instructor', label: t('instructor.dashboard'), icon: LayoutDashboard },
+        { path: '/check-ins-history', label: t('user.checkInHistory'), icon: History },
+        { path: '/instructors', label: t('instructor.instructors'), icon: GraduationCap },
         { path: '/', label: t('common.home'), icon: Home },
       ]
     : [
         { path: '/user', label: t('user.dashboard'), icon: User },
         { path: '/check-ins-history', label: t('user.checkInHistory'), icon: History },
         { path: '/classes', label: t('landing.ourClasses'), icon: GraduationCap },
+        { path: '/instructors', label: t('instructor.instructors'), icon: User },
         { path: '/', label: t('common.home'), icon: Home },
       ]
 
@@ -80,7 +90,7 @@ export function Navigation() {
                   {profile.name || profile.email}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {isAdmin ? t('admin.dashboard') : t('user.dashboard')}
+                  {isAdmin ? t('admin.dashboard') : isInstructor ? t('instructor.dashboard') : t('user.dashboard')}
                 </p>
               </div>
               <Button
@@ -133,7 +143,7 @@ export function Navigation() {
                           {profile.email}
                         </p>
                         <p className="text-xs text-pink-600 dark:text-pink-400 font-medium mt-1">
-                          {isAdmin ? t('admin.dashboard') : t('user.dashboard')}
+                          {isAdmin ? t('admin.dashboard') : isInstructor ? t('instructor.dashboard') : t('user.dashboard')}
                         </p>
                       </div>
                     </div>

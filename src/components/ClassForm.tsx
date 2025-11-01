@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Upload, X } from 'lucide-react'
-import type { Class } from '@/types'
+import type { Class, User } from '@/types'
 
 interface ClassFormProps {
   initialData?: Class | null
@@ -35,15 +35,35 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [instructors, setInstructors] = useState<User[]>([])
 
   const [name, setName] = useState(initialData?.name || '')
   const [description, setDescription] = useState(initialData?.description || '')
-  const [instructor, setInstructor] = useState(initialData?.instructor || '')
+  const [instructorId, setInstructorId] = useState(initialData?.instructor_id || '')
   const [selectedDays, setSelectedDays] = useState<string[]>(initialData?.schedule_days || [])
   const [selectedTime, setSelectedTime] = useState(initialData?.schedule_time || '18:00')
   const [duration, setDuration] = useState(initialData?.duration_minutes?.toString() || '60')
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [bannerPreview, setBannerPreview] = useState<string | null>(initialData?.banner_url || null)
+
+  useEffect(() => {
+    fetchInstructors()
+  }, [])
+
+  const fetchInstructors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, email, role')
+        .in('role', ['instructor', 'admin'])
+        .order('name')
+
+      if (error) throw error
+      setInstructors(data || [])
+    } catch (err) {
+      console.error('Error fetching instructors:', err)
+    }
+  }
 
   const handleDayToggle = (day: string) => {
     setSelectedDays(prev =>
@@ -115,7 +135,7 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
       const classData = {
         name,
         description: description || null,
-        instructor: instructor || null,
+        instructor_id: instructorId || null,
         schedule_days: selectedDays.length > 0 ? selectedDays : null,
         schedule_time: selectedTime || null,
         duration_minutes: duration ? parseInt(duration) : null,
@@ -214,12 +234,19 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
 
       <div className="space-y-2">
         <Label htmlFor="instructor">{t('admin.instructor')}</Label>
-        <Input
-          id="instructor"
-          value={instructor}
-          onChange={(e) => setInstructor(e.target.value)}
-          placeholder="John Doe"
-        />
+        <Select value={instructorId} onValueChange={setInstructorId}>
+          <SelectTrigger>
+            <SelectValue placeholder={t('admin.selectInstructor')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">{t('admin.noInstructor')}</SelectItem>
+            {instructors.map((instructor) => (
+              <SelectItem key={instructor.id} value={instructor.id}>
+                {instructor.name} ({instructor.role})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

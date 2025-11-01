@@ -4,7 +4,8 @@ export interface User {
   email: string
   phone?: string | null
   address?: string | null
-  role: 'admin' | 'user'
+  role: 'admin' | 'instructor' | 'user'
+  bio?: string | null
   avatar_url?: string | null
   created_at: string
 }
@@ -14,6 +15,7 @@ export interface Class {
   name: string
   description?: string | null
   instructor?: string | null
+  instructor_id?: string | null
   schedule?: string | null
   banner_url?: string | null
   schedule_days?: string[] | null
@@ -49,5 +51,5 @@ export interface TemporaryUser {
 export interface AuthUser {
   id: string
   email: string
-  role: 'admin' | 'user'
+  role: 'admin' | 'instructor' | 'user'
 }

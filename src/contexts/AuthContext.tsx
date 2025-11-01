@@ -9,6 +9,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -46,20 +47,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, shouldSetLoading = true) => {
     try {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
       if (error) throw error
+
+      if (!data.avatar_url && user?.user_metadata?.avatar_url) {
+        const googleAvatarUrl = user.user_metadata.avatar_url
+        await supabase
+          .from('profiles')
+          .update({ avatar_url: googleAvatarUrl })
+          .eq('id', userId)
+        data.avatar_url = googleAvatarUrl
+      }
+
       setProfile(data as AppUser)
     } catch (error) {
       console.error('Error fetching profile:', error)
     } finally {
-      setLoading(false)
+      if (shouldSetLoading) {
+        setLoading(false)
+      }
+    }
+  }
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id, false)
     }
   }
 
@@ -71,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

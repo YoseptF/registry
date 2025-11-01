@@ -10,6 +10,9 @@ import { Register } from './pages/Register'
 import { UserDashboard } from './pages/UserDashboard'
 import { CheckInsHistory } from './pages/CheckInsHistory'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { InstructorDashboard } from './pages/InstructorDashboard'
+import { InstructorProfile } from './pages/InstructorProfile'
+import { Instructors } from './pages/Instructors'
 import { CheckIn } from './pages/CheckIn'
 
 function App() {
@@ -20,6 +23,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/classes" element={<Classes />} />
+          <Route path="/instructors" element={<Instructors />} />
+          <Route path="/instructor/:instructorId" element={<InstructorProfile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -27,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/instructor"
+            element={
+              <ProtectedRoute requireInstructor>
+                <InstructorDashboard />
               </ProtectedRoute>
             }
           />

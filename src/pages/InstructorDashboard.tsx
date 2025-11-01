@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { Drawer } from '@/components/ui/drawer'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ClassForm } from '@/components/ClassForm'
+import { Label } from '@/components/ui/label'
 import { Navigation } from '@/components/Navigation'
-import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, QrCode, ArrowRight, Edit } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, Trash2, ChevronRight } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { useAuth } from '@/contexts/AuthContext'
-import type { User, Class, CheckIn } from '@/types'
+import type { Class, CheckIn, User } from '@/types'
 import { format } from 'date-fns'
 
 function ClassDrawer({
@@ -32,8 +30,6 @@ function ClassDrawer({
   const [members, setMembers] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUserId, setSelectedUserId] = useState('')
-  const [isEditing, setIsEditing] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (classInfo && open) {
@@ -95,123 +91,47 @@ function ClassDrawer({
     }
   }
 
-  const deleteClass = async () => {
-    if (!classInfo) return
-
-    if (!confirm(t('admin.confirmDeleteClass'))) return
-
-    setIsDeleting(true)
-    try {
-      const { error } = await supabase
-        .from('classes')
-        .delete()
-        .eq('id', classInfo.id)
-
-      if (error) throw error
-
-      onClose()
-      onClassUpdated()
-    } catch (error) {
-      console.error('Error deleting class:', error)
-      alert(t('admin.errorDeletingClass'))
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
   if (!classInfo) return null
 
   const enrolledUsers = users.filter((u) => members.includes(u.id))
-  const availableUsers = users.filter((u) => !members.includes(u.id) && u.role !== 'admin')
+  const availableUsers = users.filter((u) => !members.includes(u.id) && u.role === 'user')
 
   return (
-    <Drawer open={open} onClose={onClose} title={isEditing ? t('admin.editClass') : classInfo.name}>
-      {isEditing ? (
-        <div className="space-y-6">
-          <ClassForm
-            initialData={classInfo}
-            onSuccess={() => {
-              setIsEditing(false)
-              onClassUpdated()
-            }}
-            onCancel={() => setIsEditing(false)}
-          />
-          <div className="border-t pt-4">
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={deleteClass}
-              disabled={isDeleting}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? t('common.loading') : t('admin.deleteClass')}
-            </Button>
+    <Drawer open={open} onClose={onClose} title={classInfo.name}>
+      <div className="space-y-6">
+        {classInfo.banner_url && (
+          <div>
+            <img
+              src={classInfo.banner_url}
+              alt={classInfo.name}
+              className="w-full h-48 object-cover rounded-lg"
+            />
           </div>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-              <Edit className="w-4 h-4 mr-2" />
-              {t('admin.editClass')}
-            </Button>
+        )}
+
+        {classInfo.description && (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
+            <p className="text-sm">{classInfo.description}</p>
           </div>
+        )}
 
-          {classInfo.banner_url && (
-            <div>
-              <img
-                src={classInfo.banner_url}
-                alt={classInfo.name}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-            </div>
-          )}
-
-          {classInfo.description && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.description')}</h3>
-              <p className="text-sm">{classInfo.description}</p>
-            </div>
-          )}
-
-          {classInfo.instructor && (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.instructor')}</h3>
-              <p className="text-sm">{classInfo.instructor}</p>
-            </div>
-          )}
-
-          {(classInfo.schedule_days && classInfo.schedule_days.length > 0) || classInfo.schedule_time || classInfo.duration_minutes ? (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
-              <p className="text-sm">
-                {classInfo.schedule_days && classInfo.schedule_days.length > 0 && (
-                  <span>{classInfo.schedule_days.map(day => t(`admin.${day}`)).join(', ')}</span>
-                )}
-                {classInfo.schedule_time && (
-                  <span> {t('admin.at')} {classInfo.schedule_time}</span>
-                )}
-                {classInfo.duration_minutes && (
-                  <span> ({classInfo.duration_minutes} {t('admin.minutes')})</span>
-                )}
-              </p>
-            </div>
-          ) : classInfo.schedule ? (
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
-              <p className="text-sm">{classInfo.schedule}</p>
-            </div>
-          ) : null}
-
-        <div className="border-t pt-6 pb-6">
-          <Link to={`/checkin/${classInfo.id}`}>
-            <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-full py-6 text-lg font-semibold shadow-lg group">
-              <QrCode className="mr-2 w-5 h-5" />
-              {t('admin.startCheckIn')}
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            </Button>
-          </Link>
-        </div>
+        {(classInfo.schedule_days && classInfo.schedule_days.length > 0) || classInfo.schedule_time || classInfo.duration_minutes ? (
+          <div>
+            <h3 className="text-sm font-medium text-muted-foreground mb-1">{t('admin.schedule')}</h3>
+            <p className="text-sm">
+              {classInfo.schedule_days && classInfo.schedule_days.length > 0 && (
+                <span>{classInfo.schedule_days.map(day => t(`admin.${day}`)).join(', ')}</span>
+              )}
+              {classInfo.schedule_time && (
+                <span> {t('admin.at')} {classInfo.schedule_time}</span>
+              )}
+              {classInfo.duration_minutes && (
+                <span> ({classInfo.duration_minutes} {t('admin.minutes')})</span>
+              )}
+            </p>
+          </div>
+        ) : null}
 
         <div className="border-t pt-6">
           <h3 className="text-lg font-semibold mb-4">{t('admin.addUserToClass')}</h3>
@@ -270,34 +190,38 @@ function ClassDrawer({
             </div>
           )}
         </div>
-        </div>
-      )}
+      </div>
     </Drawer>
   )
 }
 
-export function AdminDashboard() {
+export function InstructorDashboard() {
   const { t } = useTranslation()
-  usePageTitle('pages.adminDashboard')
-  const { user: currentUser } = useAuth()
+  usePageTitle('pages.instructorDashboard')
+  const { profile } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [classes, setClasses] = useState<Class[]>([])
-  const [recentCheckIns, setRecentCheckIns] = useState<CheckIn[]>([])
-  const [showCreateClass, setShowCreateClass] = useState(false)
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
-    fetchAdminData()
+    fetchInstructorData()
     subscribeToCheckIns()
-  }, [])
+  }, [profile])
 
-  const fetchAdminData = async () => {
+  const fetchInstructorData = async () => {
+    if (!profile) return
+
     try {
       const [usersResult, classesResult, checkInsResult] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('classes').select('*').order('created_at', { ascending: false }),
+        supabase
+          .from('classes')
+          .select('*')
+          .eq('instructor_id', profile.id)
+          .order('created_at', { ascending: false }),
         supabase
           .from('check_ins')
           .select('*')
@@ -307,22 +231,32 @@ export function AdminDashboard() {
 
       setUsers(usersResult.data || [])
       setClasses(classesResult.data || [])
-      setRecentCheckIns(checkInsResult.data || [])
+
+      const instructorCheckIns = checkInsResult.data?.filter((ci) =>
+        classesResult.data?.some((cls) => cls.id === ci.class_id)
+      ) || []
+      setCheckIns(instructorCheckIns)
     } catch (error) {
-      console.error('Error fetching admin data:', error)
+      console.error('Error fetching instructor data:', error)
     } finally {
       setLoading(false)
     }
   }
 
   const subscribeToCheckIns = () => {
+    if (!profile) return
+
     const channel = supabase
-      .channel('check_ins_changes')
+      .channel('instructor_check_ins_changes')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'check_ins' },
-        (payload) => {
-          setRecentCheckIns((prev) => [payload.new as CheckIn, ...prev].slice(0, 20))
+        async (payload) => {
+          const newCheckIn = payload.new as CheckIn
+          const isMyClass = classes.some((cls) => cls.id === newCheckIn.class_id)
+          if (isMyClass) {
+            setCheckIns((prev) => [newCheckIn, ...prev].slice(0, 20))
+          }
         }
       )
       .subscribe()
@@ -337,26 +271,6 @@ export function AdminDashboard() {
     setIsDrawerOpen(true)
   }
 
-  const updateUserRole = async (userId: string, newRole: 'admin' | 'instructor' | 'user') => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole })
-        .eq('id', userId)
-
-      if (error) throw error
-
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === userId ? { ...user, role: newRole } : user
-        )
-      )
-    } catch (error) {
-      console.error('Error updating user role:', error)
-      alert(t('admin.errorUpdatingRole'))
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -365,30 +279,25 @@ export function AdminDashboard() {
     )
   }
 
+  const todaysCheckIns = checkIns.filter(
+    (ci) => new Date(ci.checked_in_at).toDateString() === new Date().toDateString()
+  ).length
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-            {t('admin.dashboard')}
+            {t('instructor.dashboard')}
           </h1>
+          <p className="text-muted-foreground mt-2">{t('instructor.manageYourClasses')}</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('admin.totalUsers')}</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{users.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t('admin.totalClasses')}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t('instructor.myClasses')}</CardTitle>
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -398,48 +307,35 @@ export function AdminDashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t('instructor.totalStudents')}</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{users.filter(u => u.role === 'user').length}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t('admin.todaysCheckIns')}</CardTitle>
               <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {
-                  recentCheckIns.filter(
-                    (ci) =>
-                      new Date(ci.checked_in_at).toDateString() === new Date().toDateString()
-                  ).length
-                }
-              </div>
+              <div className="text-2xl font-bold">{todaysCheckIns}</div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>{t('admin.classes')}</CardTitle>
-                <CardDescription>{t('admin.manageClasses')}</CardDescription>
-              </div>
-              <Button onClick={() => setShowCreateClass(!showCreateClass)} size="sm">
-                {showCreateClass ? t('admin.cancel') : t('admin.newClass')}
-              </Button>
+            <CardHeader>
+              <CardTitle>{t('instructor.myClasses')}</CardTitle>
+              <CardDescription>{t('instructor.classesYouTeach')}</CardDescription>
             </CardHeader>
             <CardContent>
-              {showCreateClass && (
-                <div className="mb-4 p-4 border rounded-lg">
-                  <ClassForm
-                    onSuccess={() => {
-                      setShowCreateClass(false)
-                      fetchAdminData()
-                    }}
-                    onCancel={() => setShowCreateClass(false)}
-                  />
-                </div>
-              )}
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {classes.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">{t('user.noClasses')}</p>
+                  <p className="text-muted-foreground text-sm">{t('instructor.noClassesAssigned')}</p>
                 ) : (
                   classes.map((cls) => (
                     <button
@@ -452,9 +348,6 @@ export function AdminDashboard() {
                           <div className="font-semibold">{cls.name}</div>
                           {cls.description && (
                             <div className="text-sm text-muted-foreground">{cls.description}</div>
-                          )}
-                          {cls.instructor && (
-                            <div className="text-xs text-muted-foreground">{t('admin.instructor')}: {cls.instructor}</div>
                           )}
                           {cls.schedule && (
                             <div className="text-xs text-muted-foreground">{cls.schedule}</div>
@@ -472,8 +365,8 @@ export function AdminDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <div>
-                <CardTitle>{t('admin.recentCheckIns')}</CardTitle>
-                <CardDescription>{t('admin.liveUpdates')}</CardDescription>
+                <CardTitle>{t('instructor.recentCheckIns')}</CardTitle>
+                <CardDescription>{t('instructor.checkInsInYourClasses')}</CardDescription>
               </div>
               <Link to="/check-ins-history">
                 <Button variant="outline" size="sm">
@@ -484,10 +377,10 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {recentCheckIns.length === 0 ? (
+                {checkIns.length === 0 ? (
                   <p className="text-muted-foreground text-sm">{t('user.noCheckIns')}</p>
                 ) : (
-                  recentCheckIns.map((checkIn) => (
+                  checkIns.map((checkIn) => (
                     <div key={checkIn.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
                       <div className="flex justify-between items-start">
                         <div>
@@ -510,62 +403,12 @@ export function AdminDashboard() {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('admin.allUsers')}</CardTitle>
-            <CardDescription>{t('admin.userManagement')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {users.map((user) => (
-                <div key={user.id} className="p-4 border rounded-lg hover:bg-accent transition-colors">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold">{user.name}</div>
-                      <div className="text-sm text-muted-foreground truncate">{user.email}</div>
-                      {user.phone && (
-                        <div className="text-xs text-muted-foreground">{user.phone}</div>
-                      )}
-                    </div>
-                    <div className="flex-shrink-0 w-32">
-                      <Select
-                        value={user.role}
-                        onValueChange={(value: 'admin' | 'instructor' | 'user') => updateUserRole(user.id, value)}
-                        disabled={user.id === currentUser?.id}
-                      >
-                        <SelectTrigger className="h-8 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">{t('admin.roleUser')}</SelectItem>
-                          <SelectItem value="instructor">{t('admin.roleInstructor')}</SelectItem>
-                          <SelectItem value="admin">{t('admin.roleAdmin')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {user.id === currentUser?.id && (
-                        <div className="text-xs text-muted-foreground mt-1 text-center">
-                          {t('admin.cannotChangeOwnRole')}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {user.bio && (
-                    <div className="mt-2 text-sm text-muted-foreground">
-                      {user.bio}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         <ClassDrawer
           open={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           classInfo={selectedClass}
           users={users}
-          onClassUpdated={fetchAdminData}
+          onClassUpdated={fetchInstructorData}
         />
       </div>
     </div>

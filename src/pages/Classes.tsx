@@ -5,11 +5,12 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Drawer } from '@/components/ui/drawer'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Clock, User, ArrowRight, ArrowLeft, Search } from 'lucide-react'
+import { Clock, User, ArrowRight, ArrowLeft, Search, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import type { Class } from '@/types'
+import type { Class, User as UserType } from '@/types'
 
 function ClassDrawer({
   open,
@@ -104,14 +105,17 @@ export function Classes() {
   usePageTitle('pages.classes')
   const [searchParams, setSearchParams] = useSearchParams()
   const [classes, setClasses] = useState<Class[]>([])
+  const [instructors, setInstructors] = useState<UserType[]>([])
   const [filteredClasses, setFilteredClasses] = useState<Class[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedInstructor, setSelectedInstructor] = useState<string>('')
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   useEffect(() => {
     fetchClasses()
+    fetchInstructors()
   }, [])
 
   useEffect(() => {
@@ -126,19 +130,24 @@ export function Classes() {
   }, [searchParams, classes])
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredClasses(classes)
-    } else {
+    let filtered = classes
+
+    if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase()
-      const filtered = classes.filter(
+      filtered = filtered.filter(
         (cls) =>
           cls.name.toLowerCase().includes(query) ||
           cls.description?.toLowerCase().includes(query) ||
           cls.instructor?.toLowerCase().includes(query)
       )
-      setFilteredClasses(filtered)
     }
-  }, [searchQuery, classes])
+
+    if (selectedInstructor && selectedInstructor !== 'all') {
+      filtered = filtered.filter((cls) => cls.instructor_id === selectedInstructor)
+    }
+
+    setFilteredClasses(filtered)
+  }, [searchQuery, selectedInstructor, classes])
 
   const fetchClasses = async () => {
     try {
@@ -153,6 +162,20 @@ export function Classes() {
       console.error('Error fetching classes:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchInstructors = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, name, email, role')
+        .in('role', ['instructor', 'admin'])
+        .order('name')
+
+      setInstructors(data || [])
+    } catch (error) {
+      console.error('Error fetching instructors:', error)
     }
   }
 
@@ -189,17 +212,49 @@ export function Classes() {
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              type="text"
-              placeholder={t('landing.searchClasses')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-14 text-lg rounded-full border-2 focus:border-pink-600"
-            />
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                type="text"
+                placeholder={t('landing.searchClasses')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 h-14 text-lg rounded-full border-2 focus:border-pink-600"
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+              <Select value={selectedInstructor} onValueChange={setSelectedInstructor}>
+                <SelectTrigger className="pl-12 h-14 text-lg rounded-full border-2 focus:border-pink-600">
+                  <SelectValue placeholder={t('instructor.filterByInstructor')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('instructor.allInstructors')}</SelectItem>
+                  {instructors.map((instructor) => (
+                    <SelectItem key={instructor.id} value={instructor.id}>
+                      {instructor.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+          {(searchQuery || selectedInstructor) && (
+            <div className="flex justify-center mt-4">
+              <Button
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedInstructor('')
+                }}
+                variant="ghost"
+                className="text-pink-600 hover:text-pink-700"
+              >
+                {t('landing.clearSearch')}
+              </Button>
+            </div>
+          )}
         </div>
 
         {loading ? (

@@ -115,7 +115,14 @@
     "bio": "Bio",
     "bioPlaceholder": "Tell us about yourself...",
     "saveChanges": "Save Changes",
-    "edit": "Edit"
+    "edit": "Edit",
+    "changePassword": "Change / Set Password",
+    "hidePasswordSection": "Hide Password Section",
+    "newPassword": "New Password",
+    "enterNewPassword": "Enter new password",
+    "confirmNewPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Re-enter new password",
+    "passwordRequirement": "Password must be at least 6 characters long"
   },
   "admin": {
     "dashboard": "Admin Dashboard",

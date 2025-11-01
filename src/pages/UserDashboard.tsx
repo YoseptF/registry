@@ -38,6 +38,9 @@ function ProfileEditDrawer({
   const [bio, setBio] = useState(profile?.bio || '')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPasswordSection, setShowPasswordSection] = useState(false)
 
   useEffect(() => {
     if (profile && open) {
@@ -46,6 +49,9 @@ function ProfileEditDrawer({
       setAddress(profile.address || '')
       setBio(profile.bio || '')
       setAvatarPreview(profile.avatar_url || null)
+      setNewPassword('')
+      setConfirmPassword('')
+      setShowPasswordSection(false)
     }
   }, [profile, open])
 
@@ -102,9 +108,31 @@ function ProfileEditDrawer({
     setError(null)
 
     try {
+      // Validate password if provided
+      if (newPassword) {
+        if (newPassword !== confirmPassword) {
+          setError(t('errors.passwordsDontMatch'))
+          setLoading(false)
+          return
+        }
+        if (newPassword.length < 6) {
+          setError(t('errors.passwordTooShort'))
+          setLoading(false)
+          return
+        }
+      }
+
       let avatarUrl = avatarPreview
       if (avatarFile) {
         avatarUrl = await uploadAvatar()
+      }
+
+      // Update password if provided
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({
+          password: newPassword
+        })
+        if (passwordError) throw passwordError
       }
 
       const { error: updateError } = await supabase
@@ -212,6 +240,47 @@ function ProfileEditDrawer({
             placeholder={t('user.bioPlaceholder')}
             rows={4}
           />
+        </div>
+
+        <div className="border-t pt-6">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPasswordSection(!showPasswordSection)}
+            className="w-full"
+          >
+            {showPasswordSection ? t('user.hidePasswordSection') : t('user.changePassword')}
+          </Button>
+
+          {showPasswordSection && (
+            <div className="mt-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">{t('user.newPassword')}</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder={t('user.enterNewPassword')}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">{t('user.confirmNewPassword')}</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={t('user.confirmPasswordPlaceholder')}
+                />
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                {t('user.passwordRequirement')}
+              </p>
+            </div>
+          )}
         </div>
 
         {error && (

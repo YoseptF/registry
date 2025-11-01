@@ -115,7 +115,14 @@
     "bio": "Biografía",
     "bioPlaceholder": "Cuéntanos sobre ti...",
     "saveChanges": "Guardar Cambios",
-    "edit": "Editar"
+    "edit": "Editar",
+    "changePassword": "Cambiar / Establecer Contraseña",
+    "hidePasswordSection": "Ocultar Sección de Contraseña",
+    "newPassword": "Nueva Contraseña",
+    "enterNewPassword": "Ingresa nueva contraseña",
+    "confirmNewPassword": "Confirmar Nueva Contraseña",
+    "confirmPasswordPlaceholder": "Vuelve a ingresar la contraseña",
+    "passwordRequirement": "La contraseña debe tener al menos 6 caracteres"
   },
   "admin": {
     "dashboard": "Panel de Administrador",

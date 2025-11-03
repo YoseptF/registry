@@ -29,7 +29,6 @@ import {
   Ticket,
   ShoppingCart,
   ChevronDown,
-  Settings,
   Calendar,
 } from "lucide-react";
 import { useState } from "react";
@@ -101,8 +100,8 @@ export function Navigation() {
     icon: Icon,
     onClick,
   }: {
-    path;
-    label;
+    path: string;
+    label: string;
     icon: typeof Home;
     onClick?: () => void;
   }) => {

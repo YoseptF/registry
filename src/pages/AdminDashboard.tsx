@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,8 @@ import {
   Users,
   GraduationCap,
   UserCheck,
-  Trash2,
   ChevronRight,
-  QrCode,
-  ArrowRight,
   Edit,
-  Upload,
-  X,
   RefreshCw,
   Check,
   XCircle,

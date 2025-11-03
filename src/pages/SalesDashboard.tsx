@@ -21,7 +21,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Navigation } from '@/components/Navigation'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { ShoppingCart, Package, Ticket, Calendar as CalendarIcon, User as UserIcon, DollarSign, X } from 'lucide-react'
+import { ShoppingCart, Package, Ticket, Calendar as CalendarIcon, User as UserIcon, DollarSign } from 'lucide-react'
 import type { User, ClassPackage, DropInCreditPackage, Class, ClassSession } from '@/types'
 
 type SaleType = 'class_package' | 'drop_in_credits' | null
@@ -69,7 +69,8 @@ export function SalesDashboard() {
             .from('drop_in_credit_packages')
             .select('*')
             .eq('active', true)
-            .order('name', { ascending: true }),
+            .order('name', { ascending: true })
+            .returns<DropInCreditPackage[]>(),
           supabase.from('classes').select('*').order('name', { ascending: true }),
         ])
 
@@ -155,6 +156,8 @@ export function SalesDashboard() {
   }
 
   const sellClassPackage = async (pkg: ClassPackage) => {
+    const currentUser = (await supabase.auth.getUser()).data.user;
+
     const { data: purchase, error: purchaseError } = await supabase
       .from('class_package_purchases')
       .insert({
@@ -164,7 +167,7 @@ export function SalesDashboard() {
         num_classes: pkg.num_classes,
         purchase_date: new Date().toISOString(),
         amount_paid: paymentAmount,
-        assigned_by: (await supabase.auth.getUser()).data.user?.id,
+        assigned_by: currentUser!.id,
       })
       .select()
       .single()
@@ -189,6 +192,7 @@ export function SalesDashboard() {
         .eq('session_date', dateStr)
         .eq('session_time', sessionTime)
         .maybeSingle()
+        .returns<ClassSession>()
 
       if (existingSession) {
         session = existingSession
@@ -199,10 +203,11 @@ export function SalesDashboard() {
             class_id: selection.classId,
             session_date: dateStr,
             session_time: sessionTime,
-            created_from: 'enrollment',
+            created_from: 'enrollment' as 'enrollment' | 'dropin' | 'manual',
           })
           .select()
           .single()
+          .returns<ClassSession>()
 
         if (sessionError) {
           if (sessionError.code === '23505') {
@@ -213,6 +218,7 @@ export function SalesDashboard() {
               .eq('session_date', dateStr)
               .eq('session_time', sessionTime)
               .single()
+              .returns<ClassSession>()
 
             if (retrySession) {
               session = retrySession
@@ -240,6 +246,8 @@ export function SalesDashboard() {
   }
 
   const sellCreditPackage = async (pkg: DropInCreditPackage) => {
+    const currentUser = (await supabase.auth.getUser()).data.user;
+
     const { error } = await supabase.from('drop_in_credit_purchases').insert({
       user_id: selectedUserId,
       package_id: pkg.id,
@@ -248,8 +256,8 @@ export function SalesDashboard() {
       credits_remaining: pkg.num_credits,
       purchase_date: new Date().toISOString(),
       amount_paid: paymentAmount,
-      assigned_by: (await supabase.auth.getUser()).data.user?.id,
-      payment_type: pkg.payment_type || 'percentage',
+      assigned_by: currentUser!.id,
+      payment_type: (pkg.payment_type || 'percentage') as 'flat' | 'percentage',
       payment_value: pkg.payment_value || 70,
     })
 

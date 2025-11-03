@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar } from '@/components/ui/avatar'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { ClassDrawer } from '@/components/ClassDrawer'
-import { Clock, User, ArrowRight, ArrowLeft, Search, Filter, ChevronRight } from 'lucide-react'
+import { Clock, User, ArrowLeft, Search, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, User as UserType } from '@/types'

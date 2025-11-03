@@ -24,6 +24,7 @@ interface ClassSessionWithDetails extends ClassSession {
   class: Class;
   isEnrolled?: boolean;
   enrollmentId?: string;
+  checked_in?: boolean;
 }
 
 export function ClassSessionCalendar() {
@@ -57,7 +58,8 @@ export function ClassSessionCalendar() {
         .select("*, class:classes(*)")
         .gte("session_date", monthStart.toISOString())
         .lte("session_date", monthEnd.toISOString())
-        .order("session_date", { ascending: true });
+        .order("session_date", { ascending: true })
+        .returns<Array<ClassSession & { class: Class }>>();
 
       if (sessionsError) throw sessionsError;
 
@@ -132,7 +134,8 @@ export function ClassSessionCalendar() {
       .gte("session_date", new Date().toISOString().split('T')[0])
       .neq("id", session.id)
       .order("session_date", { ascending: true })
-      .limit(30);
+      .limit(30)
+      .returns<ClassSession[]>();
 
     if (!error && availableSessionsData) {
       setAvailableSessions(availableSessionsData);
@@ -160,7 +163,7 @@ export function ClassSessionCalendar() {
       const { error } = await supabase
         .from("reschedule_requests")
         .insert({
-          enrollment_id: selectedSession.enrollmentId,
+          enrollment_id: selectedSession.enrollmentId!,
           user_id: profile.id,
           current_session_id: selectedSession.id,
           requested_session_id: targetSession.id,

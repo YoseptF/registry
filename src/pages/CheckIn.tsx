@@ -12,12 +12,10 @@ import { Navigation } from '@/components/Navigation'
 import { QrCode, UserPlus, AlertCircle } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, ClassSession } from '@/types'
-import { useAuth } from '@/contexts/AuthContext'
 
 export function CheckIn() {
   const { t } = useTranslation()
   usePageTitle('pages.checkIn')
-  const { user } = useAuth()
   const { classId } = useParams<{ classId: string }>()
   const [classInfo, setClassInfo] = useState<Class | null>(null)
   const [currentSession, setCurrentSession] = useState<ClassSession | null>(null)
@@ -96,6 +94,7 @@ export function CheckIn() {
         .eq('session_date', sessionDate)
         .eq('session_time', sessionTime)
         .limit(1)
+        .returns<ClassSession[]>()
 
       if (fetchError) {
         console.error('Error fetching session:', fetchError)
@@ -113,10 +112,11 @@ export function CheckIn() {
             class_id: classData.id,
             session_date: sessionDate,
             session_time: sessionTime,
-            created_from: 'manual',
+            created_from: 'manual' as 'enrollment' | 'dropin' | 'manual',
           })
           .select()
           .single()
+          .returns<ClassSession>()
 
         if (insertError) {
           if (insertError.code === '23505') {
@@ -129,6 +129,7 @@ export function CheckIn() {
               .eq('session_time', sessionTime)
               .limit(1)
               .single()
+              .returns<ClassSession>()
 
             if (retrySession) {
               setCurrentSession(retrySession)
@@ -285,7 +286,7 @@ export function CheckIn() {
         const { data: packagePurchase } = await supabase
           .from('class_package_purchases')
           .select('amount_paid, num_classes')
-          .eq('id', enrollment.package_purchase_id)
+          .eq('id', enrollment.package_purchase_id!)
           .single()
 
         if (packagePurchase) {
@@ -331,8 +332,8 @@ export function CheckIn() {
       )
 
       const { error: checkInError } = await supabase.from('check_ins').insert({
-        class_id: classId,
-        class_session_id: currentSession.id,
+        class_id: classId!,
+        class_session_id: currentSession!.id,
         user_id: userId,
         enrollment_id: enrollmentId,
         credit_purchase_id: creditPurchaseId,
@@ -399,8 +400,8 @@ export function CheckIn() {
       const instructorPayment = await calculateInstructorPayment(classInfo, 0, 1)
 
       const { error: checkInError } = await supabase.from('check_ins').insert({
-        class_id: classId,
-        class_session_id: currentSession.id,
+        class_id: classId!,
+        class_session_id: currentSession!.id,
         user_id: null,
         payment_method: null,
         payment_status: 'pending',

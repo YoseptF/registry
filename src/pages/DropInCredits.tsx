@@ -60,6 +60,7 @@ export function DropInCredits() {
         .from('drop_in_credit_packages')
         .select('*')
         .order('created_at', { ascending: false })
+        .returns<DropInCreditPackage[]>()
 
       setPackages(data || [])
     } catch (error) {

@@ -9,7 +9,7 @@ import { Navigation } from '@/components/Navigation'
 import { RecentCheckInsCard } from '@/components/RecentCheckInsCard'
 import { ProfileEditDrawer } from '@/components/ProfileEditDrawer'
 import { ClassDrawer } from '@/components/ClassDrawer'
-import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, X, Edit, User as UserIcon, DollarSign, TrendingUp } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, ChevronRight, Edit, TrendingUp } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, User } from '@/types'
 

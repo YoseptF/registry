@@ -23,13 +23,11 @@ import {
   MapPin,
   ChevronRight,
   Edit,
-  Upload,
-  X,
   Clock,
   GraduationCap,
 } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import type { Class, CheckIn, User as UserType } from "@/types";
+import type { Class, CheckIn } from "@/types";
 import { format } from "date-fns";
 
 export function UserDashboard() {

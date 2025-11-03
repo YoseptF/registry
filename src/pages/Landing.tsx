@@ -3,23 +3,36 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Avatar } from '@/components/ui/avatar'
-import { Clock, User, ArrowRight, Sparkles, LogIn } from 'lucide-react'
+import { Clock, User, ArrowRight, Sparkles, LogIn, Tag } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import type { Class, User as UserType } from '@/types'
+import type { Class, User as UserType, ClassPackage, DropInCreditPackage } from '@/types'
+
+interface PackageWithCount extends ClassPackage {
+  purchase_count: number
+}
+
+interface CreditWithCount extends DropInCreditPackage {
+  purchase_count: number
+}
 
 export function Landing() {
   const { t } = useTranslation()
   usePageTitle('pages.landing')
   const [classes, setClasses] = useState<Class[]>([])
   const [instructors, setInstructors] = useState<UserType[]>([])
+  const [packages, setPackages] = useState<PackageWithCount[]>([])
+  const [credits, setCredits] = useState<CreditWithCount[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAllPackages, setShowAllPackages] = useState(false)
 
   useEffect(() => {
     fetchClasses()
     fetchInstructors()
+    fetchPackages()
+    fetchCredits()
   }, [])
 
   const fetchClasses = async () => {
@@ -50,6 +63,68 @@ export function Landing() {
       setInstructors(data || [])
     } catch (error) {
       console.error('Error fetching instructors:', error)
+    }
+  }
+
+  const fetchPackages = async () => {
+    try {
+      // Fetch active packages
+      const { data: packagesData } = await supabase
+        .from('class_packages')
+        .select('*')
+        .eq('active', true)
+
+      // Fetch purchase counts for each package
+      const { data: purchasesData } = await supabase
+        .from('class_package_purchases')
+        .select('package_id')
+
+      // Count purchases per package
+      const purchaseCounts = new Map<string, number>()
+      purchasesData?.forEach(purchase => {
+        purchaseCounts.set(purchase.package_id, (purchaseCounts.get(purchase.package_id) || 0) + 1)
+      })
+
+      // Add purchase counts and sort by popularity
+      const packagesWithCounts: PackageWithCount[] = (packagesData || []).map(pkg => ({
+        ...pkg,
+        purchase_count: purchaseCounts.get(pkg.id) || 0
+      })).sort((a, b) => b.purchase_count - a.purchase_count)
+
+      setPackages(packagesWithCounts)
+    } catch (error) {
+      console.error('Error fetching packages:', error)
+    }
+  }
+
+  const fetchCredits = async () => {
+    try {
+      // Fetch active drop-in credit packages
+      const { data: creditsData } = await supabase
+        .from('drop_in_credit_packages')
+        .select('*')
+        .eq('active', true)
+
+      // Fetch purchase counts for each credit package
+      const { data: purchasesData } = await supabase
+        .from('drop_in_credit_purchases')
+        .select('package_id')
+
+      // Count purchases per package
+      const purchaseCounts = new Map<string, number>()
+      purchasesData?.forEach(purchase => {
+        purchaseCounts.set(purchase.package_id, (purchaseCounts.get(purchase.package_id) || 0) + 1)
+      })
+
+      // Add purchase counts and sort by popularity
+      const creditsWithCounts: CreditWithCount[] = (creditsData || []).map(credit => ({
+        ...credit,
+        purchase_count: purchaseCounts.get(credit.id) || 0
+      })).sort((a, b) => b.purchase_count - a.purchase_count)
+
+      setCredits(creditsWithCounts)
+    } catch (error) {
+      console.error('Error fetching credits:', error)
     }
   }
 
@@ -231,6 +306,185 @@ export function Landing() {
           </div>
         )}
       </div>
+
+      {/* Pricing Section */}
+      {(packages.length > 0 || credits.length > 0) && (
+        <div className="container mx-auto px-4 py-24 bg-gradient-to-b from-white to-pink-50">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full mb-8 shadow-lg">
+              <Tag className="w-5 h-5 text-pink-600" />
+              <span className="text-base font-semibold text-pink-600">
+                {t('landing.pricing')}
+              </span>
+            </div>
+            <h2 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              {t('landing.pricingTitle')}
+            </h2>
+            <p className="text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              {t('landing.packagesSubtitle')}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+            {/* Class Packages */}
+            {(showAllPackages ? packages : packages.slice(0, 3)).map((pkg, index) => {
+              const pricePerClass = pkg.price / pkg.num_classes
+              const isPopular = index === 0
+
+              return (
+                <Card
+                  key={`pkg-${pkg.id}`}
+                  className={`group hover:shadow-2xl transition-all duration-500 overflow-hidden shadow-xl hover:-translate-y-3 ${
+                    isPopular
+                      ? 'border-4 border-pink-600 relative'
+                      : 'border-0'
+                  }`}
+                  style={{
+                    animation: `fade-in-up 0.6s ease-out ${index * 0.1}s both`
+                  }}
+                >
+                  {isPopular && (
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-2 text-sm font-bold rounded-bl-2xl shadow-lg">
+                      {t('landing.mostPopular')}
+                    </div>
+                  )}
+                  <CardHeader className="text-center pb-8 pt-12">
+                    <div className="mb-2">
+                      <span className="inline-block px-4 py-1 bg-purple-100 text-purple-600 rounded-full text-sm font-semibold">
+                        {t('landing.classPackage')}
+                      </span>
+                    </div>
+                    <CardTitle className="text-4xl font-bold mb-4 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                      {pkg.name}
+                    </CardTitle>
+                    <div className="mb-4">
+                      <span className="text-6xl font-bold text-gray-900">${pkg.price}</span>
+                    </div>
+                    <CardDescription className="text-lg text-gray-600">
+                      {pkg.num_classes} {t('landing.classes')}
+                    </CardDescription>
+                    <div className="mt-4 text-base text-pink-600 font-semibold">
+                      ${pricePerClass.toFixed(2)} {t('landing.perClass')}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6 px-8 pb-10">
+                    {pkg.description && (
+                      <p className="text-center text-gray-600 text-base leading-relaxed">
+                        {pkg.description}
+                      </p>
+                    )}
+                    <Link to="/login" className="block">
+                      <Button
+                        className={`w-full mt-6 rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all ${
+                          isPopular
+                            ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white'
+                            : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'
+                        }`}
+                      >
+                        {t('landing.getStarted')}
+                        <ArrowRight className="ml-2 w-5 h-5" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
+            })}
+
+            {/* Drop-in Credits */}
+            {(showAllPackages ? credits : credits.slice(0, 3 - Math.min(packages.length, 3))).map((credit, index) => {
+              const pricePerCredit = credit.price / credit.num_credits
+              const displayIndex = Math.min(packages.length, 3) + index
+              const isPopular = displayIndex === 0
+
+              return (
+                <Card
+                  key={`credit-${credit.id}`}
+                  className={`group hover:shadow-2xl transition-all duration-500 overflow-hidden shadow-xl hover:-translate-y-3 ${
+                    isPopular
+                      ? 'border-4 border-pink-600 relative'
+                      : 'border-0'
+                  }`}
+                  style={{
+                    animation: `fade-in-up 0.6s ease-out ${displayIndex * 0.1}s both`
+                  }}
+                >
+                  {isPopular && (
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-pink-600 to-purple-600 text-white px-6 py-2 text-sm font-bold rounded-bl-2xl shadow-lg">
+                      {t('landing.mostPopular')}
+                    </div>
+                  )}
+                  <CardHeader className="text-center pb-8 pt-12">
+                    <div className="mb-2">
+                      <span className="inline-block px-4 py-1 bg-green-100 text-green-600 rounded-full text-sm font-semibold">
+                        {t('landing.punchCard')}
+                      </span>
+                    </div>
+                    <CardTitle className="text-4xl font-bold mb-4 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                      {credit.name}
+                    </CardTitle>
+                    <div className="mb-4">
+                      <span className="text-6xl font-bold text-gray-900">${credit.price}</span>
+                    </div>
+                    <CardDescription className="text-lg text-gray-600">
+                      {credit.num_credits} {t('landing.credits')}
+                    </CardDescription>
+                    <div className="mt-4 text-base text-pink-600 font-semibold">
+                      ${pricePerCredit.toFixed(2)} {t('landing.perCredit')}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6 px-8 pb-10">
+                    {credit.description && (
+                      <p className="text-center text-gray-600 text-base leading-relaxed">
+                        {credit.description}
+                      </p>
+                    )}
+                    <Link to="/login" className="block">
+                      <Button
+                        className={`w-full mt-6 rounded-full py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all ${
+                          isPopular
+                            ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white'
+                            : 'bg-white text-pink-600 border-2 border-pink-600 hover:bg-pink-50'
+                        }`}
+                      >
+                        {t('landing.getStarted')}
+                        <ArrowRight className="ml-2 w-5 h-5" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+
+          {/* View More Button */}
+          {!showAllPackages && (packages.length + credits.length > 3) && (
+            <div className="text-center mt-16">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-10 py-7 border-3 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                onClick={() => setShowAllPackages(true)}
+              >
+                {t('landing.viewMorePackages')}
+                <ArrowRight className="ml-3 w-6 h-6" />
+              </Button>
+            </div>
+          )}
+
+          {showAllPackages && (packages.length + credits.length > 3) && (
+            <div className="text-center mt-16">
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-10 py-7 border-3 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                onClick={() => setShowAllPackages(false)}
+              >
+                {t('landing.showLess')}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* CTA Section */}
       <div className="relative bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 py-28 overflow-hidden">

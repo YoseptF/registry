@@ -71,7 +71,20 @@
     "searchClasses": "Buscar clases por nombre, instructor o descripción...",
     "noResultsFound": "No se encontraron clases que coincidan con tu búsqueda",
     "clearSearch": "Limpiar Búsqueda",
-    "showingClasses": "Mostrando {{count}} clases"
+    "showingClasses": "Mostrando {{count}} clases",
+    "pricing": "Precios",
+    "pricingTitle": "Paquetes y Tarjetas de Visita",
+    "classPackages": "Paquetes de Clases",
+    "packagesSubtitle": "Elige el paquete perfecto para tus objetivos fitness",
+    "classes": "clases",
+    "perClass": "por clase",
+    "classPackage": "Paquete de Clases",
+    "punchCard": "Tarjeta de Visita",
+    "credits": "créditos",
+    "perCredit": "por crédito",
+    "viewMorePackages": "Ver Más Paquetes",
+    "showLess": "Mostrar Menos",
+    "mostPopular": "Más Popular"
   },
   "user": {
     "user": "Usuario",

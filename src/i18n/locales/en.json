@@ -71,7 +71,20 @@
     "searchClasses": "Search classes by name, instructor, or description...",
     "noResultsFound": "No classes found matching your search",
     "clearSearch": "Clear Search",
-    "showingClasses": "Showing {{count}} classes"
+    "showingClasses": "Showing {{count}} classes",
+    "pricing": "Pricing",
+    "pricingTitle": "Packages & Punch Cards",
+    "classPackages": "Class Packages",
+    "packagesSubtitle": "Choose the perfect package for your fitness goals",
+    "classes": "classes",
+    "perClass": "per class",
+    "classPackage": "Class Package",
+    "punchCard": "Punch Card",
+    "credits": "credits",
+    "perCredit": "per credit",
+    "viewMorePackages": "View More Packages",
+    "showLess": "Show Less",
+    "mostPopular": "Most Popular"
   },
   "user": {
     "user": "User",

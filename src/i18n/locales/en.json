@@ -195,7 +195,14 @@
     "checkInGuest": "Check In Guest",
     "checkedInSuccess": "checked in successfully!",
     "attendanceRecorded": "Attendance recorded successfully",
-    "clickStart": "Click Start Scanning to begin"
+    "clickStart": "Click Start Scanning to begin",
+    "sessionInfo": "Session",
+    "at": "at",
+    "loadingSession": "Loading session",
+    "alreadyCheckedIn": "has already checked in for this session",
+    "notEnrolledNoCredits": "is not enrolled and has no drop-in credits available",
+    "usingPackage": "Used Class Package",
+    "usingCredit": "Used Drop-in Credit"
   },
   "instructor": {
     "dashboard": "Instructor Dashboard",
@@ -244,6 +251,8 @@
     "invalidQrCode": "Invalid QR code or check-in failed",
     "notEnrolled": "User is not enrolled in this class",
     "classNotFound": "Class not found",
-    "cameraPermission": "Failed to start camera. Please check permissions."
+    "cameraPermission": "Failed to start camera. Please check permissions.",
+    "sessionCreationFailed": "Failed to create or load class session",
+    "creditDeductionFailed": "Failed to deduct drop-in credit"
   }
 }

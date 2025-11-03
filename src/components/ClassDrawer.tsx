@@ -44,10 +44,10 @@ export function ClassDrawer({
   const [instructor, setInstructor] = useState<UserType | null>(null)
   const [loadingInstructor, setLoadingInstructor] = useState(false)
 
-  const canManageMembers = mode === 'admin' || mode === 'instructor'
+  const canManageMembers = false
   const canEdit = mode === 'admin'
   const showInstructorProfile = mode === 'user' || mode === 'public'
-  const showCheckInButton = mode === 'admin'
+  const showCheckInButton = mode === 'admin' || mode === 'instructor'
   const showAuthCTA = mode === 'public'
 
   useEffect(() => {
@@ -351,7 +351,7 @@ export function ClassDrawer({
 
           {showCheckInButton && (
             <div className="border-t pt-6 pb-6">
-              <Link to={`/checkin/${classInfo.id}`}>
+              <Link to={`/checkin/${classInfo.id}`} onClick={onClose}>
                 <Button className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-full py-6 text-lg font-semibold shadow-lg group">
                   <QrCode className="mr-2 w-5 h-5" />
                   {t('admin.startCheckIn')}

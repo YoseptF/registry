@@ -9,25 +9,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Navigation } from '@/components/Navigation'
-import { QrCode, UserPlus } from 'lucide-react'
+import { QrCode, UserPlus, AlertCircle } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import type { Class } from '@/types'
+import type { Class, ClassSession } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
 
 export function CheckIn() {
   const { t } = useTranslation()
   usePageTitle('pages.checkIn')
+  const { user } = useAuth()
   const { classId } = useParams<{ classId: string }>()
   const [classInfo, setClassInfo] = useState<Class | null>(null)
+  const [currentSession, setCurrentSession] = useState<ClassSession | null>(null)
   const [scanning, setScanning] = useState(false)
   const [showTempUserForm, setShowTempUserForm] = useState(false)
   const [tempUserName, setTempUserName] = useState('')
   const [tempUserPhone, setTempUserPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [codeReader, setCodeReader] = useState<BrowserMultiFormatReader | null>(null)
+  const [isLoadingSession, setIsLoadingSession] = useState(false)
 
   useEffect(() => {
-    if (classId) {
+    let isMounted = true
+
+    if (classId && isMounted) {
       fetchClassInfo()
+    }
+
+    return () => {
+      isMounted = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchClassInfo is stable
   }, [classId])
@@ -47,6 +57,7 @@ export function CheckIn() {
   const fetchClassInfo = async () => {
     if (!classId) return
 
+    setIsLoadingSession(true)
     try {
       const { data, error } = await supabase
         .from('classes')
@@ -56,9 +67,95 @@ export function CheckIn() {
 
       if (error) throw error
       setClassInfo(data)
+
+      await getOrCreateTodaySession(data)
     } catch (err) {
       console.error('Error fetching class:', err)
       setError(t('errors.classNotFound'))
+    } finally {
+      setIsLoadingSession(false)
+    }
+  }
+
+  const getOrCreateTodaySession = async (classData: Class) => {
+    try {
+      const today = new Date()
+      const sessionDate = today.toISOString().split('T')[0]
+      let sessionTime = classData.schedule_time || '18:00'
+
+      if (sessionTime.split(':').length === 2) {
+        sessionTime = sessionTime + ':00'
+      }
+
+      console.debug('Fetching session for:', { classId: classData.id, sessionDate, sessionTime })
+
+      let { data: existingSessions, error: fetchError } = await supabase
+        .from('class_sessions')
+        .select('*')
+        .eq('class_id', classData.id)
+        .eq('session_date', sessionDate)
+        .eq('session_time', sessionTime)
+        .limit(1)
+
+      if (fetchError) {
+        console.error('Error fetching session:', fetchError)
+        throw fetchError
+      }
+
+      if (existingSessions && existingSessions.length > 0) {
+        console.debug('Found existing session:', existingSessions[0])
+        setCurrentSession(existingSessions[0])
+      } else {
+        console.debug('Creating new session...')
+        const { data: newSession, error: insertError } = await supabase
+          .from('class_sessions')
+          .insert({
+            class_id: classData.id,
+            session_date: sessionDate,
+            session_time: sessionTime,
+            created_from: 'manual',
+          })
+          .select()
+          .single()
+
+        if (insertError) {
+          if (insertError.code === '23505') {
+            console.debug('Session already exists (race condition), fetching it...')
+            const { data: retrySession } = await supabase
+              .from('class_sessions')
+              .select('*')
+              .eq('class_id', classData.id)
+              .eq('session_date', sessionDate)
+              .eq('session_time', sessionTime)
+              .limit(1)
+              .single()
+
+            if (retrySession) {
+              setCurrentSession(retrySession)
+              return
+            }
+          }
+
+          console.error('Error inserting session:', insertError)
+          console.error('Attempted to insert:', {
+            class_id: classData.id,
+            session_date: sessionDate,
+            session_time: sessionTime,
+            created_from: 'manual',
+          })
+          throw insertError
+        }
+
+        console.debug('Created new session:', newSession)
+        setCurrentSession(newSession)
+      }
+    } catch (err) {
+      console.error('Error getting/creating session:', err)
+      if (err && typeof err === 'object' && 'message' in err) {
+        toast.error(`Session error: ${(err as { message: string }).message}`)
+      } else {
+        toast.error(t('errors.sessionCreationFailed'))
+      }
     }
   }
 
@@ -149,35 +246,118 @@ export function CheckIn() {
   }
 
   const handleQRCode = async (qrData: string) => {
-    if (!classId) return
+    if (!classId || !currentSession || !classInfo) return
 
     try {
       const data = JSON.parse(qrData)
       const { userId, name } = data
 
-      const { data: membership } = await supabase
-        .from('class_memberships')
+      const { data: existingCheckIn } = await supabase
+        .from('check_ins')
         .select('*')
-        .eq('class_id', classId)
+        .eq('class_session_id', currentSession.id)
         .eq('user_id', userId)
         .single()
 
-      if (!membership) {
-        setError(t('errors.notEnrolled'))
+      if (existingCheckIn) {
+        setError(`${name} ${t('checkIn.alreadyCheckedIn')}`)
+        toast.error(`${name} ${t('checkIn.alreadyCheckedIn')}`)
         return
       }
 
+      const { data: enrollment } = await supabase
+        .from('class_enrollments')
+        .select('*')
+        .eq('class_session_id', currentSession.id)
+        .eq('user_id', userId)
+        .single()
+
+      let paymentMethod: 'package' | 'credit' | null = null
+      let enrollmentId: string | null = null
+      let creditPurchaseId: string | null = null
+      let amountPaid = 0
+      let numClasses = 1
+
+      if (enrollment) {
+        paymentMethod = 'package'
+        enrollmentId = enrollment.id
+
+        const { data: packagePurchase } = await supabase
+          .from('class_package_purchases')
+          .select('amount_paid, num_classes')
+          .eq('id', enrollment.package_purchase_id)
+          .single()
+
+        if (packagePurchase) {
+          amountPaid = packagePurchase.amount_paid
+          numClasses = packagePurchase.num_classes
+        }
+      } else {
+        const { data: creditPurchase } = await supabase
+          .from('drop_in_credit_purchases')
+          .select('*')
+          .eq('user_id', userId)
+          .gt('credits_remaining', 0)
+          .order('purchase_date', { ascending: true })
+          .limit(1)
+          .single()
+
+        if (!creditPurchase) {
+          setError(`${name} ${t('checkIn.notEnrolledNoCredits')}`)
+          console.debug(`User ${userId} not enrolled and has no credits`)
+          return
+        }
+
+        const { error: creditError } = await supabase.rpc('use_drop_in_credit', {
+          p_user_id: userId,
+        })
+
+        if (creditError) {
+          console.error('Error using credit:', creditError)
+          setError(t('errors.creditDeductionFailed'))
+          return
+        }
+
+        paymentMethod = 'credit'
+        creditPurchaseId = creditPurchase.id
+        amountPaid = creditPurchase.amount_paid
+        numClasses = creditPurchase.credits_total
+      }
+
+      const instructorPayment = await calculateInstructorPayment(
+        classInfo,
+        amountPaid,
+        numClasses
+      )
+
       const { error: checkInError } = await supabase.from('check_ins').insert({
         class_id: classId,
+        class_session_id: currentSession.id,
         user_id: userId,
+        enrollment_id: enrollmentId,
+        credit_purchase_id: creditPurchaseId,
+        payment_method: paymentMethod,
+        payment_status: 'pending',
+        instructor_payment_amount: instructorPayment,
         is_temporary_user: false,
       })
 
       if (checkInError) throw checkInError
 
+      if (enrollment) {
+        await supabase
+          .from('class_enrollments')
+          .update({ checked_in: true })
+          .eq('id', enrollment.id)
+      }
+
+      const paymentBadge = paymentMethod === 'package'
+        ? t('checkIn.usingPackage')
+        : t('checkIn.usingCredit')
+
       toast.success(`✓ ${name} ${t('checkIn.checkedInSuccess')}`, {
         duration: 3000,
-        description: t('checkIn.attendanceRecorded'),
+        description: `${t('checkIn.attendanceRecorded')} • ${paymentBadge}`,
       })
       setError(null)
     } catch (err) {
@@ -186,9 +366,24 @@ export function CheckIn() {
     }
   }
 
+  const calculateInstructorPayment = async (
+    classData: Class,
+    amountPaid: number,
+    numClasses: number
+  ): Promise<number> => {
+    const classValue = amountPaid / Math.max(numClasses, 1)
+
+    if (classData.instructor_payment_type === 'flat') {
+      return classData.instructor_payment_value || 0
+    } else {
+      const percentage = classData.instructor_payment_value || 70
+      return Math.round((classValue * (percentage / 100)) * 100) / 100
+    }
+  }
+
   const handleTempUserCheckIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!classId) return
+    if (!classId || !currentSession || !classInfo) return
 
     try {
       const { error: tempUserError } = await supabase
@@ -201,9 +396,15 @@ export function CheckIn() {
 
       if (tempUserError) throw tempUserError
 
+      const instructorPayment = await calculateInstructorPayment(classInfo, 0, 1)
+
       const { error: checkInError } = await supabase.from('check_ins').insert({
         class_id: classId,
+        class_session_id: currentSession.id,
         user_id: null,
+        payment_method: null,
+        payment_status: 'pending',
+        instructor_payment_amount: instructorPayment,
         is_temporary_user: true,
       })
 
@@ -232,12 +433,33 @@ export function CheckIn() {
             {t('checkIn.checkIn')}
           </h1>
           {classInfo && (
-            <div className="text-center mb-8">
+            <div className="text-center mb-4">
               <h2 className="text-2xl font-semibold">{classInfo.name}</h2>
               {classInfo.instructor && (
                 <p className="text-muted-foreground">{t('admin.instructor')}: {classInfo.instructor}</p>
               )}
             </div>
+          )}
+
+          {currentSession && (
+            <Card className="mb-6 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950 dark:to-purple-950 border-pink-200 dark:border-pink-800">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span className="font-medium">
+                    {t('checkIn.sessionInfo')}: {new Date(currentSession.session_date).toLocaleDateString()} {t('checkIn.at')} {currentSession.session_time}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {isLoadingSession && (
+            <Card className="mb-6">
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                {t('checkIn.loadingSession')}...
+              </CardContent>
+            </Card>
           )}
 
           {error && (

@@ -71,7 +71,7 @@ function AppContent() {
         <Route
           path="/checkin/:classId"
           element={
-            <ProtectedRoute requireAdmin>
+            <ProtectedRoute requireInstructor>
               <CheckIn />
             </ProtectedRoute>
           }

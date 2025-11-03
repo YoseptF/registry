@@ -55,18 +55,30 @@ export function UserDashboard() {
     if (!profile) return;
 
     try {
-      const { data: memberships } = await supabase
-        .from("class_memberships")
-        .select("class_id")
-        .eq("user_id", profile.id);
+      const { data: enrollments } = await supabase
+        .rpc("get_upcoming_enrollments", {
+          p_user_id: profile.id,
+          p_limit: 20,
+        });
 
-      if (memberships && memberships.length > 0) {
-        const classIds = memberships.map((m) => m.class_id);
-        const { data: classData } = await supabase
-          .from("classes")
-          .select("*")
-          .in("id", classIds);
-        setClasses(classData || []);
+      if (enrollments && enrollments.length > 0) {
+        const uniqueClasses = enrollments.reduce((acc: Class[], enrollment: any) => {
+          const existingClass = acc.find((c) => c.id === enrollment.class_id);
+          if (!existingClass) {
+            acc.push({
+              id: enrollment.class_id,
+              name: enrollment.class_name,
+              description: enrollment.class_description,
+              banner_url: enrollment.banner_url,
+              duration_minutes: enrollment.duration_minutes,
+              instructor_id: enrollment.instructor_id,
+              created_by: "",
+              created_at: "",
+            });
+          }
+          return acc;
+        }, []);
+        setClasses(uniqueClasses);
       }
 
       const { data: checkInData } = await supabase

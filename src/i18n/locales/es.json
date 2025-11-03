@@ -195,7 +195,14 @@
     "checkInGuest": "Registrar Invitado",
     "checkedInSuccess": "se registró exitosamente!",
     "attendanceRecorded": "Asistencia registrada exitosamente",
-    "clickStart": "Haz clic en Iniciar Escaneo para comenzar"
+    "clickStart": "Haz clic en Iniciar Escaneo para comenzar",
+    "sessionInfo": "Sesión",
+    "at": "a las",
+    "loadingSession": "Cargando sesión",
+    "alreadyCheckedIn": "ya se registró en esta sesión",
+    "notEnrolledNoCredits": "no está inscrito y no tiene créditos disponibles",
+    "usingPackage": "Usó Paquete de Clases",
+    "usingCredit": "Usó Crédito de Visita"
   },
   "instructor": {
     "dashboard": "Panel de Instructor",
@@ -244,6 +251,8 @@
     "invalidQrCode": "Código QR inválido o registro fallido",
     "notEnrolled": "El usuario no está inscrito en esta clase",
     "classNotFound": "Clase no encontrada",
-    "cameraPermission": "No se pudo iniciar la cámara. Por favor verifica los permisos."
+    "cameraPermission": "No se pudo iniciar la cámara. Por favor verifica los permisos.",
+    "sessionCreationFailed": "Error al crear o cargar la sesión de clase",
+    "creditDeductionFailed": "Error al descontar el crédito de visita"
   }
 }

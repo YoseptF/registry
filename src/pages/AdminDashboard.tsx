@@ -327,6 +327,7 @@ function ClassDrawer({
     if (classInfo && open) {
       fetchMembers()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchMembers is stable, classInfo?.id is sufficient
   }, [classInfo?.id, open])
 
   const fetchMembers = async () => {

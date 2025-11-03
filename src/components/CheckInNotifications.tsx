@@ -44,6 +44,7 @@ export function CheckInNotifications() {
     return () => {
       channel.unsubscribe()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- t (i18n) is stable, only profile.id changes matter for subscription filter
   }, [profile?.id])
 
   return null

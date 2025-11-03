@@ -22,6 +22,7 @@ export function InstructorProfile() {
     if (instructorId) {
       fetchInstructorData()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchInstructorData is stable
   }, [instructorId])
 
   const fetchInstructorData = async () => {

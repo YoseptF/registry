@@ -36,6 +36,7 @@ function ClassDrawer({
     if (classInfo && open) {
       fetchMembers()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchMembers is stable, classInfo?.id is sufficient
   }, [classInfo?.id, open])
 
   const fetchMembers = async () => {
@@ -499,6 +500,7 @@ export function InstructorDashboard() {
   useEffect(() => {
     fetchInstructorData()
     subscribeToCheckIns()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchInstructorData and subscribeToCheckIns are stable
   }, [profile])
 
   const fetchInstructorData = async () => {

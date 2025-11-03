@@ -45,11 +45,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run auth initialization on mount
   }, [])
 
   const fetchProfile = async (userId: string, shouldSetLoading = true) => {
     try {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
@@ -100,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- useAuth hook needs to be co-located with AuthProvider
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {

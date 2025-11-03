@@ -1,63 +1,118 @@
-import { Link, useLocation } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Menu, Home, GraduationCap, User, LayoutDashboard, LogOut, History } from 'lucide-react'
-import { useState } from 'react'
+import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import {
+  Menu,
+  Home,
+  GraduationCap,
+  User,
+  LayoutDashboard,
+  LogOut,
+  History,
+} from "lucide-react";
+import { useState } from "react";
 
 export function Navigation() {
-  const { t } = useTranslation()
-  const { profile, signOut } = useAuth()
-  const location = useLocation()
-  const [isOpen, setIsOpen] = useState(false)
+  const { t } = useTranslation();
+  const { profile, signOut } = useAuth();
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
-  if (!profile) return null
+  if (!profile) return null;
 
-  const isAdmin = profile.role === 'admin'
-  const isInstructor = profile.role === 'instructor'
-  const isActive = (path: string) => location.pathname === path
+  const isAdmin = profile.role === "admin";
+  const isInstructor = profile.role === "instructor";
+  const isActive = (path: string) => location.pathname === path;
 
   const navLinks = isAdmin
     ? [
-        { path: '/admin', label: t('admin.dashboard'), icon: LayoutDashboard },
-        { path: '/instructors', label: t('instructor.instructors'), icon: GraduationCap },
-        { path: '/', label: t('common.home'), icon: Home },
+        { path: "/admin", label: t("admin.dashboard"), icon: LayoutDashboard },
+        {
+          path: "/instructors",
+          label: t("instructor.instructors"),
+          icon: GraduationCap,
+        },
+        { path: "/", label: t("common.home"), icon: Home },
       ]
     : isInstructor
     ? [
-        { path: '/instructor', label: t('instructor.dashboard'), icon: LayoutDashboard },
-        { path: '/check-ins-history', label: t('user.checkInHistory'), icon: History },
-        { path: '/instructors', label: t('instructor.instructors'), icon: GraduationCap },
-        { path: '/', label: t('common.home'), icon: Home },
+        {
+          path: "/instructor",
+          label: t("instructor.dashboard"),
+          icon: LayoutDashboard,
+        },
+        {
+          path: "/check-ins-history",
+          label: t("user.checkInHistory"),
+          icon: History,
+        },
+        {
+          path: "/instructors",
+          label: t("instructor.instructors"),
+          icon: GraduationCap,
+        },
+        { path: "/", label: t("common.home"), icon: Home },
       ]
     : [
-        { path: '/user', label: t('user.dashboard'), icon: User },
-        { path: '/check-ins-history', label: t('user.checkInHistory'), icon: History },
-        { path: '/classes', label: t('landing.ourClasses'), icon: GraduationCap },
-        { path: '/instructors', label: t('instructor.instructors'), icon: User },
-        { path: '/', label: t('common.home'), icon: Home },
-      ]
+        { path: "/user", label: t("user.dashboard"), icon: User },
+        {
+          path: "/check-ins-history",
+          label: t("user.checkInHistory"),
+          icon: History,
+        },
+        {
+          path: "/classes",
+          label: t("landing.ourClasses"),
+          icon: GraduationCap,
+        },
+        {
+          path: "/instructors",
+          label: t("instructor.instructors"),
+          icon: User,
+        },
+        { path: "/", label: t("common.home"), icon: Home },
+      ];
 
   const handleSignOut = async () => {
-    await signOut()
-  }
+    await signOut();
+  };
 
-  const NavLink = ({ path, label, icon: Icon, onClick }: { path: string; label: string; icon: typeof Home; onClick?: () => void }) => (
-    <Link
-      to={path}
-      onClick={onClick}
-      className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-        isActive(path)
-          ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white'
-          : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground'
-      }`}
-    >
-      <Icon className="w-5 h-5" />
-      <span className="font-medium">{label}</span>
-    </Link>
-  )
+  const NavLink = ({
+    path,
+    label,
+    icon: Icon,
+    onClick,
+  }: {
+    path;
+    label;
+    icon: typeof Home;
+    onClick?: () => void;
+  }) => {
+    const active = isActive(path);
+    return (
+      <Link
+        to={path}
+        onClick={onClick}
+        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-white ${
+          active
+            ? "bg-linear-to-r from-pink-600 to-purple-600"
+            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground"
+        }`}
+      >
+        <Icon className="w-5 h-5" />
+        <span className="font-medium">{label}</span>
+      </Link>
+    );
+  };
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b bg-white dark:bg-gray-900 shadow-md">
@@ -69,7 +124,7 @@ export function Navigation() {
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-              {t('app.title')}
+              {t("app.title")}
             </span>
           </Link>
 
@@ -90,7 +145,11 @@ export function Navigation() {
                   {profile.name || profile.email}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {isAdmin ? t('admin.dashboard') : isInstructor ? t('instructor.dashboard') : t('user.dashboard')}
+                  {isAdmin
+                    ? t("admin.dashboard")
+                    : isInstructor
+                    ? t("instructor.dashboard")
+                    : t("user.dashboard")}
                 </p>
               </div>
               <Button
@@ -100,7 +159,7 @@ export function Navigation() {
                 className="gap-2"
               >
                 <LogOut className="w-4 h-4" />
-                {t('auth.signOut')}
+                {t("auth.signOut")}
               </Button>
             </div>
 
@@ -123,7 +182,7 @@ export function Navigation() {
                       <GraduationCap className="w-5 h-5 text-white" />
                     </div>
                     <span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                      {t('app.title')}
+                      {t("app.title")}
                     </span>
                   </SheetTitle>
                 </SheetHeader>
@@ -143,7 +202,11 @@ export function Navigation() {
                           {profile.email}
                         </p>
                         <p className="text-xs text-pink-600 dark:text-pink-400 font-medium mt-1">
-                          {isAdmin ? t('admin.dashboard') : isInstructor ? t('instructor.dashboard') : t('user.dashboard')}
+                          {isAdmin
+                            ? t("admin.dashboard")
+                            : isInstructor
+                            ? t("instructor.dashboard")
+                            : t("user.dashboard")}
                         </p>
                       </div>
                     </div>
@@ -164,14 +227,14 @@ export function Navigation() {
                   <div className="pt-4 border-t">
                     <Button
                       onClick={() => {
-                        setIsOpen(false)
-                        handleSignOut()
+                        setIsOpen(false);
+                        handleSignOut();
                       }}
                       variant="outline"
                       className="w-full gap-2 border-2 border-pink-600 text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20"
                     >
                       <LogOut className="w-4 h-4" />
-                      {t('auth.signOut')}
+                      {t("auth.signOut")}
                     </Button>
                   </div>
                 </div>
@@ -181,5 +244,5 @@ export function Navigation() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

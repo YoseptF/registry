@@ -30,6 +30,7 @@ function ClassDrawer({
     if (classInfo?.instructor_id && open) {
       fetchInstructor()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchInstructor is stable
   }, [classInfo?.instructor_id, open])
 
   const fetchInstructor = async () => {

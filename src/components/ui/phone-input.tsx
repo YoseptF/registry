@@ -44,8 +44,8 @@ export function PhoneInput({
             setDefaultCountry('MX')
           }
         }
-      } catch (error) {
-        // Default to Mexico if detection fails
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Error intentionally ignored, fallback to Mexico
+      } catch (_error) {
         setDefaultCountry('MX')
       }
     }

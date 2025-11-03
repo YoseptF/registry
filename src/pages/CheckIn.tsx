@@ -29,6 +29,7 @@ export function CheckIn() {
     if (classId) {
       fetchClassInfo()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchClassInfo is stable
   }, [classId])
 
   useEffect(() => {

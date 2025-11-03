@@ -346,6 +346,7 @@ function ClassDrawer({
     if (classInfo?.instructor_id && open) {
       fetchInstructor();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchInstructor is stable
   }, [classInfo?.instructor_id, open]);
 
   const fetchInstructor = async () => {
@@ -496,6 +497,7 @@ export function UserDashboard() {
       fetchUserData();
       subscribeToCheckIns();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUserData and subscribeToCheckIns are stable
   }, [profile]);
 
   const fetchUserData = async () => {

@@ -31,10 +31,12 @@ export function CheckInsHistory() {
     if (profile) {
       fetchData()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchData is stable
   }, [profile])
 
   useEffect(() => {
     applyFilters()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- applyFilters is stable
   }, [checkIns, searchQuery, selectedClass, dateFilter, customStartDate, customEndDate])
 
   const fetchData = async () => {

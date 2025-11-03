@@ -440,17 +440,61 @@ export function SalesDashboard() {
 
                       <div className="space-y-2">
                         <Label>{t('sales.selectDate')}</Label>
-                        <Calendar
-                          mode="single"
-                          selected={selection.date || undefined}
-                          onSelect={(date) =>
-                            updateSessionSelection(index, 'date', date || null)
+                        {selection.classId && (() => {
+                          const selectedClass = classes.find(c => c.id === selection.classId)
+                          const scheduleDays = selectedClass?.schedule_days || []
+
+                          const dayMap: Record<string, number> = {
+                            'sunday': 0,
+                            'monday': 1,
+                            'tuesday': 2,
+                            'wednesday': 3,
+                            'thursday': 4,
+                            'friday': 5,
+                            'saturday': 6
                           }
-                          disabled={(date) =>
-                            date < new Date(new Date().setHours(0, 0, 0, 0))
+
+                          const scheduleDayNumbers = scheduleDays.map(day => dayMap[day.toLowerCase()]).filter(n => n !== undefined)
+
+                          const isScheduledDay = (date: Date) => {
+                            return scheduleDayNumbers.includes(date.getDay())
                           }
-                          className="rounded-md border"
-                        />
+
+                          return (
+                            <>
+                              <div className="text-xs text-muted-foreground mb-2">
+                                {selectedClass && scheduleDays.length > 0 && (
+                                  <span className="inline-flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-500"></span>
+                                    Scheduled days: {scheduleDays.join(', ')}
+                                  </span>
+                                )}
+                              </div>
+                              <Calendar
+                                mode="single"
+                                selected={selection.date || undefined}
+                                onSelect={(date) =>
+                                  updateSessionSelection(index, 'date', date || null)
+                                }
+                                disabled={(date) =>
+                                  date < new Date(new Date().setHours(0, 0, 0, 0))
+                                }
+                                modifiers={{
+                                  scheduled: (date) => scheduleDayNumbers.length > 0 && isScheduledDay(date)
+                                }}
+                                modifiersClassNames={{
+                                  scheduled: "bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 font-semibold"
+                                }}
+                                className="rounded-md border"
+                              />
+                            </>
+                          )
+                        })()}
+                        {!selection.classId && (
+                          <div className="text-sm text-muted-foreground border rounded-md p-4 text-center">
+                            {t('sales.selectClass')} first to see scheduled dates
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

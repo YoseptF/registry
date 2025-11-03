@@ -167,13 +167,15 @@ export interface RescheduleRequest {
   id: string
   enrollment_id: string
   user_id: string
-  original_session_id: string
-  new_session_id?: string | null
-  status: 'pending' | 'approved' | 'denied' | 'completed'
-  requested_at: string
-  processed_at?: string | null
-  processed_by?: string | null
+  current_session_id: string
+  requested_session_id: string
+  reason?: string | null
+  status: 'pending' | 'approved' | 'rejected'
   admin_notes?: string | null
+  processed_by?: string | null
+  processed_at?: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface UserEnrollmentWithDetails {

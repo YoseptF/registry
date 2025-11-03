@@ -112,6 +112,8 @@
     "startDate": "Fecha de Inicio",
     "endDate": "Fecha de Fin",
     "noCheckInsFound": "No se encontraron registros",
+    "myCalendar": "Mi Calendario",
+    "viewSchedule": "Ver tu horario de clases",
     "editProfile": "Editar Perfil",
     "profilePicture": "Foto de Perfil",
     "uploadAvatar": "Haz clic para subir foto de perfil (máx 5MB)",
@@ -247,7 +249,8 @@
     "required": "requerido",
     "soon": "Pronto",
     "home": "Inicio",
-    "unknown": "Desconocido"
+    "unknown": "Desconocido",
+    "available": "Disponible"
   },
   "packages": {
     "title": "Paquetes de Clases",

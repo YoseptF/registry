@@ -112,6 +112,8 @@
     "startDate": "Start Date",
     "endDate": "End Date",
     "noCheckInsFound": "No check-ins found",
+    "myCalendar": "My Calendar",
+    "viewSchedule": "View your class schedule",
     "editProfile": "Edit Profile",
     "profilePicture": "Profile Picture",
     "uploadAvatar": "Click to upload profile picture (max 5MB)",
@@ -247,7 +249,8 @@
     "required": "required",
     "soon": "Soon",
     "home": "Home",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "available": "Available"
   },
   "packages": {
     "title": "Class Packages",

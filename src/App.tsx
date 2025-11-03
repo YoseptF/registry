@@ -13,6 +13,7 @@ import { Classes } from "./pages/Classes";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { UserDashboard } from "./pages/UserDashboard";
+import UserCalendar from "./pages/UserCalendar";
 import { CheckInsHistory } from "./pages/CheckInsHistory";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { ClassPackages } from "./pages/ClassPackages";
@@ -44,6 +45,14 @@ function AppContent() {
           element={
             <ProtectedRoute requireUser>
               <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/calendar"
+          element={
+            <ProtectedRoute requireUser>
+              <UserCalendar />
             </ProtectedRoute>
           }
         />

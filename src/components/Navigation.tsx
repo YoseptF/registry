@@ -9,6 +9,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import {
   Menu,
@@ -18,6 +25,12 @@ import {
   LayoutDashboard,
   LogOut,
   History,
+  Package,
+  Ticket,
+  ShoppingCart,
+  ChevronDown,
+  Settings,
+  Calendar,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -33,9 +46,14 @@ export function Navigation() {
   const isInstructor = profile.role === "instructor";
   const isActive = (path: string) => location.pathname === path;
 
+  const adminDropdownLinks = [
+    { path: "/admin/sales", label: t("pages.salesDashboard"), icon: ShoppingCart },
+    { path: "/admin/class-packages", label: t("pages.classPackages"), icon: Package },
+    { path: "/admin/drop-in-credits", label: t("pages.dropInCredits"), icon: Ticket },
+  ];
+
   const navLinks = isAdmin
     ? [
-        { path: "/admin", label: t("admin.dashboard"), icon: LayoutDashboard },
         {
           path: "/instructors",
           label: t("instructor.instructors"),
@@ -64,6 +82,11 @@ export function Navigation() {
       ]
     : [
         { path: "/user", label: t("user.dashboard"), icon: User },
+        {
+          path: "/user/calendar",
+          label: t("user.myCalendar"),
+          icon: Calendar,
+        },
         {
           path: "/check-ins-history",
           label: t("user.checkInHistory"),
@@ -102,9 +125,9 @@ export function Navigation() {
       <Link
         to={path}
         onClick={onClick}
-        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-white ${
+        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
           active
-            ? "bg-linear-to-r from-pink-600 to-purple-600"
+            ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white"
             : "hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground"
         }`}
       >
@@ -131,6 +154,43 @@ export function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <div className="flex items-center gap-2">
+              {isAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={location.pathname.startsWith("/admin") ? "default" : "ghost"}
+                      className="gap-2"
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                      <span className="font-medium">{t("admin.dashboard")}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/admin"
+                        className="flex items-center gap-3 cursor-pointer"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span>{t("admin.dashboard")}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {adminDropdownLinks.map((link) => (
+                      <DropdownMenuItem key={link.path} asChild>
+                        <Link
+                          to={link.path}
+                          className="flex items-center gap-3 cursor-pointer"
+                        >
+                          <link.icon className="w-4 h-4" />
+                          <span>{link.label}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {navLinks.map((link) => (
                 <NavLink key={link.path} {...link} />
               ))}
@@ -214,6 +274,25 @@ export function Navigation() {
 
                   {/* Navigation Links */}
                   <div className="space-y-2">
+                    {isAdmin && (
+                      <>
+                        <NavLink
+                          path="/admin"
+                          label={t("admin.dashboard")}
+                          icon={LayoutDashboard}
+                          onClick={() => setIsOpen(false)}
+                        />
+                        <div className="pl-4 space-y-2 border-l-2 border-pink-200 dark:border-pink-800 ml-4">
+                          {adminDropdownLinks.map((link) => (
+                            <NavLink
+                              key={link.path}
+                              {...link}
+                              onClick={() => setIsOpen(false)}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
                     {navLinks.map((link) => (
                       <NavLink
                         key={link.path}

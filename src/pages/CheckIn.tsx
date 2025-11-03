@@ -258,7 +258,7 @@ export function CheckIn() {
         .select('*')
         .eq('class_session_id', currentSession.id)
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
       if (existingCheckIn) {
         setError(`${name} ${t('checkIn.alreadyCheckedIn')}`)
@@ -271,7 +271,7 @@ export function CheckIn() {
         .select('*')
         .eq('class_session_id', currentSession.id)
         .eq('user_id', userId)
-        .single()
+        .maybeSingle()
 
       let paymentMethod: 'package' | 'credit' | null = null
       let enrollmentId: string | null = null
@@ -301,7 +301,7 @@ export function CheckIn() {
           .gt('credits_remaining', 0)
           .order('purchase_date', { ascending: true })
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (!creditPurchase) {
           setError(`${name} ${t('checkIn.notEnrolledNoCredits')}`)

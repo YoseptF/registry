@@ -114,6 +114,12 @@
     "noCheckInsFound": "No se encontraron registros",
     "myCalendar": "Mi Calendario",
     "viewSchedule": "Ver tu horario de clases",
+    "myPackages": "Mis Paquetes de Clases",
+    "myPackagesDesc": "Tus paquetes de clases comprados y sesiones programadas",
+    "purchased": "Comprado",
+    "classesUsed": "clases usadas",
+    "scheduledSessions": "Sesiones Programadas",
+    "checkedIn": "Registrado",
     "editProfile": "Editar Perfil",
     "profilePicture": "Foto de Perfil",
     "uploadAvatar": "Haz clic para subir foto de perfil (máx 5MB)",
@@ -246,11 +252,13 @@
     "close": "Cerrar",
     "back": "Atrás",
     "next": "Siguiente",
+    "cancel": "Cancelar",
     "required": "requerido",
     "soon": "Pronto",
     "home": "Inicio",
     "unknown": "Desconocido",
-    "available": "Disponible"
+    "available": "Disponible",
+    "submitting": "Enviando..."
   },
   "packages": {
     "title": "Paquetes de Clases",
@@ -338,6 +346,29 @@
     "saleSuccess": "¡Venta completada exitosamente!",
     "saleError": "Error al completar la venta. Por favor, inténtalo de nuevo."
   },
+  "reschedule": {
+    "requestReschedule": "Solicitar Reprogramación",
+    "rescheduleDescription": "Estás solicitando reprogramar",
+    "reason": "Razón (opcional)",
+    "reasonPlaceholder": "Por favor explica por qué necesitas reprogramar...",
+    "selectNewDate": "Seleccionar Nueva Fecha",
+    "highlightedDatesInfo": "Las fechas resaltadas están disponibles para esta clase",
+    "submitRequest": "Enviar Solicitud",
+    "requestSubmitted": "Solicitud de reprogramación enviada exitosamente",
+    "requestError": "Error al enviar solicitud de reprogramación",
+    "pending": "Pendiente",
+    "approved": "Aprobada",
+    "rejected": "Rechazada",
+    "viewRequests": "Ver Solicitudes de Reprogramación",
+    "noRequests": "No hay solicitudes de reprogramación",
+    "approveRequest": "Aprobar Solicitud",
+    "rejectRequest": "Rechazar Solicitud",
+    "adminNotes": "Notas del Administrador",
+    "adminNotesPlaceholder": "Agregar notas sobre esta solicitud...",
+    "currentSession": "Sesión Actual",
+    "requestedSession": "Sesión Solicitada",
+    "processRequest": "Procesar Solicitud"
+  },
   "errors": {
     "passwordsDontMatch": "Las contraseñas no coinciden",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
@@ -346,6 +377,7 @@
     "classNotFound": "Clase no encontrada",
     "cameraPermission": "No se pudo iniciar la cámara. Por favor verifica los permisos.",
     "sessionCreationFailed": "Error al crear o cargar la sesión de clase",
-    "creditDeductionFailed": "Error al descontar el crédito de visita"
+    "creditDeductionFailed": "Error al descontar el crédito de visita",
+    "sessionNotFound": "Sesión no encontrada"
   }
 }

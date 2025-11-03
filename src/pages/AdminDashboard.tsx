@@ -34,7 +34,12 @@ import {
   Edit,
   Upload,
   X,
+  RefreshCw,
+  Check,
+  XCircle,
+  Clock,
 } from "lucide-react";
+import { format } from "date-fns";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuth } from "@/contexts/AuthContext";
 import type { User, Class } from "@/types";
@@ -51,6 +56,7 @@ export function AdminDashboard() {
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
+  const [rescheduleRequests, setRescheduleRequests] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAdminData();
@@ -61,7 +67,7 @@ export function AdminDashboard() {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      const [usersResult, classesResult, checkInsResult] = await Promise.all([
+      const [usersResult, classesResult, checkInsResult, rescheduleResult] = await Promise.all([
         supabase
           .from("profiles")
           .select("*")
@@ -74,11 +80,30 @@ export function AdminDashboard() {
           .from("check_ins")
           .select("id", { count: "exact" })
           .gte("checked_in_at", today.toISOString()),
+        supabase
+          .from("reschedule_requests")
+          .select(`
+            *,
+            user:profiles!reschedule_requests_user_id_fkey(name, email),
+            current_session:class_sessions!reschedule_requests_current_session_id_fkey(
+              session_date,
+              session_time,
+              class:classes(name)
+            ),
+            requested_session:class_sessions!reschedule_requests_requested_session_id_fkey(
+              session_date,
+              session_time,
+              class:classes(name)
+            )
+          `)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false }),
       ]);
 
       setUsers((usersResult.data as User[]) || []);
       setClasses(classesResult.data || []);
       setTodaysCheckIns(checkInsResult.count || 0);
+      setRescheduleRequests(rescheduleResult.data || []);
     } catch (error) {
       console.error("Error fetching admin data:", error);
     } finally {
@@ -111,6 +136,46 @@ export function AdminDashboard() {
     } catch (error) {
       console.error("Error updating user role:", error);
       alert(t("admin.errorUpdatingRole"));
+    }
+  };
+
+  const handleRescheduleRequest = async (requestId: string, action: "approved" | "rejected", adminNotes?: string) => {
+    try {
+      const request = rescheduleRequests.find(r => r.id === requestId);
+      if (!request) return;
+
+      // Update the reschedule request status
+      const { error: updateError } = await supabase
+        .from("reschedule_requests")
+        .update({
+          status: action,
+          processed_by: currentUser?.id,
+          processed_at: new Date().toISOString(),
+          admin_notes: adminNotes || null,
+        })
+        .eq("id", requestId);
+
+      if (updateError) throw updateError;
+
+      // If approved, update the enrollment to point to the new session
+      if (action === "approved") {
+        const { error: enrollmentError } = await supabase
+          .from("class_enrollments")
+          .update({
+            class_session_id: request.requested_session_id,
+          })
+          .eq("id", request.enrollment_id);
+
+        if (enrollmentError) throw enrollmentError;
+      }
+
+      // Remove from pending list
+      setRescheduleRequests(prev => prev.filter(r => r.id !== requestId));
+
+      alert(action === "approved" ? t("reschedule.requestApproved") : t("reschedule.requestRejected"));
+    } catch (error) {
+      console.error("Error processing reschedule request:", error);
+      alert(t("reschedule.processError"));
     }
   };
 

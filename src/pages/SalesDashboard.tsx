@@ -188,8 +188,7 @@ export function SalesDashboard() {
         .eq('class_id', selection.classId)
         .eq('session_date', dateStr)
         .eq('session_time', sessionTime)
-        .limit(1)
-        .single()
+        .maybeSingle()
 
       if (existingSession) {
         session = existingSession
@@ -200,7 +199,6 @@ export function SalesDashboard() {
             class_id: selection.classId,
             session_date: dateStr,
             session_time: sessionTime,
-            duration_minutes: classData.duration_minutes || 60,
             created_from: 'enrollment',
           })
           .select()

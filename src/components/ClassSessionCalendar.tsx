@@ -63,20 +63,25 @@ export function ClassSessionCalendar() {
 
       // Get user's enrollments
       const { data: enrollmentsData, error: enrollmentsError } = await supabase
-        .from("enrollments")
-        .select("class_session_id")
+        .from("class_enrollments")
+        .select("id, class_session_id, checked_in")
         .eq("user_id", profile.id);
 
       if (enrollmentsError) throw enrollmentsError;
 
-      const enrolledSessionIds = new Set(
-        enrollmentsData?.map((e) => e.class_session_id) || []
+      const enrollmentMap = new Map(
+        enrollmentsData?.map((e) => [e.class_session_id, { id: e.id, checked_in: e.checked_in }]) || []
       );
 
-      const sessionsWithEnrollment = (sessionsData || []).map((session) => ({
-        ...session,
-        isEnrolled: enrolledSessionIds.has(session.id),
-      }));
+      const sessionsWithEnrollment = (sessionsData || []).map((session) => {
+        const enrollment = enrollmentMap.get(session.id);
+        return {
+          ...session,
+          isEnrolled: !!enrollment,
+          enrollmentId: enrollment?.id,
+          checked_in: enrollment?.checked_in,
+        };
+      });
 
       setSessions(sessionsWithEnrollment);
     } catch (error) {
@@ -107,6 +112,70 @@ export function ClassSessionCalendar() {
 
   const nextMonth = () => {
     setCurrentMonth(addMonths(currentMonth, 1));
+  };
+
+  const handleRescheduleClick = async (session: ClassSessionWithDetails) => {
+    if (!session.isEnrolled || !session.enrollmentId || session.checked_in) return;
+
+    setSelectedSession(session);
+    setNewSessionDate(undefined);
+    setRescheduleReason("");
+
+    // Load available sessions for the same class
+    const { data: availableSessionsData, error } = await supabase
+      .from("class_sessions")
+      .select("*")
+      .eq("class_id", session.class_id)
+      .gte("session_date", new Date().toISOString().split('T')[0])
+      .neq("id", session.id)
+      .order("session_date", { ascending: true })
+      .limit(30);
+
+    if (!error && availableSessionsData) {
+      setAvailableSessions(availableSessionsData);
+    }
+
+    setRescheduleDialogOpen(true);
+  };
+
+  const handleRescheduleSubmit = async () => {
+    if (!selectedSession || !newSessionDate || !profile) return;
+
+    setSubmitting(true);
+    try {
+      // Find the session for the selected date
+      const targetSession = availableSessions.find(s =>
+        isSameDay(parseISO(s.session_date), newSessionDate)
+      );
+
+      if (!targetSession) {
+        toast.error(t("errors.sessionNotFound"));
+        return;
+      }
+
+      // Create reschedule request
+      const { error } = await supabase
+        .from("reschedule_requests")
+        .insert({
+          enrollment_id: selectedSession.enrollmentId,
+          user_id: profile.id,
+          current_session_id: selectedSession.id,
+          requested_session_id: targetSession.id,
+          reason: rescheduleReason,
+          status: "pending",
+        });
+
+      if (error) throw error;
+
+      toast.success(t("reschedule.requestSubmitted"));
+      setRescheduleDialogOpen(false);
+      loadSessions(); // Reload to show updated state
+    } catch (error) {
+      console.error("Error submitting reschedule request:", error);
+      toast.error(t("reschedule.requestError"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const days = getDaysInMonth();
@@ -194,12 +263,25 @@ export function ClassSessionCalendar() {
                               : "bg-gray-100 dark:bg-gray-700"
                           }`}
                         >
-                          <div className="font-semibold truncate">
-                            {session.class.name}
-                          </div>
-                          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                            <Clock className="w-3 h-3" />
-                            <span>{format(new Date(session.session_date), "HH:mm")}</span>
+                          <div className="flex items-center justify-between gap-1">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold truncate">
+                                {session.class.name}
+                              </div>
+                              <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                                <Clock className="w-3 h-3" />
+                                <span>{format(new Date(session.session_date), "HH:mm")}</span>
+                              </div>
+                            </div>
+                            {session.isEnrolled && !session.checked_in && (
+                              <button
+                                onClick={() => handleRescheduleClick(session)}
+                                className="flex-shrink-0 p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded transition-colors"
+                                title={t("reschedule.requestReschedule")}
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -227,6 +309,79 @@ export function ClassSessionCalendar() {
           </div>
         )}
       </CardContent>
+
+      {/* Reschedule Dialog */}
+      <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{t("reschedule.requestReschedule")}</DialogTitle>
+            <DialogDescription>
+              {selectedSession && (
+                <span>
+                  {t("reschedule.rescheduleDescription")} <strong>{selectedSession.class.name}</strong> on{" "}
+                  <strong>{format(parseISO(selectedSession.session_date), "MMMM d, yyyy")}</strong>
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="reason">{t("reschedule.reason")}</Label>
+              <Textarea
+                id="reason"
+                value={rescheduleReason}
+                onChange={(e) => setRescheduleReason(e.target.value)}
+                placeholder={t("reschedule.reasonPlaceholder")}
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label>{t("reschedule.selectNewDate")}</Label>
+              <CalendarComponent
+                mode="single"
+                selected={newSessionDate}
+                onSelect={setNewSessionDate}
+                disabled={(date) => {
+                  const hasSession = availableSessions.some(s =>
+                    isSameDay(parseISO(s.session_date), date)
+                  );
+                  return !hasSession || date < new Date(new Date().setHours(0, 0, 0, 0));
+                }}
+                modifiers={{
+                  available: (date) => availableSessions.some(s =>
+                    isSameDay(parseISO(s.session_date), date)
+                  )
+                }}
+                modifiersClassNames={{
+                  available: "bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 font-semibold"
+                }}
+                className="rounded-md border"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                {t("reschedule.highlightedDatesInfo")}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRescheduleDialogOpen(false)}
+              disabled={submitting}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleRescheduleSubmit}
+              disabled={!newSessionDate || submitting}
+            >
+              {submitting ? t("common.submitting") : t("reschedule.submitRequest")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -114,6 +114,12 @@
     "noCheckInsFound": "No check-ins found",
     "myCalendar": "My Calendar",
     "viewSchedule": "View your class schedule",
+    "myPackages": "My Class Packages",
+    "myPackagesDesc": "Your purchased class packages and scheduled sessions",
+    "purchased": "Purchased",
+    "classesUsed": "classes used",
+    "scheduledSessions": "Scheduled Sessions",
+    "checkedIn": "Checked In",
     "editProfile": "Edit Profile",
     "profilePicture": "Profile Picture",
     "uploadAvatar": "Click to upload profile picture (max 5MB)",
@@ -246,11 +252,13 @@
     "close": "Close",
     "back": "Back",
     "next": "Next",
+    "cancel": "Cancel",
     "required": "required",
     "soon": "Soon",
     "home": "Home",
     "unknown": "Unknown",
-    "available": "Available"
+    "available": "Available",
+    "submitting": "Submitting..."
   },
   "packages": {
     "title": "Class Packages",
@@ -338,6 +346,29 @@
     "saleSuccess": "Sale completed successfully!",
     "saleError": "Error completing sale. Please try again."
   },
+  "reschedule": {
+    "requestReschedule": "Request Reschedule",
+    "rescheduleDescription": "You are requesting to reschedule",
+    "reason": "Reason (optional)",
+    "reasonPlaceholder": "Please explain why you need to reschedule...",
+    "selectNewDate": "Select New Date",
+    "highlightedDatesInfo": "Highlighted dates are available for this class",
+    "submitRequest": "Submit Request",
+    "requestSubmitted": "Reschedule request submitted successfully",
+    "requestError": "Error submitting reschedule request",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "viewRequests": "View Reschedule Requests",
+    "noRequests": "No reschedule requests",
+    "approveRequest": "Approve Request",
+    "rejectRequest": "Reject Request",
+    "adminNotes": "Admin Notes",
+    "adminNotesPlaceholder": "Add notes about this request...",
+    "currentSession": "Current Session",
+    "requestedSession": "Requested Session",
+    "processRequest": "Process Request"
+  },
   "errors": {
     "passwordsDontMatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
@@ -346,6 +377,7 @@
     "classNotFound": "Class not found",
     "cameraPermission": "Failed to start camera. Please check permissions.",
     "sessionCreationFailed": "Failed to create or load class session",
-    "creditDeductionFailed": "Failed to deduct drop-in credit"
+    "creditDeductionFailed": "Failed to deduct drop-in credit",
+    "sessionNotFound": "Session not found"
   }
 }

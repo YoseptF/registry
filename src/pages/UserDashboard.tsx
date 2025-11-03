@@ -42,6 +42,8 @@ export function UserDashboard() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [classMap, setClassMap] = useState<Record<string, string>>({});
+  const [packagePurchases, setPackagePurchases] = useState<any[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
 
   useEffect(() => {
     if (profile) {
@@ -55,26 +57,56 @@ export function UserDashboard() {
     if (!profile) return;
 
     try {
-      const { data: enrollments } = await supabase
-        .rpc("get_upcoming_enrollments", {
-          p_user_id: profile.id,
-          p_limit: 20,
-        });
+      // Fetch package purchases
+      const { data: packageData } = await supabase
+        .from("class_package_purchases")
+        .select("*")
+        .eq("user_id", profile.id)
+        .order("purchase_date", { ascending: false });
 
-      if (enrollments && enrollments.length > 0) {
-        const uniqueClasses = enrollments.reduce((acc: Class[], enrollment: any) => {
-          const existingClass = acc.find((c) => c.id === enrollment.class_id);
-          if (!existingClass) {
-            acc.push({
-              id: enrollment.class_id,
-              name: enrollment.class_name,
-              description: enrollment.class_description,
-              banner_url: enrollment.banner_url,
-              duration_minutes: enrollment.duration_minutes,
-              instructor_id: enrollment.instructor_id,
-              created_by: "",
-              created_at: "",
-            });
+      setPackagePurchases(packageData || []);
+
+      // Fetch enrollments with class and session details
+      const { data: enrollmentData } = await supabase
+        .from("class_enrollments")
+        .select(`
+          id,
+          checked_in,
+          enrolled_at,
+          package_purchase_id,
+          class_session:class_sessions(
+            id,
+            session_date,
+            session_time,
+            class:classes(
+              id,
+              name,
+              description,
+              banner_url
+            )
+          )
+        `)
+        .eq("user_id", profile.id)
+        .order("enrolled_at", { ascending: false });
+
+      setEnrollments(enrollmentData || []);
+
+      // Extract unique classes from enrollments
+      if (enrollmentData && enrollmentData.length > 0) {
+        const uniqueClasses = enrollmentData.reduce((acc: Class[], enrollment: any) => {
+          const classInfo = enrollment.class_session?.class;
+          if (classInfo) {
+            const existingClass = acc.find((c) => c.id === classInfo.id);
+            if (!existingClass) {
+              acc.push({
+                id: classInfo.id,
+                name: classInfo.name,
+                description: classInfo.description,
+                banner_url: classInfo.banner_url,
+                created_by: "",
+                created_at: "",
+              });
+            }
           }
           return acc;
         }, []);
@@ -259,6 +291,73 @@ export function UserDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Package Purchases Section */}
+        {packagePurchases.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>{t("user.myPackages")}</CardTitle>
+              <CardDescription>{t("user.myPackagesDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {packagePurchases.map((pkg) => {
+                  const pkgEnrollments = enrollments.filter(
+                    (e: any) => e.package_purchase_id === pkg.id
+                  );
+                  return (
+                    <div
+                      key={pkg.id}
+                      className="p-4 border rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/10 dark:to-purple-900/10"
+                    >
+                      <div className="mb-3">
+                        <h3 className="font-semibold text-lg">{pkg.package_name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t("user.purchased")} {format(new Date(pkg.purchase_date), "PPP")}
+                        </p>
+                      </div>
+
+                      {pkgEnrollments.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground uppercase">
+                            {t("user.scheduledSessions")}
+                          </p>
+                          {pkgEnrollments.map((enrollment: any) => (
+                            <div
+                              key={enrollment.id}
+                              className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-sm"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-muted-foreground" />
+                                <span className="font-medium">
+                                  {enrollment.class_session?.class?.name}
+                                </span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-muted-foreground">
+                                  {format(
+                                    new Date(enrollment.class_session?.session_date),
+                                    "MMM d, yyyy"
+                                  )}{" "}
+                                  at {enrollment.class_session?.session_time}
+                                </div>
+                                {enrollment.checked_in && (
+                                  <span className="text-xs text-green-600 dark:text-green-400">
+                                    ✓ {t("user.checkedIn")}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           <Card>

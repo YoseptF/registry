@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Avatar } from '@/components/ui/avatar'
-import { Clock, User, ArrowRight, Sparkles, LogIn, Tag } from 'lucide-react'
+import { Clock, User, ArrowRight, Sparkles, LogIn, Tag, QrCode } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { useAuth } from '@/contexts/AuthContext'
+import { QRCodeSVG } from 'qrcode.react'
 import type { Class, User as UserType, ClassPackage, DropInCreditPackage } from '@/types'
 
 interface PackageWithCount extends ClassPackage {
@@ -21,12 +24,15 @@ interface CreditWithCount extends DropInCreditPackage {
 export function Landing() {
   const { t } = useTranslation()
   usePageTitle('pages.landing')
+  const navigate = useNavigate()
+  const { user, profile } = useAuth()
   const [classes, setClasses] = useState<Class[]>([])
   const [instructors, setInstructors] = useState<UserType[]>([])
   const [packages, setPackages] = useState<PackageWithCount[]>([])
   const [credits, setCredits] = useState<CreditWithCount[]>([])
   const [loading, setLoading] = useState(true)
   const [showAllPackages, setShowAllPackages] = useState(false)
+  const [qrModalOpen, setQrModalOpen] = useState(false)
 
   useEffect(() => {
     fetchClasses()
@@ -135,6 +141,32 @@ export function Landing() {
     return null
   }
 
+  const generateQRData = () => {
+    if (!profile) return ""
+    return JSON.stringify({
+      userId: profile.id,
+      name: profile.name,
+      timestamp: Date.now(),
+    })
+  }
+
+  const isLoggedIn = user && profile
+  const isRegularUser = isLoggedIn && profile.role === 'user'
+
+  const getProfileRoute = () => {
+    if (!profile) return '/login'
+    switch (profile.role) {
+      case 'admin':
+        return '/admin'
+      case 'instructor':
+        return '/instructor'
+      case 'user':
+        return '/user'
+      default:
+        return '/user'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <LanguageSwitcher />
@@ -168,12 +200,48 @@ export function Landing() {
                   <Sparkles className="ml-2 md:ml-3 w-5 md:w-6 h-5 md:h-6" />
                 </Button>
               </Link>
-              <Link to="/login" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-3 border-white bg-white/20 text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-full backdrop-blur-md transition-all duration-300 font-semibold">
-                  <LogIn className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
-                  {t('landing.memberLogin')}
-                </Button>
-              </Link>
+
+              {isLoggedIn ? (
+                isRegularUser ? (
+                  <div className="w-full sm:w-auto flex border-3 border-white bg-white/20 backdrop-blur-md rounded-full overflow-hidden shadow-2xl">
+                    <Button
+                      size="lg"
+                      variant="ghost"
+                      onClick={() => navigate(getProfileRoute())}
+                      className="flex-1 text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-none rounded-l-full transition-all duration-300 font-semibold border-0"
+                    >
+                      <User className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
+                      {t('landing.myProfile')}
+                    </Button>
+                    <div className="w-px bg-white/30" />
+                    <Button
+                      size="lg"
+                      variant="ghost"
+                      onClick={() => setQrModalOpen(true)}
+                      className="text-white hover:bg-white hover:text-purple-900 px-6 md:px-8 py-6 md:py-8 rounded-none rounded-r-full transition-all duration-300 border-0"
+                    >
+                      <QrCode className="w-5 md:w-6 h-5 md:h-6" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate(getProfileRoute())}
+                    className="w-full sm:w-auto border-3 border-white bg-white/20 text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-full backdrop-blur-md transition-all duration-300 font-semibold"
+                  >
+                    <User className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
+                    {t('landing.myProfile')}
+                  </Button>
+                )
+              ) : (
+                <Link to="/login" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto border-3 border-white bg-white/20 text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-full backdrop-blur-md transition-all duration-300 font-semibold">
+                    <LogIn className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
+                    {t('landing.memberLogin')}
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -507,6 +575,36 @@ export function Landing() {
           </Link>
         </div>
       </div>
+
+      {/* QR Code Modal */}
+      <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold text-center">
+              {profile?.name}
+            </DialogTitle>
+            <DialogDescription className="text-center text-lg">
+              {t('user.qrCodeDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <QRCodeSVG
+                value={generateQRData()}
+                size={320}
+                level="H"
+                includeMargin
+                imageSettings={{
+                  src: "/qr-center.png",
+                  height: 64,
+                  width: 64,
+                  excavate: true,
+                }}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <style>{`
         @keyframes fade-in {

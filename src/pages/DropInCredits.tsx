@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select'
 import { Navigation } from '@/components/Navigation'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { Edit, Trash2, Plus, X, DollarSign, Calendar, Ticket } from 'lucide-react'
+import { Edit, Trash2, Plus, X, DollarSign, Ticket } from 'lucide-react'
 import type { DropInCreditPackage } from '@/types'
 
 interface PackageFormData {
@@ -100,10 +100,9 @@ export function DropInCredits() {
     try {
       const packageData = {
         name: formData.name,
-        credit_count: formData.credit_count,
+        num_credits: formData.num_credits,
         price: formData.price,
         description: formData.description || null,
-        validity_days: formData.validity_days,
         active: formData.active,
       }
 
@@ -200,16 +199,16 @@ export function DropInCredits() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="credit_count">{t('credits.creditCount')}</Label>
+                    <Label htmlFor="num_credits">{t('credits.creditCount')}</Label>
                     <Input
-                      id="credit_count"
+                      id="num_credits"
                       type="number"
                       min="1"
-                      value={formData.credit_count}
+                      value={formData.num_credits}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          credit_count: parseInt(e.target.value) || 1,
+                          num_credits: parseInt(e.target.value) || 1,
                         })
                       }
                       required
@@ -231,27 +230,6 @@ export function DropInCredits() {
                         })
                       }
                       required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="validity_days">
-                      {t('credits.validityDays')}
-                    </Label>
-                    <Input
-                      id="validity_days"
-                      type="number"
-                      min="1"
-                      value={formData.validity_days || ''}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          validity_days: e.target.value
-                            ? parseInt(e.target.value)
-                            : null,
-                        })
-                      }
-                      placeholder={t('credits.validityDaysPlaceholder')}
                     />
                   </div>
 
@@ -359,7 +337,7 @@ export function DropInCredits() {
                       <span className="text-muted-foreground">
                         {t('credits.creditCount')}:
                       </span>
-                      <span className="font-semibold">{pkg.credit_count}</span>
+                      <span className="font-semibold">{pkg.num_credits}</span>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -377,21 +355,9 @@ export function DropInCredits() {
                         {t('credits.pricePerCredit')}:
                       </span>
                       <span className="font-semibold">
-                        ${(pkg.price / pkg.credit_count).toFixed(2)}
+                        ${(pkg.price / pkg.num_credits).toFixed(2)}
                       </span>
                     </div>
-
-                    {pkg.validity_days && (
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {t('credits.validFor')}:
-                        </span>
-                        <span className="font-semibold">
-                          {pkg.validity_days} {t('user.days')}
-                        </span>
-                      </div>
-                    )}
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">

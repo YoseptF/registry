@@ -21,11 +21,15 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { Navigation } from '@/components/Navigation'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import { generateSessionsFromSchedule } from '@/lib/classSessionUtils'
-import { ShoppingCart, Package, Ticket, Calendar as CalendarIcon, User as UserIcon, DollarSign } from 'lucide-react'
+import { ShoppingCart, Package, Ticket, Calendar as CalendarIcon, User as UserIcon, DollarSign, X } from 'lucide-react'
 import type { User, ClassPackage, DropInCreditPackage, Class, ClassSession } from '@/types'
 
 type SaleType = 'class_package' | 'drop_in_credits' | null
+
+interface SessionSelection {
+  classId: string
+  date: Date | null
+}
 
 export function SalesDashboard() {
   const { t } = useTranslation()
@@ -41,8 +45,7 @@ export function SalesDashboard() {
   const [selectedUserId, setSelectedUserId] = useState('')
   const [saleType, setSaleType] = useState<SaleType>(null)
   const [selectedPackageId, setSelectedPackageId] = useState('')
-  const [selectedDates, setSelectedDates] = useState<Date[]>([])
-  const [availableSessions, setAvailableSessions] = useState<ClassSession[]>([])
+  const [sessionSelections, setSessionSelections] = useState<SessionSelection[]>([])
   const [paymentAmount, setPaymentAmount] = useState(0)
 
   useEffect(() => {
@@ -83,52 +86,31 @@ export function SalesDashboard() {
 
   useEffect(() => {
     if (saleType === 'class_package' && selectedPackageId) {
-      loadAvailableSessions()
       const pkg = classPackages.find((p) => p.id === selectedPackageId)
-      setPaymentAmount(pkg?.price || 0)
+      if (pkg) {
+        setPaymentAmount(pkg.price)
+        setSessionSelections(
+          Array(pkg.num_classes)
+            .fill(null)
+            .map(() => ({ classId: '', date: null }))
+        )
+      }
     } else if (saleType === 'drop_in_credits' && selectedPackageId) {
       const pkg = creditPackages.find((p) => p.id === selectedPackageId)
       setPaymentAmount(pkg?.price || 0)
+      setSessionSelections([])
     } else {
       setPaymentAmount(0)
+      setSessionSelections([])
     }
   }, [saleType, selectedPackageId, classPackages, creditPackages])
-
-  const loadAvailableSessions = async () => {
-    if (!selectedPackageId) return
-
-    const pkg = classPackages.find((p) => p.id === selectedPackageId)
-    if (!pkg) return
-
-    const classData = classes.find((c) => c.id === pkg.class_id)
-    if (!classData) return
-
-    try {
-      const today = new Date()
-      const endDate = new Date()
-      endDate.setMonth(endDate.getMonth() + 6)
-
-      const { data: existingSessions } = await supabase
-        .from('class_sessions')
-        .select('*')
-        .eq('class_id', pkg.class_id)
-        .gte('session_date', today.toISOString().split('T')[0])
-        .lte('session_date', endDate.toISOString().split('T')[0])
-        .order('session_date', { ascending: true })
-
-      setAvailableSessions(existingSessions || [])
-    } catch (error) {
-      console.error('Error loading sessions:', error)
-    }
-  }
 
   const handleReset = () => {
     setSelectedUserId('')
     setSaleType(null)
     setSelectedPackageId('')
-    setSelectedDates([])
+    setSessionSelections([])
     setPaymentAmount(0)
-    setAvailableSessions([])
   }
 
   const handleSell = async () => {
@@ -137,9 +119,13 @@ export function SalesDashboard() {
       return
     }
 
-    if (saleType === 'class_package' && selectedDates.length === 0) {
-      alert(t('sales.selectDates'))
-      return
+    if (saleType === 'class_package') {
+      for (const selection of sessionSelections) {
+        if (!selection.classId || !selection.date) {
+          alert(t('sales.completeAllSelections'))
+          return
+        }
+      }
     }
 
     const pkg = saleType === 'class_package'
@@ -147,14 +133,6 @@ export function SalesDashboard() {
       : creditPackages.find((p) => p.id === selectedPackageId)
 
     if (!pkg) return
-
-    if (saleType === 'class_package') {
-      const classPackage = pkg as ClassPackage
-      if (selectedDates.length !== classPackage.class_count) {
-        alert(t('sales.wrongDateCount', { count: classPackage.class_count }))
-        return
-      }
-    }
 
     setSubmitting(true)
 
@@ -177,28 +155,25 @@ export function SalesDashboard() {
   }
 
   const sellClassPackage = async (pkg: ClassPackage) => {
-    const validityDate = pkg.validity_days
-      ? new Date(Date.now() + pkg.validity_days * 24 * 60 * 60 * 1000).toISOString()
-      : null
-
     const { data: purchase, error: purchaseError } = await supabase
       .from('class_package_purchases')
       .insert({
         user_id: selectedUserId,
         package_id: pkg.id,
+        package_name: pkg.name,
+        num_classes: pkg.num_classes,
         purchase_date: new Date().toISOString(),
-        expiration_date: validityDate,
-        payment_amount: paymentAmount,
+        amount_paid: paymentAmount,
+        assigned_by: (await supabase.auth.getUser()).data.user?.id,
       })
       .select()
       .single()
 
     if (purchaseError) throw purchaseError
 
-    for (const date of selectedDates) {
-      const dateStr = date.toISOString().split('T')[0]
-
-      const classData = classes.find((c) => c.id === pkg.class_id)
+    for (const selection of sessionSelections) {
+      const dateStr = selection.date!.toISOString().split('T')[0]
+      const classData = classes.find((c) => c.id === selection.classId)
       if (!classData) continue
 
       let sessionTime = classData.schedule_time || '09:00'
@@ -206,18 +181,27 @@ export function SalesDashboard() {
         sessionTime = sessionTime + ':00'
       }
 
-      let session = availableSessions.find(
-        (s) => s.session_date === dateStr && s.session_time === sessionTime
-      )
+      let session: ClassSession | null = null
+      const { data: existingSession } = await supabase
+        .from('class_sessions')
+        .select('*')
+        .eq('class_id', selection.classId)
+        .eq('session_date', dateStr)
+        .eq('session_time', sessionTime)
+        .limit(1)
+        .single()
 
-      if (!session) {
+      if (existingSession) {
+        session = existingSession
+      } else {
         const { data: newSession, error: sessionError } = await supabase
           .from('class_sessions')
           .insert({
-            class_id: pkg.class_id,
+            class_id: selection.classId,
             session_date: dateStr,
             session_time: sessionTime,
             duration_minutes: classData.duration_minutes || 60,
+            created_from: 'enrollment',
           })
           .select()
           .single()
@@ -227,7 +211,7 @@ export function SalesDashboard() {
             const { data: retrySession } = await supabase
               .from('class_sessions')
               .select('*')
-              .eq('class_id', pkg.class_id)
+              .eq('class_id', selection.classId)
               .eq('session_date', dateStr)
               .eq('session_time', sessionTime)
               .single()
@@ -258,34 +242,36 @@ export function SalesDashboard() {
   }
 
   const sellCreditPackage = async (pkg: DropInCreditPackage) => {
-    const validityDate = pkg.validity_days
-      ? new Date(Date.now() + pkg.validity_days * 24 * 60 * 60 * 1000).toISOString()
-      : null
-
     const { error } = await supabase.from('drop_in_credit_purchases').insert({
       user_id: selectedUserId,
       package_id: pkg.id,
+      package_name: pkg.name,
+      credits_total: pkg.num_credits,
+      credits_remaining: pkg.num_credits,
       purchase_date: new Date().toISOString(),
-      credits_remaining: pkg.credit_count,
-      expiration_date: validityDate,
-      payment_amount: paymentAmount,
+      amount_paid: paymentAmount,
+      assigned_by: (await supabase.auth.getUser()).data.user?.id,
+      payment_type: pkg.payment_type || 'percentage',
+      payment_value: pkg.payment_value || 70,
     })
 
     if (error) throw error
   }
 
-  const getClassName = (classId: string) => {
-    return classes.find((c) => c.id === classId)?.name || t('common.unknown')
+  const updateSessionSelection = (index: number, field: 'classId' | 'date', value: string | Date | null) => {
+    const newSelections = [...sessionSelections]
+    if (field === 'classId') {
+      newSelections[index].classId = value as string
+    } else {
+      newSelections[index].date = value as Date | null
+    }
+    setSessionSelections(newSelections)
   }
 
   const selectedUser = users.find((u) => u.id === selectedUserId)
   const selectedPackage = saleType === 'class_package'
     ? classPackages.find((p) => p.id === selectedPackageId)
     : creditPackages.find((p) => p.id === selectedPackageId)
-
-  const requiredDates = saleType === 'class_package' && selectedPackage
-    ? (selectedPackage as ClassPackage).class_count
-    : 0
 
   if (loading) {
     return (
@@ -340,7 +326,7 @@ export function SalesDashboard() {
                   onClick={() => {
                     setSaleType('class_package')
                     setSelectedPackageId('')
-                    setSelectedDates([])
+                    setSessionSelections([])
                   }}
                   className={`p-6 border-2 rounded-lg transition-all ${
                     saleType === 'class_package'
@@ -359,7 +345,7 @@ export function SalesDashboard() {
                   onClick={() => {
                     setSaleType('drop_in_credits')
                     setSelectedPackageId('')
-                    setSelectedDates([])
+                    setSessionSelections([])
                   }}
                   className={`p-6 border-2 rounded-lg transition-all ${
                     saleType === 'drop_in_credits'
@@ -393,16 +379,14 @@ export function SalesDashboard() {
                       {saleType === 'class_package'
                         ? classPackages.map((pkg) => (
                             <SelectItem key={pkg.id} value={pkg.id}>
-                              {pkg.name} - {getClassName(pkg.class_id)} (
-                              {pkg.class_count} {t('packages.classCount')}) - $
-                              {pkg.price.toFixed(2)}
+                              {pkg.name} ({pkg.num_classes}{' '}
+                              {t('packages.classCount')}) - ${pkg.price.toFixed(2)}
                             </SelectItem>
                           ))
                         : creditPackages.map((pkg) => (
                             <SelectItem key={pkg.id} value={pkg.id}>
-                              {pkg.name} ({pkg.credit_count}{' '}
-                              {t('credits.creditCount')}) - $
-                              {pkg.price.toFixed(2)}
+                              {pkg.name} ({pkg.num_credits}{' '}
+                              {t('credits.creditCount')}) - ${pkg.price.toFixed(2)}
                             </SelectItem>
                           ))}
                     </SelectContent>
@@ -416,26 +400,60 @@ export function SalesDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CalendarIcon className="w-5 h-5" />
-                    {t('sales.selectDates')}
+                    {t('sales.selectClassesAndDates')}
                   </CardTitle>
                   <CardDescription>
-                    {t('sales.selectDatesDesc', { count: requiredDates })}
-                    <br />
-                    {t('sales.selectedCount', { selected: selectedDates.length, total: requiredDates })}
+                    {t('sales.selectClassAndDateForEach')}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Calendar
-                    mode="multiple"
-                    selected={selectedDates}
-                    onSelect={(dates) => {
-                      if (dates && dates.length <= requiredDates) {
-                        setSelectedDates(dates)
-                      }
-                    }}
-                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                    className="rounded-md border"
-                  />
+                <CardContent className="space-y-6">
+                  {sessionSelections.map((selection, index) => (
+                    <div key={index} className="p-4 border rounded-lg space-y-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-semibold">
+                          {t('sales.session')} {index + 1}
+                        </h4>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`class-${index}`}>
+                          {t('sales.selectClass')}
+                        </Label>
+                        <Select
+                          value={selection.classId}
+                          onValueChange={(value) =>
+                            updateSessionSelection(index, 'classId', value)
+                          }
+                        >
+                          <SelectTrigger id={`class-${index}`}>
+                            <SelectValue placeholder={t('sales.chooseClass')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {classes.map((cls) => (
+                              <SelectItem key={cls.id} value={cls.id}>
+                                {cls.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>{t('sales.selectDate')}</Label>
+                        <Calendar
+                          mode="single"
+                          selected={selection.date || undefined}
+                          onSelect={(date) =>
+                            updateSessionSelection(index, 'date', date || null)
+                          }
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
+                          className="rounded-md border"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
@@ -472,7 +490,7 @@ export function SalesDashboard() {
                     <p className="font-semibold">{selectedPackage.name}</p>
                     {saleType === 'class_package' && (
                       <p className="text-xs text-muted-foreground">
-                        {getClassName((selectedPackage as ClassPackage).class_id)}
+                        {(selectedPackage as ClassPackage).num_classes} {t('packages.classCount')}
                       </p>
                     )}
                   </div>
@@ -482,17 +500,21 @@ export function SalesDashboard() {
                   </p>
                 )}
 
-                {saleType === 'class_package' && selectedDates.length > 0 && (
+                {saleType === 'class_package' && sessionSelections.length > 0 && (
                   <div className="pb-4 border-b">
                     <p className="text-sm text-muted-foreground mb-2">
-                      {t('sales.selectedDates')}:
+                      {t('sales.selections')}:
                     </p>
                     <div className="space-y-1 max-h-40 overflow-y-auto">
-                      {selectedDates.map((date, index) => (
-                        <p key={index} className="text-xs">
-                          {date.toLocaleDateString()}
-                        </p>
-                      ))}
+                      {sessionSelections.map((sel, index) => {
+                        const cls = classes.find((c) => c.id === sel.classId)
+                        return (
+                          <p key={index} className="text-xs">
+                            {index + 1}. {cls?.name || '—'}{' '}
+                            {sel.date ? `- ${sel.date.toLocaleDateString()}` : ''}
+                          </p>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -531,7 +553,7 @@ export function SalesDashboard() {
                     !selectedUserId ||
                     !selectedPackageId ||
                     (saleType === 'class_package' &&
-                      selectedDates.length !== requiredDates)
+                      sessionSelections.some((s) => !s.classId || !s.date))
                   }
                 >
                   {submitting ? t('common.loading') : t('sales.completeSale')}

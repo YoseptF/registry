@@ -15,6 +15,9 @@ import { Register } from "./pages/Register";
 import { UserDashboard } from "./pages/UserDashboard";
 import { CheckInsHistory } from "./pages/CheckInsHistory";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { ClassPackages } from "./pages/ClassPackages";
+import { DropInCredits } from "./pages/DropInCredits";
+import { SalesDashboard } from "./pages/SalesDashboard";
 import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { InstructorProfile } from "./pages/InstructorProfile";
 import { Instructors } from "./pages/Instructors";
@@ -65,6 +68,30 @@ function AppContent() {
           element={
             <ProtectedRoute requireAdmin>
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/class-packages"
+          element={
+            <ProtectedRoute requireAdmin>
+              <ClassPackages />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/drop-in-credits"
+          element={
+            <ProtectedRoute requireAdmin>
+              <DropInCredits />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/sales"
+          element={
+            <ProtectedRoute requireAdmin>
+              <SalesDashboard />
             </ProtectedRoute>
           }
         />

@@ -1,0 +1,380 @@
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Navigation } from '@/components/Navigation'
+import { usePageTitle } from '@/hooks/usePageTitle'
+import { Edit, Trash2, Plus, X, DollarSign } from 'lucide-react'
+import type { ClassPackage } from '@/types'
+
+interface PackageFormData {
+  name: string
+  num_classes: number
+  price: number
+  description: string
+  active: boolean
+}
+
+const defaultFormData: PackageFormData = {
+  name: '',
+  num_classes: 1,
+  price: 0,
+  description: '',
+  active: true,
+}
+
+export function ClassPackages() {
+  const { t } = useTranslation()
+  usePageTitle('pages.classPackages')
+  const [packages, setPackages] = useState<ClassPackage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingPackage, setEditingPackage] = useState<ClassPackage | null>(null)
+  const [formData, setFormData] = useState<PackageFormData>(defaultFormData)
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      const { data } = await supabase
+        .from('class_packages')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      setPackages(data || [])
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreate = () => {
+    setEditingPackage(null)
+    setFormData(defaultFormData)
+    setShowForm(true)
+  }
+
+  const handleEdit = (pkg: ClassPackage) => {
+    setEditingPackage(pkg)
+    setFormData({
+      name: pkg.name,
+      num_classes: pkg.num_classes,
+      price: pkg.price,
+      description: pkg.description || '',
+      active: pkg.active,
+    })
+    setShowForm(true)
+  }
+
+  const handleCancel = () => {
+    setShowForm(false)
+    setEditingPackage(null)
+    setFormData(defaultFormData)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+
+    try {
+      const packageData = {
+        name: formData.name,
+        num_classes: formData.num_classes,
+        price: formData.price,
+        description: formData.description || null,
+        active: formData.active,
+      }
+
+      if (editingPackage) {
+        const { error } = await supabase
+          .from('class_packages')
+          .update(packageData)
+          .eq('id', editingPackage.id)
+
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('class_packages')
+          .insert(packageData)
+
+        if (error) throw error
+      }
+
+      await fetchData()
+      handleCancel()
+    } catch (error) {
+      console.error('Error saving package:', error)
+      alert(t('packages.errorSaving'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm(t('packages.confirmDelete'))) return
+
+    try {
+      const { error } = await supabase
+        .from('class_packages')
+        .update({ active: false })
+        .eq('id', id)
+
+      if (error) throw error
+      await fetchData()
+    } catch (error) {
+      console.error('Error deleting package:', error)
+      alert(t('packages.errorDeleting'))
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold bg-linear-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+              {t('packages.title')}
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              {t('packages.description')}
+            </p>
+          </div>
+          <Button onClick={handleCreate}>
+            <Plus className="w-4 h-4 mr-2" />
+            {t('packages.newPackage')}
+          </Button>
+        </div>
+
+        {showForm && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>
+                {editingPackage ? t('packages.editPackage') : t('packages.createPackage')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">{t('packages.packageName')}</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      required
+                      placeholder={t('packages.packageNamePlaceholder')}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="num_classes">{t('packages.classCount')}</Label>
+                    <Input
+                      id="num_classes"
+                      type="number"
+                      min="1"
+                      value={formData.num_classes}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          num_classes: parseInt(e.target.value) || 1,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="price">{t('packages.price')}</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          price: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="active">{t('packages.status')}</Label>
+                    <Select
+                      value={formData.active ? 'active' : 'inactive'}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, active: value === 'active' })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">{t('packages.active')}</SelectItem>
+                        <SelectItem value="inactive">
+                          {t('packages.inactive')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">{t('packages.packageDescription')}</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    placeholder={t('packages.descriptionPlaceholder')}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                    disabled={submitting}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    {t('admin.cancel')}
+                  </Button>
+                  <Button type="submit" disabled={submitting}>
+                    {submitting
+                      ? t('common.loading')
+                      : editingPackage
+                      ? t('packages.updatePackage')
+                      : t('packages.createPackage')}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {packages.length === 0 ? (
+            <Card className="col-span-full">
+              <CardContent className="py-12">
+                <p className="text-center text-muted-foreground">
+                  {t('packages.noPackages')}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            packages.map((pkg) => (
+              <Card
+                key={pkg.id}
+                className={`${
+                  !pkg.active ? 'opacity-60 border-dashed' : ''
+                } transition-all hover:shadow-lg`}
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="flex items-center gap-2">
+                        {pkg.name}
+                        {!pkg.active && (
+                          <span className="text-xs font-normal px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+                            {t('packages.inactive')}
+                          </span>
+                        )}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {t('packages.genericPackage')}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {pkg.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {pkg.description}
+                    </p>
+                  )}
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        {t('packages.classCount')}:
+                      </span>
+                      <span className="font-semibold">{pkg.num_classes}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground flex items-center gap-1">
+                        <DollarSign className="w-4 h-4" />
+                        {t('packages.price')}:
+                      </span>
+                      <span className="text-2xl font-bold text-primary">
+                        ${pkg.price.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(pkg)}
+                      className="flex-1"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      {t('common.edit')}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(pkg.id)}
+                      disabled={!pkg.active}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

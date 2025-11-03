@@ -117,7 +117,7 @@ export function Landing() {
       })
 
       // Add purchase counts and sort by popularity
-      const creditsWithCounts: CreditWithCount[] = (creditsData || []).map(credit => ({
+      const creditsWithCounts: CreditWithCount[] = ((creditsData as DropInCreditPackage[]) || []).map(credit => ({
         ...credit,
         purchase_count: purchaseCounts.get(credit.id) || 0
       })).sort((a, b) => b.purchase_count - a.purchase_count)

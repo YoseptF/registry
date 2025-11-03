@@ -13,7 +13,6 @@ import {
   Edit,
   QrCode,
   ArrowRight,
-  User,
   Clock,
 } from 'lucide-react'
 import type { Class, User as UserType } from '@/types'
@@ -47,6 +46,7 @@ export function ClassDrawer({
   const canManageMembers = false
   const canEdit = mode === 'admin'
   const showInstructorProfile = mode === 'user' || mode === 'public'
+  const showInstructor = mode === 'admin' || mode === 'user' || mode === 'public'
   const showCheckInButton = mode === 'admin' || mode === 'instructor'
   const showAuthCTA = mode === 'public'
 
@@ -55,7 +55,7 @@ export function ClassDrawer({
       if (canManageMembers) {
         fetchMembers()
       }
-      if (showInstructorProfile && classInfo.instructor_id) {
+      if (showInstructor && classInfo.instructor_id) {
         fetchInstructor()
       }
     }
@@ -236,40 +236,48 @@ export function ClassDrawer({
               <h3 className="text-sm font-medium text-muted-foreground mb-1">
                 {t('admin.instructor')}
               </h3>
-              {showInstructorProfile && instructor ? (
-                <Link to={`/instructor/${instructor.id}`} onClick={onClose}>
-                  <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
+              {instructor ? (
+                showInstructorProfile ? (
+                  <Link to={`/instructor/${instructor.id}`} onClick={onClose}>
+                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
+                      <Avatar
+                        src={instructor.avatar_url}
+                        alt={instructor.name}
+                        fallbackText={instructor.name}
+                        size="md"
+                      />
+                      <div className="flex-1">
+                        <p className="font-semibold text-base group-hover:text-primary transition-colors">
+                          {instructor.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {instructor.role}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-3 text-sm">
                     <Avatar
                       src={instructor.avatar_url}
                       alt={instructor.name}
                       fallbackText={instructor.name}
-                      size="md"
+                      size="sm"
                     />
-                    <div className="flex-1">
-                      <p className="font-semibold text-base group-hover:text-primary transition-colors">
-                        {instructor.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {instructor.role}
-                      </p>
+                    <div>
+                      <p className="font-medium">{instructor.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{instructor.role}</p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                   </div>
-                </Link>
-              ) : showInstructorProfile && loadingInstructor ? (
+                )
+              ) : loadingInstructor ? (
                 <div className="text-sm text-muted-foreground">
                   {t('common.loading')}
                 </div>
-              ) : showInstructorProfile && classInfo.instructor ? (
-                <div className="flex items-center gap-3 text-base">
-                  <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
-                    <User className="w-5 h-5 text-pink-600" />
-                  </div>
-                  <span className="font-semibold">{classInfo.instructor}</span>
-                </div>
-              ) : (
+              ) : classInfo.instructor ? (
                 <p className="text-sm">{classInfo.instructor}</p>
-              )}
+              ) : null}
             </div>
           )}
 

@@ -15,6 +15,7 @@
     "classPackages": "Class Packages",
     "dropInCredits": "Drop-in Credits",
     "salesDashboard": "Sales Dashboard",
+    "payments": "Payments",
     "instructorDashboard": "Instructor Dashboard",
     "instructorProfile": "Instructor Profile",
     "instructors": "Instructors",
@@ -73,6 +74,7 @@
     "showingClasses": "Showing {{count}} classes"
   },
   "user": {
+    "user": "User",
     "dashboard": "My Dashboard",
     "profile": "My Profile",
     "myProfile": "Your account information",
@@ -142,6 +144,7 @@
     "totalUsers": "Total Users",
     "totalClasses": "Total Classes",
     "todaysCheckIns": "Today's Check-ins",
+    "class": "Class",
     "classes": "Classes",
     "manageClasses": "Manage your classes",
     "newClass": "New Class",
@@ -193,7 +196,14 @@
     "roleInstructor": "Instructor",
     "roleAdmin": "Admin",
     "cannotChangeOwnRole": "You cannot change your own role",
-    "errorUpdatingRole": "Error updating user role. Please try again."
+    "errorUpdatingRole": "Error updating user role. Please try again.",
+    "instructorPaymentType": "Instructor Payment Type",
+    "percentage": "Percentage",
+    "flatRate": "Flat Rate",
+    "instructorPercentage": "Instructor Percentage",
+    "instructorFlatRate": "Instructor Flat Rate (per class)",
+    "instructorPaymentHelp": "Instructor earns {{value}}%, admin earns {{admin}}%",
+    "instructorPaymentHelpFlat": "Instructor earns ${{value}} per class, admin earns the remainder"
   },
   "checkIn": {
     "checkIn": "Check-In",
@@ -262,7 +272,11 @@
     "home": "Home",
     "unknown": "Unknown",
     "available": "Available",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "date": "Date",
+    "all": "All",
+    "filters": "Filters",
+    "clearFilters": "Clear Filters"
   },
   "packages": {
     "title": "Class Packages",
@@ -376,6 +390,55 @@
     "requestRejected": "Reschedule request rejected",
     "processError": "Error processing reschedule request"
   },
+  "payments": {
+    "manageInstructorPayments": "Manage instructor payments and earnings",
+    "showAdminEarnings": "Show Admin Earnings",
+    "hideAdminEarnings": "Hide Admin Earnings",
+    "totalStudentRevenue": "Total Student Revenue",
+    "totalInstructorPayments": "Total Instructor Payments",
+    "totalAdminEarnings": "Total Admin Earnings",
+    "avgRevenuePerEnrollment": "Avg. Revenue per Enrollment",
+    "enrollments": "enrollments",
+    "instructorEarnings": "Instructor earnings",
+    "profitMargin": "Profit margin",
+    "perEnrollment": "Per enrollment",
+    "filterByInstructor": "Filter by Instructor",
+    "filterByClass": "Filter by Class",
+    "filterByStatus": "Filter by Status",
+    "instructor": "Instructor",
+    "package": "Package",
+    "studentPaid": "Student Paid",
+    "instructorEarns": "Instructor Earns",
+    "adminEarns": "Admin Earns",
+    "checkedIn": "Checked In",
+    "allInstructorEarnings": "All instructor earnings from class enrollments",
+    "noPayments": "No payments found",
+    "pendingPayments": "Pending Payments",
+    "approvedPayments": "Approved Payments",
+    "paidPayments": "Paid Payments",
+    "payments": "payments",
+    "pending": "Pending",
+    "approved": "Approved",
+    "paid": "Paid",
+    "status": "Status",
+    "totalAmount": "Total Amount",
+    "checkInsIncluded": "Check-ins Included",
+    "checkIns": "check-ins",
+    "approvalNotes": "Approval Notes",
+    "notesPlaceholder": "Add notes about this payment...",
+    "notes": "Notes",
+    "approve": "Approve",
+    "markAsPaid": "Mark as Paid",
+    "paymentDetails": "Payment Details",
+    "requiresApproval": "Payments that need admin approval",
+    "readyForPayment": "Approved and ready to be paid",
+    "completedPayments": "Historical payment records",
+    "approvedOn": "Approved on",
+    "paidOn": "Paid on",
+    "markedAsPaid": "Payment marked as paid successfully",
+    "approvalError": "Error approving payment",
+    "paidError": "Error marking payment as paid"
+  },
   "errors": {
     "passwordsDontMatch": "Passwords do not match",
     "passwordTooShort": "Password must be at least 6 characters",
@@ -385,6 +448,7 @@
     "cameraPermission": "Failed to start camera. Please check permissions.",
     "sessionCreationFailed": "Failed to create or load class session",
     "creditDeductionFailed": "Failed to deduct drop-in credit",
-    "sessionNotFound": "Session not found"
+    "sessionNotFound": "Session not found",
+    "loadingFailed": "Failed to load data"
   }
 }

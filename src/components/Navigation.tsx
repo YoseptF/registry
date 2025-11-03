@@ -30,6 +30,7 @@ import {
   ShoppingCart,
   ChevronDown,
   Calendar,
+  DollarSign,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -47,6 +48,7 @@ export function Navigation() {
 
   const adminDropdownLinks = [
     { path: "/admin/sales", label: t("pages.salesDashboard"), icon: ShoppingCart },
+    { path: "/admin/payments", label: t("pages.payments"), icon: DollarSign },
     { path: "/admin/class-packages", label: t("pages.classPackages"), icon: Package },
     { path: "/admin/drop-in-credits", label: t("pages.dropInCredits"), icon: Ticket },
   ];

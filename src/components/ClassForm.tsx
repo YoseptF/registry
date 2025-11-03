@@ -40,6 +40,12 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
   const [name, setName] = useState(initialData?.name || '')
   const [description, setDescription] = useState(initialData?.description || '')
   const [instructorId, setInstructorId] = useState(initialData?.instructor_id || '')
+  const [instructorPaymentType, setInstructorPaymentType] = useState<'flat' | 'percentage'>(
+    initialData?.instructor_payment_type || 'percentage'
+  )
+  const [instructorPaymentValue, setInstructorPaymentValue] = useState(
+    initialData?.instructor_payment_value?.toString() || '70'
+  )
   const [selectedDays, setSelectedDays] = useState<string[]>(initialData?.schedule_days || [])
   const [selectedTime, setSelectedTime] = useState(initialData?.schedule_time || '18:00')
   const [duration, setDuration] = useState(initialData?.duration_minutes?.toString() || '60')
@@ -137,6 +143,8 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
         name,
         description: description || null,
         instructor_id: instructorId && instructorId !== 'none' ? instructorId : null,
+        instructor_payment_type: instructorPaymentType,
+        instructor_payment_value: parseFloat(instructorPaymentValue) || 70,
         schedule_days: selectedDays.length > 0 ? selectedDays : null,
         schedule_time: selectedTime || null,
         duration_minutes: duration ? parseInt(duration) : null,
@@ -248,6 +256,48 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+        <div className="space-y-2">
+          <Label>{t('admin.instructorPaymentType')}</Label>
+          <Select value={instructorPaymentType} onValueChange={(value: 'flat' | 'percentage') => setInstructorPaymentType(value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="percentage">{t('admin.percentage')}</SelectItem>
+              <SelectItem value="flat">{t('admin.flatRate')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="paymentValue">
+            {instructorPaymentType === 'percentage'
+              ? t('admin.instructorPercentage')
+              : t('admin.instructorFlatRate')}
+          </Label>
+          <div className="flex items-center gap-2">
+            {instructorPaymentType === 'flat' && <span className="text-muted-foreground">$</span>}
+            <Input
+              id="paymentValue"
+              type="number"
+              min="0"
+              max={instructorPaymentType === 'percentage' ? '100' : undefined}
+              step={instructorPaymentType === 'percentage' ? '1' : '0.01'}
+              value={instructorPaymentValue}
+              onChange={(e) => setInstructorPaymentValue(e.target.value)}
+              required
+            />
+            {instructorPaymentType === 'percentage' && <span className="text-muted-foreground">%</span>}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {instructorPaymentType === 'percentage'
+              ? t('admin.instructorPaymentHelp', { value: instructorPaymentValue, admin: 100 - parseFloat(instructorPaymentValue || '0') })
+              : t('admin.instructorPaymentHelpFlat', { value: instructorPaymentValue })}
+          </p>
+        </div>
       </div>
 
       <div className="space-y-2">

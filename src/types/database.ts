@@ -52,6 +52,8 @@ export type Database = {
           description: string | null
           instructor: string | null
           instructor_id: string | null
+          instructor_payment_type: 'flat' | 'percentage'
+          instructor_payment_value: number
           schedule: string | null
           banner_url: string | null
           schedule_days: string[] | null
@@ -66,6 +68,8 @@ export type Database = {
           description?: string | null
           instructor?: string | null
           instructor_id?: string | null
+          instructor_payment_type?: 'flat' | 'percentage'
+          instructor_payment_value?: number
           schedule?: string | null
           banner_url?: string | null
           schedule_days?: string[] | null
@@ -80,6 +84,8 @@ export type Database = {
           description?: string | null
           instructor?: string | null
           instructor_id?: string | null
+          instructor_payment_type?: 'flat' | 'percentage'
+          instructor_payment_value?: number
           schedule?: string | null
           banner_url?: string | null
           schedule_days?: string[] | null

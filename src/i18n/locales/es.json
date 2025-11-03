@@ -15,6 +15,7 @@
     "classPackages": "Paquetes de Clases",
     "dropInCredits": "Créditos de Visita",
     "salesDashboard": "Panel de Ventas",
+    "payments": "Pagos",
     "instructorDashboard": "Panel de Instructor",
     "instructorProfile": "Perfil de Instructor",
     "instructors": "Instructores",
@@ -73,6 +74,7 @@
     "showingClasses": "Mostrando {{count}} clases"
   },
   "user": {
+    "user": "Usuario",
     "dashboard": "Mi Panel",
     "profile": "Mi Perfil",
     "myProfile": "Información de tu cuenta",
@@ -142,6 +144,7 @@
     "totalUsers": "Total de Usuarios",
     "totalClasses": "Total de Clases",
     "todaysCheckIns": "Registros de Hoy",
+    "class": "Clase",
     "classes": "Clases",
     "manageClasses": "Gestiona tus clases",
     "newClass": "Nueva Clase",
@@ -193,7 +196,14 @@
     "roleInstructor": "Instructor",
     "roleAdmin": "Administrador",
     "cannotChangeOwnRole": "No puedes cambiar tu propio rol",
-    "errorUpdatingRole": "Error al actualizar el rol del usuario. Por favor, inténtalo de nuevo."
+    "errorUpdatingRole": "Error al actualizar el rol del usuario. Por favor, inténtalo de nuevo.",
+    "instructorPaymentType": "Tipo de Pago Instructor",
+    "percentage": "Porcentaje",
+    "flatRate": "Tarifa Fija",
+    "instructorPercentage": "Porcentaje Instructor",
+    "instructorFlatRate": "Tarifa Fija Instructor (por clase)",
+    "instructorPaymentHelp": "Instructor gana {{value}}%, admin gana {{admin}}%",
+    "instructorPaymentHelpFlat": "Instructor gana ${{value}} por clase, admin gana el resto"
   },
   "checkIn": {
     "checkIn": "Registro",
@@ -262,7 +272,11 @@
     "home": "Inicio",
     "unknown": "Desconocido",
     "available": "Disponible",
-    "submitting": "Enviando..."
+    "submitting": "Enviando...",
+    "date": "Fecha",
+    "all": "Todos",
+    "filters": "Filtros",
+    "clearFilters": "Limpiar Filtros"
   },
   "packages": {
     "title": "Paquetes de Clases",
@@ -376,6 +390,55 @@
     "requestRejected": "Solicitud de reprogramación rechazada",
     "processError": "Error al procesar solicitud de reprogramación"
   },
+  "payments": {
+    "manageInstructorPayments": "Gestionar pagos y ganancias de instructores",
+    "showAdminEarnings": "Mostrar Ganancias Admin",
+    "hideAdminEarnings": "Ocultar Ganancias Admin",
+    "totalStudentRevenue": "Ingresos Totales de Estudiantes",
+    "totalInstructorPayments": "Pagos Totales a Instructores",
+    "totalAdminEarnings": "Ganancias Totales Admin",
+    "avgRevenuePerEnrollment": "Ingreso Prom. por Inscripción",
+    "enrollments": "inscripciones",
+    "instructorEarnings": "Ganancias de instructores",
+    "profitMargin": "Margen de ganancia",
+    "perEnrollment": "Por inscripción",
+    "filterByInstructor": "Filtrar por Instructor",
+    "filterByClass": "Filtrar por Clase",
+    "filterByStatus": "Filtrar por Estado",
+    "instructor": "Instructor",
+    "package": "Paquete",
+    "studentPaid": "Estudiante Pagó",
+    "instructorEarns": "Instructor Gana",
+    "adminEarns": "Admin Gana",
+    "checkedIn": "Registrado",
+    "allInstructorEarnings": "Todas las ganancias de instructores por inscripciones",
+    "noPayments": "No se encontraron pagos",
+    "pendingPayments": "Pagos Pendientes",
+    "approvedPayments": "Pagos Aprobados",
+    "paidPayments": "Pagos Realizados",
+    "payments": "pagos",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "paid": "Pagado",
+    "status": "Estado",
+    "totalAmount": "Monto Total",
+    "checkInsIncluded": "Registros Incluidos",
+    "checkIns": "registros",
+    "approvalNotes": "Notas de Aprobación",
+    "notesPlaceholder": "Agregar notas sobre este pago...",
+    "notes": "Notas",
+    "approve": "Aprobar",
+    "markAsPaid": "Marcar como Pagado",
+    "paymentDetails": "Detalles del Pago",
+    "requiresApproval": "Pagos que necesitan aprobación del administrador",
+    "readyForPayment": "Aprobados y listos para ser pagados",
+    "completedPayments": "Registros históricos de pagos",
+    "approvedOn": "Aprobado el",
+    "paidOn": "Pagado el",
+    "markedAsPaid": "Pago marcado como pagado exitosamente",
+    "approvalError": "Error al aprobar pago",
+    "paidError": "Error al marcar pago como pagado"
+  },
   "errors": {
     "passwordsDontMatch": "Las contraseñas no coinciden",
     "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
@@ -385,6 +448,7 @@
     "cameraPermission": "No se pudo iniciar la cámara. Por favor verifica los permisos.",
     "sessionCreationFailed": "Error al crear o cargar la sesión de clase",
     "creditDeductionFailed": "Error al descontar el crédito de visita",
-    "sessionNotFound": "Sesión no encontrada"
+    "sessionNotFound": "Sesión no encontrada",
+    "loadingFailed": "Error al cargar datos"
   }
 }

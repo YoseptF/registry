@@ -19,6 +19,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { ClassPackages } from "./pages/ClassPackages";
 import { DropInCredits } from "./pages/DropInCredits";
 import { SalesDashboard } from "./pages/SalesDashboard";
+import { AdminPayments } from "./pages/AdminPayments";
 import { InstructorDashboard } from "./pages/InstructorDashboard";
 import { InstructorProfile } from "./pages/InstructorProfile";
 import { Instructors } from "./pages/Instructors";
@@ -101,6 +102,14 @@ function AppContent() {
           element={
             <ProtectedRoute requireAdmin>
               <SalesDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payments"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminPayments />
             </ProtectedRoute>
           }
         />

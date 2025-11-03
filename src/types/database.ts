@@ -455,6 +455,8 @@ export type Database = {
           reschedule_requested_at: string | null
           reschedule_approved_at: string | null
           reschedule_approved_by: string | null
+          paid_out_at: string | null
+          payment_batch_id: string | null
         }
         Insert: {
           id?: string
@@ -467,6 +469,8 @@ export type Database = {
           reschedule_requested_at?: string | null
           reschedule_approved_at?: string | null
           reschedule_approved_by?: string | null
+          paid_out_at?: string | null
+          payment_batch_id?: string | null
         }
         Update: {
           id?: string
@@ -479,6 +483,8 @@ export type Database = {
           reschedule_requested_at?: string | null
           reschedule_approved_at?: string | null
           reschedule_approved_by?: string | null
+          paid_out_at?: string | null
+          payment_batch_id?: string | null
         }
         Relationships: [
           {
@@ -571,6 +577,153 @@ export type Database = {
           }
         ]
       }
+      instructor_payment_batches: {
+        Row: {
+          id: string
+          instructor_id: string
+          payment_date: string
+          period_start: string
+          period_end: string
+          total_amount: number
+          status: 'pending' | 'paid'
+          payment_method: string | null
+          notes: string | null
+          created_at: string
+          created_by: string
+          paid_at: string | null
+        }
+        Insert: {
+          id?: string
+          instructor_id: string
+          payment_date: string
+          period_start: string
+          period_end: string
+          total_amount: number
+          status?: 'pending' | 'paid'
+          payment_method?: string | null
+          notes?: string | null
+          created_at?: string
+          created_by: string
+          paid_at?: string | null
+        }
+        Update: {
+          id?: string
+          instructor_id?: string
+          payment_date?: string
+          period_start?: string
+          period_end?: string
+          total_amount?: number
+          status?: 'pending' | 'paid'
+          payment_method?: string | null
+          notes?: string | null
+          created_at?: string
+          created_by?: string
+          paid_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_payment_batches_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instructor_payment_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      instructor_payment_items: {
+        Row: {
+          id: string
+          payment_batch_id: string
+          enrollment_id: string
+          class_name: string
+          session_date: string
+          session_time: string
+          student_paid: number
+          instructor_earned: number
+          admin_earned: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          payment_batch_id: string
+          enrollment_id: string
+          class_name: string
+          session_date: string
+          session_time: string
+          student_paid: number
+          instructor_earned: number
+          admin_earned: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          payment_batch_id?: string
+          enrollment_id?: string
+          class_name?: string
+          session_date?: string
+          session_time?: string
+          student_paid?: number
+          instructor_earned?: number
+          admin_earned?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_payment_items_payment_batch_id_fkey"
+            columns: ["payment_batch_id"]
+            isOneToOne: false
+            referencedRelation: "instructor_payment_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instructor_payment_items_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "class_enrollments"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      payment_settings: {
+        Row: {
+          id: string
+          payment_day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+          payment_hour: number
+          payment_minute: number
+          timezone: string
+          auto_process: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          payment_day?: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+          payment_hour?: number
+          payment_minute?: number
+          timezone?: string
+          auto_process?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          payment_day?: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+          payment_hour?: number
+          payment_minute?: number
+          timezone?: string
+          auto_process?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -580,6 +733,14 @@ export type Database = {
         Args: {
           p_user_id: string
         }
+        Returns: void
+      }
+      process_instructor_payments: {
+        Args: Record<string, never>
+        Returns: void
+      }
+      update_payment_schedule: {
+        Args: Record<string, never>
         Returns: void
       }
     }

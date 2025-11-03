@@ -1,12 +1,17 @@
 import { useTranslation } from "react-i18next";
 import { ClassSessionCalendar } from "@/components/ClassSessionCalendar";
+import { Navigation } from "@/components/Navigation";
 import { Calendar } from "lucide-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function UserCalendar() {
   const { t } = useTranslation();
+  usePageTitle("user.myCalendar");
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center">
@@ -24,6 +29,7 @@ export default function UserCalendar() {
       </div>
 
       <ClassSessionCalendar />
+      </div>
     </div>
   );
 }

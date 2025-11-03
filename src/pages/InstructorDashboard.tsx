@@ -9,7 +9,7 @@ import { Navigation } from '@/components/Navigation'
 import { RecentCheckInsCard } from '@/components/RecentCheckInsCard'
 import { ProfileEditDrawer } from '@/components/ProfileEditDrawer'
 import { ClassDrawer } from '@/components/ClassDrawer'
-import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, X, Edit, User as UserIcon } from 'lucide-react'
+import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, X, Edit, User as UserIcon, DollarSign, TrendingUp } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, User } from '@/types'
 
@@ -20,6 +20,7 @@ export function InstructorDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [classes, setClasses] = useState<Class[]>([])
   const [todaysCheckIns, setTodaysCheckIns] = useState(0)
+  const [monthlyCheckIns, setMonthlyCheckIns] = useState(0)
   const [loading, setLoading] = useState(true)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -51,13 +52,25 @@ export function InstructorDashboard() {
       const classIds = classesResult.data?.map(cls => cls.id) || []
 
       if (classIds.length > 0) {
-        const { count } = await supabase
-          .from('check_ins')
-          .select('id', { count: 'exact' })
-          .in('class_id', classIds)
-          .gte('checked_in_at', today.toISOString())
+        const monthStart = new Date()
+        monthStart.setDate(1)
+        monthStart.setHours(0, 0, 0, 0)
 
-        setTodaysCheckIns(count || 0)
+        const [todayCount, monthCount] = await Promise.all([
+          supabase
+            .from('check_ins')
+            .select('id', { count: 'exact' })
+            .in('class_id', classIds)
+            .gte('checked_in_at', today.toISOString()),
+          supabase
+            .from('check_ins')
+            .select('id', { count: 'exact' })
+            .in('class_id', classIds)
+            .gte('checked_in_at', monthStart.toISOString())
+        ])
+
+        setTodaysCheckIns(todayCount.count || 0)
+        setMonthlyCheckIns(monthCount.count || 0)
       }
     } catch (error) {
       console.error('Error fetching instructor data:', error)
@@ -125,7 +138,7 @@ export function InstructorDashboard() {
           </Card>
         )}
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t('instructor.myClasses')}</CardTitle>
@@ -153,6 +166,17 @@ export function InstructorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{todaysCheckIns}</div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t('instructor.monthlyCheckIns')}</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{monthlyCheckIns}</div>
+              <p className="text-xs text-muted-foreground mt-1">{t('instructor.thisMonth')}</p>
             </CardContent>
           </Card>
         </div>

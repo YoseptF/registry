@@ -38,6 +38,13 @@ export interface CheckIn {
   user_id?: string | null
   checked_in_at: string
   is_temporary_user: boolean
+  profiles?: {
+    name: string
+    email: string
+  } | null
+  classes?: {
+    name: string
+  } | null
 }
 
 export interface TemporaryUser {

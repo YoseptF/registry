@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
@@ -11,10 +10,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar } from '@/components/ui/avatar'
 import { Navigation } from '@/components/Navigation'
+import { RecentCheckInsCard } from '@/components/RecentCheckInsCard'
 import { Users, GraduationCap, UserCheck, Trash2, ChevronRight, X, Edit, User as UserIcon } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
-import type { Class, CheckIn, User } from '@/types'
-import { format } from 'date-fns'
+import type { Class, User } from '@/types'
 
 function ClassDrawer({
   open,
@@ -491,7 +490,7 @@ export function InstructorDashboard() {
   const { profile, refreshProfile } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [classes, setClasses] = useState<Class[]>([])
-  const [checkIns, setCheckIns] = useState<CheckIn[]>([])
+  const [todaysCheckIns, setTodaysCheckIns] = useState(0)
   const [loading, setLoading] = useState(true)
   const [selectedClass, setSelectedClass] = useState<Class | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
@@ -499,62 +498,42 @@ export function InstructorDashboard() {
 
   useEffect(() => {
     fetchInstructorData()
-    subscribeToCheckIns()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchInstructorData and subscribeToCheckIns are stable
   }, [profile])
 
   const fetchInstructorData = async () => {
     if (!profile) return
 
     try {
-      const [usersResult, classesResult, checkInsResult] = await Promise.all([
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const [usersResult, classesResult] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase
           .from('classes')
           .select('*')
           .eq('instructor_id', profile.id)
           .order('created_at', { ascending: false }),
-        supabase
-          .from('check_ins')
-          .select('*')
-          .order('checked_in_at', { ascending: false })
-          .limit(20),
       ])
 
       setUsers(usersResult.data || [])
       setClasses(classesResult.data || [])
 
-      const instructorCheckIns = checkInsResult.data?.filter((ci) =>
-        classesResult.data?.some((cls) => cls.id === ci.class_id)
-      ) || []
-      setCheckIns(instructorCheckIns)
+      const classIds = classesResult.data?.map(cls => cls.id) || []
+
+      if (classIds.length > 0) {
+        const { count } = await supabase
+          .from('check_ins')
+          .select('id', { count: 'exact' })
+          .in('class_id', classIds)
+          .gte('checked_in_at', today.toISOString())
+
+        setTodaysCheckIns(count || 0)
+      }
     } catch (error) {
       console.error('Error fetching instructor data:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const subscribeToCheckIns = () => {
-    if (!profile) return
-
-    const channel = supabase
-      .channel('instructor_check_ins_changes')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'check_ins' },
-        async (payload) => {
-          const newCheckIn = payload.new as CheckIn
-          const isMyClass = classes.some((cls) => cls.id === newCheckIn.class_id)
-          if (isMyClass) {
-            setCheckIns((prev) => [newCheckIn, ...prev].slice(0, 20))
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
     }
   }
 
@@ -571,9 +550,7 @@ export function InstructorDashboard() {
     )
   }
 
-  const todaysCheckIns = checkIns.filter(
-    (ci) => new Date(ci.checked_in_at).toDateString() === new Date().toDateString()
-  ).length
+  const classIds = classes.map(cls => cls.id)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -687,45 +664,7 @@ export function InstructorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <div>
-                <CardTitle>{t('instructor.recentCheckIns')}</CardTitle>
-                <CardDescription>{t('instructor.checkInsInYourClasses')}</CardDescription>
-              </div>
-              <Link to="/check-ins-history">
-                <Button variant="outline" size="sm">
-                  {t('user.viewAll')}
-                  <ChevronRight className="ml-1 w-4 h-4" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {checkIns.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">{t('user.noCheckIns')}</p>
-                ) : (
-                  checkIns.map((checkIn) => (
-                    <div key={checkIn.id} className="p-3 border rounded-lg hover:bg-accent transition-colors">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="text-sm font-medium">
-                            {checkIn.is_temporary_user ? t('admin.guestUser') : `User ID: ${checkIn.user_id}`}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Class ID: {checkIn.class_id}
-                          </div>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {format(new Date(checkIn.checked_in_at), 'p')}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <RecentCheckInsCard classIds={classIds} />
         </div>
 
         <ClassDrawer

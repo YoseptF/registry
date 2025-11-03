@@ -49,7 +49,14 @@
     "codeSentTo": "Code sent to",
     "verify": "Verify",
     "verifying": "Verifying...",
-    "changeNumber": "Change Number"
+    "changeNumber": "Change Number",
+    "accountCreated": "Account Created!",
+    "checkYourEmail": "We've sent a confirmation email to",
+    "emailInstructions": "Click the link in your email to confirm your account and sign in",
+    "checkEmail": "Check Your Email",
+    "welcomeMember": "You are now a member!",
+    "redirecting": "Redirecting to your dashboard in",
+    "seconds": "seconds"
   },
   "landing": {
     "heroTitle": "Transform Your Body & Mind",

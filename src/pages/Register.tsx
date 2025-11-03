@@ -187,23 +187,18 @@ export function Register() {
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
                   <div>
-                    <h3 className="font-semibold text-green-900">Account Created!</h3>
+                    <h3 className="font-semibold text-green-900">{t('auth.accountCreated')}</h3>
                     <p className="text-sm text-green-700 mt-1">
-                      We've sent a confirmation email to <strong>{email}</strong>
+                      {t('auth.checkYourEmail')} <strong>{email}</strong>
                     </p>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-green-300 text-green-700 hover:bg-green-100"
-                  onClick={() => window.open('mailto:', '_blank')}
-                >
-                  <Mail className="mr-2 w-4 h-4" />
-                  Open Email App
-                </Button>
+                <div className="flex items-center justify-center gap-2 p-4 bg-green-100 rounded-lg">
+                  <Mail className="w-5 h-5 text-green-700" />
+                  <span className="font-medium text-green-900">{t('auth.checkEmail')}</span>
+                </div>
                 <p className="text-xs text-green-600 text-center">
-                  Click the link in your email to confirm your account and sign in
+                  {t('auth.emailInstructions')}
                 </p>
               </div>
             )}

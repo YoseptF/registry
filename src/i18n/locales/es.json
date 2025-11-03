@@ -49,7 +49,14 @@
     "codeSentTo": "Código enviado a",
     "verify": "Verificar",
     "verifying": "Verificando...",
-    "changeNumber": "Cambiar Número"
+    "changeNumber": "Cambiar Número",
+    "accountCreated": "¡Cuenta Creada!",
+    "checkYourEmail": "Hemos enviado un correo de confirmación a",
+    "emailInstructions": "Haz clic en el enlace de tu correo para confirmar tu cuenta e iniciar sesión",
+    "checkEmail": "Revisa Tu Correo",
+    "welcomeMember": "¡Ya eres miembro!",
+    "redirecting": "Redirigiendo a tu panel en",
+    "seconds": "segundos"
   },
   "landing": {
     "heroTitle": "Transforma Tu Cuerpo y Mente",

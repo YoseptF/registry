@@ -11,6 +11,7 @@ import { PhoneInput } from '@/components/ui/phone-input'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useAuth } from '@/contexts/AuthContext'
 import { getRoleBasedDashboard } from '@/utils/roleRedirect'
+import { Mail, CheckCircle } from 'lucide-react'
 
 export function Register() {
   const { t } = useTranslation()
@@ -24,6 +25,7 @@ export function Register() {
   const [phoneAuth, setPhoneAuth] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const navigate = useNavigate()
   const { user, profile } = useAuth()
 
@@ -37,6 +39,7 @@ export function Register() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSuccess(null)
 
     if (password !== confirmPassword) {
       setError(t('errors.passwordsDontMatch'))
@@ -51,7 +54,7 @@ export function Register() {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -63,6 +66,16 @@ export function Register() {
         },
       })
       if (error) throw error
+
+      if (data.user) {
+        if (data.user.identities && data.user.identities.length === 0) {
+          setError('This email is already registered. Please sign in instead.')
+        } else if (!data.session) {
+          setSuccess('Account created! Please check your email to confirm your account before signing in.')
+        } else {
+          navigate(getRoleBasedDashboard('user'))
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -167,6 +180,31 @@ export function Register() {
             {error && (
               <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-50 border border-green-200 p-6 rounded-lg space-y-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-green-900">Account Created!</h3>
+                    <p className="text-sm text-green-700 mt-1">
+                      We've sent a confirmation email to <strong>{email}</strong>
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-green-300 text-green-700 hover:bg-green-100"
+                  onClick={() => window.open('mailto:', '_blank')}
+                >
+                  <Mail className="mr-2 w-4 h-4" />
+                  Open Email App
+                </Button>
+                <p className="text-xs text-green-600 text-center">
+                  Click the link in your email to confirm your account and sign in
+                </p>
               </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>

@@ -88,10 +88,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    const currentSession = await supabase.auth.getSession()
+    console.debug('Current session before logout:', currentSession)
+
+    try {
+      const { error } = await supabase.auth.signOut({ scope: 'local' })
+      if (error) {
+        console.error('Supabase signOut error:', error)
+        if (error.message.includes('403') || error.status === 403) {
+          console.debug('Session already invalid on server, clearing locally')
+        }
+      }
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+
     setUser(null)
     setProfile(null)
     setSession(null)
+
+    localStorage.removeItem('supabase.auth.token')
+    window.location.href = '/'
   }
 
   return (

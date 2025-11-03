@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, useOnlineStatus } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -31,12 +31,14 @@ import {
   ChevronDown,
   Calendar,
   DollarSign,
+  WifiOff,
 } from "lucide-react";
 import { useState } from "react";
 
 export function Navigation() {
   const { t } = useTranslation();
   const { profile, signOut } = useAuth();
+  const isOnline = useOnlineStatus();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -121,8 +123,15 @@ export function Navigation() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b bg-white shadow-md">
-      <div className="container mx-auto px-4">
+    <>
+      {!isOnline && (
+        <div className="sticky top-0 z-50 w-full bg-yellow-500 text-black py-2 px-4 text-center text-sm font-medium flex items-center justify-center gap-2">
+          <WifiOff className="w-4 h-4" />
+          <span>{t("common.offline", "You are offline - Some features may not be available")}</span>
+        </div>
+      )}
+      <nav className="sticky top-0 z-40 w-full border-b bg-white shadow-md">
+        <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
@@ -418,5 +427,6 @@ export function Navigation() {
         </div>
       </div>
     </nav>
+    </>
   );
 }

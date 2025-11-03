@@ -9,14 +9,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Navigation } from '@/components/Navigation'
-import { QrCode, UserPlus, AlertCircle } from 'lucide-react'
+import { QrCode, UserPlus, AlertCircle, WifiOff } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { useOnlineStatus } from '@/contexts/AuthContext'
 import type { Class, ClassSession } from '@/types'
 
 export function CheckIn() {
   const { t } = useTranslation()
   usePageTitle('pages.checkIn')
   const { classId } = useParams<{ classId: string }>()
+  const isOnline = useOnlineStatus()
   const [classInfo, setClassInfo] = useState<Class | null>(null)
   const [currentSession, setCurrentSession] = useState<ClassSession | null>(null)
   const [scanning, setScanning] = useState(false)
@@ -494,17 +496,25 @@ export function CheckIn() {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  {!scanning ? (
-                    <Button onClick={startScanning} className="flex-1">
-                      {t('checkIn.startScanning')}
-                    </Button>
-                  ) : (
-                    <Button onClick={stopScanning} variant="destructive" className="flex-1">
-                      {t('checkIn.stopScanning')}
-                    </Button>
-                  )}
-                </div>
+                {!isOnline ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                    <WifiOff className="w-8 h-8 mx-auto mb-2 text-yellow-600" />
+                    <p className="font-medium text-yellow-800">{t('common.offline', 'You are offline')}</p>
+                    <p className="text-sm text-yellow-600 mt-1">{t('checkIn.needInternetForScanning', 'Internet connection required for check-ins')}</p>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    {!scanning ? (
+                      <Button onClick={startScanning} className="flex-1">
+                        {t('checkIn.startScanning')}
+                      </Button>
+                    ) : (
+                      <Button onClick={stopScanning} variant="destructive" className="flex-1">
+                        {t('checkIn.stopScanning')}
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -517,7 +527,13 @@ export function CheckIn() {
                 <CardDescription>{t('checkIn.guestDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
-                {!showTempUserForm ? (
+                {!isOnline ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                    <WifiOff className="w-8 h-8 mx-auto mb-2 text-yellow-600" />
+                    <p className="font-medium text-yellow-800">{t('common.offline', 'You are offline')}</p>
+                    <p className="text-sm text-yellow-600 mt-1">{t('checkIn.needInternetForGuest', 'Internet connection required for guest check-ins')}</p>
+                  </div>
+                ) : !showTempUserForm ? (
                   <Button
                     onClick={() => setShowTempUserForm(true)}
                     variant="outline"

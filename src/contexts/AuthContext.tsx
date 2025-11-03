@@ -8,6 +8,7 @@ interface AuthContextType {
   profile: AppUser | null
   session: Session | null
   loading: boolean
+  isOnline: boolean
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<AppUser | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -46,6 +48,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run auth initialization on mount
+  }, [])
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
   }, [])
 
   const fetchProfile = async (userId: string, shouldSetLoading = true) => {
@@ -112,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, isOnline, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
@@ -125,4 +140,10 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
+}
+
+// eslint-disable-next-line react-refresh/only-export-components -- useOnlineStatus hook needs to be co-located with AuthProvider
+export function useOnlineStatus() {
+  const { isOnline } = useAuth()
+  return isOnline
 }

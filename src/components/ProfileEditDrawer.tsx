@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase'
+import { useOnlineStatus } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Drawer } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,7 @@ export function ProfileEditDrawer({
   onProfileUpdated,
 }: ProfileEditDrawerProps) {
   const { t } = useTranslation()
+  const isOnline = useOnlineStatus()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -288,8 +290,8 @@ export function ProfileEditDrawer({
         )}
 
         <div className="flex gap-3 pt-4">
-          <Button type="submit" className="flex-1" disabled={loading}>
-            {loading ? t('common.loading') : t('user.saveChanges')}
+          <Button type="submit" className="flex-1" disabled={loading || !isOnline}>
+            {!isOnline ? t('common.offline', 'Offline') : loading ? t('common.loading') : t('user.saveChanges')}
           </Button>
           <Button
             type="button"

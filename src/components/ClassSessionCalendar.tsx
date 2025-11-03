@@ -58,23 +58,30 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
       const monthEnd = endOfMonth(currentMonth);
 
       if (instructorMode) {
-        // Instructor mode: Get all sessions for their classes
-        const { data: sessionsData, error: sessionsError } = await supabase
+        // Instructor mode: Generate all sessions based on class periodicity
+        // First, get instructor's classes
+        const { data: classesData, error: classesError } = await supabase
+          .from("classes")
+          .select("*")
+          .eq("instructor_id", profile.id);
+
+        if (classesError) throw classesError;
+
+        // Get existing sessions from database for this month
+        const { data: existingSessions, error: sessionsError } = await supabase
           .from("class_sessions")
-          .select("*, class:classes!inner(*)")
-          .eq("class.instructor_id", profile.id)
+          .select("*")
+          .in("class_id", (classesData || []).map(c => c.id))
           .gte("session_date", monthStart.toISOString())
-          .lte("session_date", monthEnd.toISOString())
-          .order("session_date", { ascending: true })
-          .returns<Array<ClassSession & { class: Class }>>();
+          .lte("session_date", monthEnd.toISOString());
 
         if (sessionsError) throw sessionsError;
 
-        // Get enrollment counts for each session
+        // Get enrollment counts
         const { data: enrollmentCounts, error: enrollmentError } = await supabase
           .from("class_enrollments")
           .select("class_session_id, id")
-          .in("class_session_id", (sessionsData || []).map(s => s.id));
+          .in("class_session_id", (existingSessions || []).map(s => s.id));
 
         if (enrollmentError) throw enrollmentError;
 
@@ -83,12 +90,55 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
           countMap.set(e.class_session_id, (countMap.get(e.class_session_id) || 0) + 1);
         });
 
-        const sessionsWithCounts = (sessionsData || []).map((session) => ({
-          ...session,
-          enrollmentCount: countMap.get(session.id) || 0,
-        }));
+        // Generate all potential sessions based on periodicity
+        const allSessions: ClassSessionWithDetails[] = [];
 
-        setSessions(sessionsWithCounts);
+        (classesData || []).forEach((cls) => {
+          if (!cls.schedule_days || cls.schedule_days.length === 0) return;
+
+          const scheduleDays = cls.schedule_days;
+
+          // Get all days in the month
+          const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+          daysInMonth.forEach((day) => {
+            const dayName = format(day, 'EEEE').toLowerCase();
+
+            // Check if this class happens on this day
+            if (scheduleDays.includes(dayName)) {
+              const dateStr = format(day, 'yyyy-MM-dd');
+
+              // Check if session exists in database
+              const existingSession = existingSessions?.find(
+                s => s.class_id === cls.id && s.session_date === dateStr
+              );
+
+              if (existingSession) {
+                // Use existing session with enrollment count
+                allSessions.push({
+                  ...existingSession,
+                  created_from: existingSession.created_from as 'enrollment' | 'dropin' | 'manual',
+                  class: cls,
+                  enrollmentCount: countMap.get(existingSession.id) || 0,
+                });
+              } else {
+                // Generate virtual session
+                allSessions.push({
+                  id: `virtual-${cls.id}-${dateStr}`,
+                  class_id: cls.id,
+                  session_date: dateStr,
+                  session_time: cls.schedule_time || '00:00',
+                  created_from: 'manual',
+                  created_at: '',
+                  class: cls,
+                  enrollmentCount: 0,
+                });
+              }
+            }
+          });
+        });
+
+        setSessions(allSessions);
       } else {
         // User mode: Get all class sessions and mark which ones user is enrolled in
         const { data: sessionsData, error: sessionsError } = await supabase
@@ -306,22 +356,32 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
                         return (
                           <div
                             key={session.id}
-                            className={`text-xs p-1 rounded ${
-                              hasEnrollments || isUserEnrolled
+                            className={`text-xs p-1 rounded border ${
+                              hasEnrollments
+                                ? "bg-gradient-to-r from-pink-100 to-purple-100 border-pink-400"
+                                : isUserEnrolled
                                 ? "bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"
-                                : "bg-gray-100"
+                                : instructorMode
+                                ? "bg-gray-50 border-gray-300"
+                                : "bg-gray-100 border-gray-200"
                             }`}
                           >
                             <div className="flex items-center justify-between gap-1">
                               <div className="flex-1 min-w-0">
-                                <div className="font-semibold truncate">
+                                <div className={`font-semibold truncate ${
+                                  hasEnrollments ? "text-pink-700" : "text-gray-700"
+                                }`}>
                                   {session.class.name}
                                 </div>
-                                <div className="flex items-center gap-1 text-gray-600">
+                                <div className={`flex items-center gap-1 ${
+                                  hasEnrollments ? "text-gray-700" : "text-gray-600"
+                                }`}>
                                   <Clock className="w-3 h-3" />
                                   <span>{session.session_time}</span>
                                   {instructorMode && session.enrollmentCount !== undefined && (
-                                    <span className="ml-1 font-medium text-pink-600">
+                                    <span className={`ml-1 font-bold ${
+                                      session.enrollmentCount > 0 ? "text-pink-600" : "text-gray-500"
+                                    }`}>
                                       ({session.enrollmentCount})
                                     </span>
                                   )}
@@ -349,13 +409,13 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
             {/* Legend */}
             <div className="flex items-center gap-4 mt-4 pt-4 border-t">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"></div>
+                <div className="w-4 h-4 rounded bg-gradient-to-r from-pink-100 to-purple-100 border-2 border-pink-400"></div>
                 <span className="text-sm text-gray-600">
                   {instructorMode ? t("instructor.withStudents") : t("user.myClasses")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-gray-100"></div>
+                <div className="w-4 h-4 rounded bg-gray-50 border border-gray-300"></div>
                 <span className="text-sm text-gray-600">
                   {instructorMode ? t("instructor.noStudents") : t("common.available")}
                 </span>

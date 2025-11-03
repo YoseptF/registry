@@ -78,16 +78,6 @@ export function Navigation() {
     : isInstructor
     ? [
         {
-          path: "/instructor",
-          label: t("instructor.dashboard"),
-          icon: LayoutDashboard,
-        },
-        {
-          path: "/check-ins-history",
-          label: t("user.checkInHistory"),
-          icon: History,
-        },
-        {
           path: "/instructors",
           label: t("instructor.instructors"),
           icon: GraduationCap,
@@ -171,6 +161,43 @@ export function Navigation() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {adminDropdownLinks.map((link) => (
+                      <DropdownMenuItem key={link.path} asChild>
+                        <Link
+                          to={link.path}
+                          className="flex items-center gap-3 cursor-pointer"
+                        >
+                          <link.icon className="w-4 h-4" />
+                          <span>{link.label}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {isInstructor && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={location.pathname.startsWith("/instructor") || location.pathname === "/check-ins-history" ? "default" : "ghost"}
+                      className="gap-2"
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                      <span className="font-medium">{t("instructor.dashboard")}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/instructor"
+                        className="flex items-center gap-3 cursor-pointer"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        <span>{t("instructor.dashboard")}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {instructorDropdownLinks.map((link) => (
                       <DropdownMenuItem key={link.path} asChild>
                         <Link
                           to={link.path}
@@ -314,6 +341,25 @@ export function Navigation() {
                         />
                         <div className="pl-4 space-y-2 border-l-2 border-pink-200 ml-4">
                           {adminDropdownLinks.map((link) => (
+                            <NavLink
+                              key={link.path}
+                              {...link}
+                              onClick={() => setIsOpen(false)}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {isInstructor && (
+                      <>
+                        <NavLink
+                          path="/instructor"
+                          label={t("instructor.dashboard")}
+                          icon={LayoutDashboard}
+                          onClick={() => setIsOpen(false)}
+                        />
+                        <div className="pl-4 space-y-2 border-l-2 border-pink-200 ml-4">
+                          {instructorDropdownLinks.map((link) => (
                             <NavLink
                               key={link.path}
                               {...link}

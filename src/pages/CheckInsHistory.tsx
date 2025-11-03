@@ -27,6 +27,8 @@ export function CheckInsHistory() {
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
 
+  const showUserInfo = profile?.role === 'instructor' || profile?.role === 'admin'
+
   useEffect(() => {
     if (profile) {
       fetchData()
@@ -43,15 +45,18 @@ export function CheckInsHistory() {
     if (!profile) return
 
     try {
+      // RLS policies automatically filter based on role:
+      // - Users: see only their own check-ins
+      // - Instructors: see check-ins for their classes
+      // - Admins: see all check-ins
       const { data: checkInData } = await supabase
         .from('check_ins')
-        .select('*')
-        .eq('user_id', profile.id)
+        .select('*, profiles!check_ins_user_id_fkey(name, email)')
         .order('checked_in_at', { ascending: false })
 
       setCheckIns(checkInData || [])
 
-      const uniqueClassIds = [...new Set(checkInData?.map((ci) => ci.class_id) || [])]
+      const uniqueClassIds = [...new Set((checkInData || []).map((ci: any) => ci.class_id))]
       if (uniqueClassIds.length > 0) {
         const { data: classData } = await supabase
           .from('classes')
@@ -386,19 +391,26 @@ export function CheckInsHistory() {
                 filteredCheckIns.map((checkIn) => (
                   <div
                     key={checkIn.id}
-                    className="p-4 border rounded-lg hover:bg-accent transition-colors flex justify-between items-center"
+                    className="p-4 border rounded-lg hover:bg-accent transition-colors"
                   >
-                    <div>
-                      <div className="font-semibold text-lg">
-                        {classMap[checkIn.class_id] || t('user.unknownClass')}
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="font-semibold text-lg">
+                          {classMap[checkIn.class_id] || t('user.unknownClass')}
+                        </div>
+                        {showUserInfo && (checkIn as any).profiles && (
+                          <div className="text-sm text-pink-600 font-medium">
+                            {(checkIn as any).profiles.name || (checkIn as any).profiles.email}
+                          </div>
+                        )}
+                        <div className="text-sm text-muted-foreground">
+                          {format(new Date(checkIn.checked_in_at), 'EEEE, MMMM d, yyyy')}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {format(new Date(checkIn.checked_in_at), 'EEEE, MMMM d, yyyy')}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-pink-600">
-                        {format(new Date(checkIn.checked_in_at), 'h:mm a')}
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-pink-600">
+                          {format(new Date(checkIn.checked_in_at), 'h:mm a')}
+                        </div>
                       </div>
                     </div>
                   </div>

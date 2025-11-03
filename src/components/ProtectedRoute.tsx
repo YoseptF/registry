@@ -1,13 +1,15 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { getRoleBasedDashboard } from '@/utils/roleRedirect'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
   requireAdmin?: boolean
   requireInstructor?: boolean
+  requireUser?: boolean
 }
 
-export function ProtectedRoute({ children, requireAdmin = false, requireInstructor = false }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, requireAdmin = false, requireInstructor = false, requireUser = false }: ProtectedRouteProps) {
   const { user, profile, loading } = useAuth()
 
   if (loading) {
@@ -23,11 +25,15 @@ export function ProtectedRoute({ children, requireAdmin = false, requireInstruct
   }
 
   if (requireAdmin && profile.role !== 'admin') {
-    return <Navigate to="/user" replace />
+    return <Navigate to={getRoleBasedDashboard(profile.role)} replace />
   }
 
   if (requireInstructor && profile.role !== 'instructor' && profile.role !== 'admin') {
-    return <Navigate to="/user" replace />
+    return <Navigate to={getRoleBasedDashboard(profile.role)} replace />
+  }
+
+  if (requireUser && profile.role !== 'user') {
+    return <Navigate to={getRoleBasedDashboard(profile.role)} replace />
   }
 
   return <>{children}</>

@@ -10,6 +10,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useAuth } from '@/contexts/AuthContext'
+import { getRoleBasedDashboard } from '@/utils/roleRedirect'
 
 export function Register() {
   const { t } = useTranslation()
@@ -24,13 +25,13 @@ export function Register() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
 
   useEffect(() => {
-    if (user) {
-      navigate('/user')
+    if (user && profile) {
+      navigate(getRoleBasedDashboard(profile.role))
     }
-  }, [user, navigate])
+  }, [user, profile, navigate])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,8 +63,6 @@ export function Register() {
         },
       })
       if (error) throw error
-
-      navigate('/user')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -79,7 +78,7 @@ export function Register() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/user`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
       if (error) throw error

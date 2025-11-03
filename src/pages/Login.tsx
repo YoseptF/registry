@@ -10,6 +10,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useAuth } from '@/contexts/AuthContext'
+import { getRoleBasedDashboard } from '@/utils/roleRedirect'
 
 export function Login() {
   const { t } = useTranslation()
@@ -24,11 +25,7 @@ export function Login() {
 
   useEffect(() => {
     if (user && profile) {
-      if (profile.role === 'admin') {
-        navigate('/admin')
-      } else {
-        navigate('/user')
-      }
+      navigate(getRoleBasedDashboard(profile.role))
     }
   }, [user, profile, navigate])
 
@@ -58,7 +55,7 @@ export function Login() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/user`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
       if (error) throw error

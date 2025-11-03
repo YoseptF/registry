@@ -203,22 +203,22 @@ export function Landing() {
 
               {isLoggedIn ? (
                 isRegularUser ? (
-                  <div className="w-full sm:w-auto flex border-3 border-white bg-white/20 backdrop-blur-md rounded-full overflow-hidden shadow-2xl">
+                  <div className="w-full sm:w-auto inline-flex items-stretch border-3 border-white bg-white/20 backdrop-blur-md rounded-full overflow-hidden shadow-2xl hover:scale-105 transition-all duration-300">
                     <Button
                       size="lg"
                       variant="ghost"
                       onClick={() => navigate(getProfileRoute())}
-                      className="flex-1 text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-8 md:px-12 py-6 md:py-8 rounded-none rounded-l-full transition-all duration-300 font-semibold border-0"
+                      className="text-white hover:bg-white hover:text-purple-900 text-lg md:text-xl px-6 md:px-10 rounded-l-full rounded-r-none font-semibold border-0 h-auto"
                     >
                       <User className="mr-2 md:mr-3 w-5 md:w-6 h-5 md:h-6" />
                       {t('landing.myProfile')}
                     </Button>
-                    <div className="w-px bg-white/30" />
+                    <div className="w-px bg-white/30 self-stretch my-3" />
                     <Button
                       size="lg"
                       variant="ghost"
                       onClick={() => setQrModalOpen(true)}
-                      className="text-white hover:bg-white hover:text-purple-900 px-6 md:px-8 py-6 md:py-8 rounded-none rounded-r-full transition-all duration-300 border-0"
+                      className="text-white hover:bg-white hover:text-purple-900 px-4 md:px-5 rounded-r-full rounded-l-none border-0 h-auto"
                     >
                       <QrCode className="w-5 md:w-6 h-5 md:h-6" />
                     </Button>
@@ -578,28 +578,29 @@ export function Landing() {
 
       {/* QR Code Modal */}
       <Dialog open={qrModalOpen} onOpenChange={setQrModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold text-center">
+        <DialogContent className="max-w-[90vw] sm:max-w-lg p-4 sm:p-6">
+          <DialogHeader className="space-y-2 pb-2">
+            <DialogTitle className="text-2xl sm:text-3xl font-bold text-center">
               {profile?.name}
             </DialogTitle>
-            <DialogDescription className="text-center text-lg">
+            <DialogDescription className="text-center text-base sm:text-lg">
               {t('user.qrCodeDesc')}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center py-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="flex justify-center pb-2">
+            <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center">
               <QRCodeSVG
                 value={generateQRData()}
-                size={320}
+                size={256}
                 level="H"
-                includeMargin
+                includeMargin={false}
                 imageSettings={{
                   src: "/qr-center.png",
-                  height: 64,
-                  width: 64,
+                  height: 48,
+                  width: 48,
                   excavate: true,
                 }}
+                className="w-full h-full"
               />
             </div>
           </div>

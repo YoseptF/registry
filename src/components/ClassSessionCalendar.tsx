@@ -101,9 +101,12 @@ export function ClassSessionCalendar() {
   };
 
   const getSessionsForDay = (day: Date) => {
-    return sessions.filter((session) =>
-      isSameDay(new Date(session.session_date), day)
-    );
+    return sessions.filter((session) => {
+      // Parse date as local time, not UTC
+      const [year, month, dayNum] = session.session_date.split('-').map(Number);
+      const sessionDate = new Date(year, month - 1, dayNum);
+      return isSameDay(sessionDate, day);
+    });
   };
 
   const previousMonth = () => {
@@ -319,7 +322,12 @@ export function ClassSessionCalendar() {
               {selectedSession && (
                 <span>
                   {t("reschedule.rescheduleDescription")} <strong>{selectedSession.class.name}</strong> on{" "}
-                  <strong>{format(parseISO(selectedSession.session_date), "MMMM d, yyyy")}</strong>
+                  <strong>
+                    {(() => {
+                      const [year, month, day] = selectedSession.session_date.split('-').map(Number);
+                      return format(new Date(year, month - 1, day), "MMMM d, yyyy");
+                    })()}
+                  </strong>
                 </span>
               )}
             </DialogDescription>

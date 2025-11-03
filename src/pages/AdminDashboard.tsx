@@ -269,6 +269,105 @@ export function AdminDashboard() {
           </Card>
         </div>
 
+        {/* Reschedule Requests Section */}
+        {rescheduleRequests.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5" />
+                <CardTitle>{t("reschedule.viewRequests")}</CardTitle>
+              </div>
+              <CardDescription>
+                {rescheduleRequests.length} {t("reschedule.pending")} {rescheduleRequests.length === 1 ? 'request' : 'requests'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {rescheduleRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="p-4 border rounded-lg bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/10 dark:to-yellow-900/10"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold">{request.user?.name || request.user?.email}</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(request.created_at), "PPp")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4 mb-3">
+                      <div className="p-3 bg-white dark:bg-gray-800 rounded">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          {t("reschedule.currentSession")}
+                        </p>
+                        <p className="font-medium">{request.current_session?.class?.name}</p>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                          <Clock className="w-3 h-3" />
+                          <span>
+                            {(() => {
+                              const [year, month, day] = request.current_session?.session_date.split('-').map(Number);
+                              return format(new Date(year, month - 1, day), "MMM d, yyyy");
+                            })()} at{" "}
+                            {request.current_session?.session_time}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          {t("reschedule.requestedSession")}
+                        </p>
+                        <p className="font-medium">{request.requested_session?.class?.name}</p>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                          <Clock className="w-3 h-3" />
+                          <span>
+                            {(() => {
+                              const [year, month, day] = request.requested_session?.session_date.split('-').map(Number);
+                              return format(new Date(year, month - 1, day), "MMM d, yyyy");
+                            })()} at{" "}
+                            {request.requested_session?.session_time}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {request.reason && (
+                      <div className="mb-3 p-3 bg-white dark:bg-gray-800 rounded">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          {t("reschedule.reason")}
+                        </p>
+                        <p className="text-sm">{request.reason}</p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleRescheduleRequest(request.id, "approved")}
+                        className="flex-1"
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        {t("reschedule.approveRequest")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRescheduleRequest(request.id, "rejected")}
+                        className="flex-1"
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        {t("reschedule.rejectRequest")}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">

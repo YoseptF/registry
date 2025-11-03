@@ -120,6 +120,8 @@
     "classesUsed": "classes used",
     "scheduledSessions": "Scheduled Sessions",
     "checkedIn": "Checked In",
+    "viewCalendar": "View Calendar",
+    "browseClassesDesc": "Explore all available classes",
     "editProfile": "Edit Profile",
     "profilePicture": "Profile Picture",
     "uploadAvatar": "Click to upload profile picture (max 5MB)",
@@ -367,7 +369,10 @@
     "adminNotesPlaceholder": "Add notes about this request...",
     "currentSession": "Current Session",
     "requestedSession": "Requested Session",
-    "processRequest": "Process Request"
+    "processRequest": "Process Request",
+    "requestApproved": "Reschedule request approved successfully",
+    "requestRejected": "Reschedule request rejected",
+    "processError": "Error processing reschedule request"
   },
   "errors": {
     "passwordsDontMatch": "Passwords do not match",

@@ -120,6 +120,8 @@
     "classesUsed": "clases usadas",
     "scheduledSessions": "Sesiones Programadas",
     "checkedIn": "Registrado",
+    "viewCalendar": "Ver Calendario",
+    "browseClassesDesc": "Explora todas las clases disponibles",
     "editProfile": "Editar Perfil",
     "profilePicture": "Foto de Perfil",
     "uploadAvatar": "Haz clic para subir foto de perfil (máx 5MB)",
@@ -367,7 +369,10 @@
     "adminNotesPlaceholder": "Agregar notas sobre esta solicitud...",
     "currentSession": "Sesión Actual",
     "requestedSession": "Sesión Solicitada",
-    "processRequest": "Procesar Solicitud"
+    "processRequest": "Procesar Solicitud",
+    "requestApproved": "Solicitud de reprogramación aprobada exitosamente",
+    "requestRejected": "Solicitud de reprogramación rechazada",
+    "processError": "Error al procesar solicitud de reprogramación"
   },
   "errors": {
     "passwordsDontMatch": "Las contraseñas no coinciden",

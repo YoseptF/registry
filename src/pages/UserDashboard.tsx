@@ -26,6 +26,7 @@ import {
   Upload,
   X,
   Clock,
+  GraduationCap,
 } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import type { Class, CheckIn, User as UserType } from "@/types";
@@ -35,7 +36,6 @@ export function UserDashboard() {
   const { t } = useTranslation();
   usePageTitle("pages.userDashboard");
   const { profile, refreshProfile } = useAuth();
-  const [classes, setClasses] = useState<Class[]>([]);
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
@@ -82,7 +82,13 @@ export function UserDashboard() {
               id,
               name,
               description,
-              banner_url
+              banner_url,
+              instructor_id,
+              schedule_days,
+              schedule_time,
+              duration_minutes,
+              created_by,
+              created_at
             )
           )
         `)
@@ -90,28 +96,6 @@ export function UserDashboard() {
         .order("enrolled_at", { ascending: false });
 
       setEnrollments(enrollmentData || []);
-
-      // Extract unique classes from enrollments
-      if (enrollmentData && enrollmentData.length > 0) {
-        const uniqueClasses = enrollmentData.reduce((acc: Class[], enrollment: any) => {
-          const classInfo = enrollment.class_session?.class;
-          if (classInfo) {
-            const existingClass = acc.find((c) => c.id === classInfo.id);
-            if (!existingClass) {
-              acc.push({
-                id: classInfo.id,
-                name: classInfo.name,
-                description: classInfo.description,
-                banner_url: classInfo.banner_url,
-                created_by: "",
-                created_at: "",
-              });
-            }
-          }
-          return acc;
-        }, []);
-        setClasses(uniqueClasses);
-      }
 
       const { data: checkInData } = await supabase
         .from("check_ins")
@@ -295,9 +279,17 @@ export function UserDashboard() {
         {/* Package Purchases Section */}
         {packagePurchases.length > 0 && (
           <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>{t("user.myPackages")}</CardTitle>
-              <CardDescription>{t("user.myPackagesDesc")}</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <div>
+                <CardTitle>{t("user.myPackages")}</CardTitle>
+                <CardDescription>{t("user.myPackagesDesc")}</CardDescription>
+              </div>
+              <Link to="/user/calendar">
+                <Button variant="outline" size="sm">
+                  {t("user.viewCalendar")}
+                  <ChevronRight className="ml-1 w-4 h-4" />
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -323,9 +315,14 @@ export function UserDashboard() {
                             {t("user.scheduledSessions")}
                           </p>
                           {pkgEnrollments.map((enrollment: any) => (
-                            <div
+                            <button
                               key={enrollment.id}
-                              className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-sm"
+                              onClick={() => {
+                                if (enrollment.class_session?.class) {
+                                  handleClassClick(enrollment.class_session.class);
+                                }
+                              }}
+                              className="w-full flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                             >
                               <div className="flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-muted-foreground" />
@@ -335,10 +332,11 @@ export function UserDashboard() {
                               </div>
                               <div className="text-right">
                                 <div className="text-xs text-muted-foreground">
-                                  {format(
-                                    new Date(enrollment.class_session?.session_date),
-                                    "MMM d, yyyy"
-                                  )}{" "}
+                                  {(() => {
+                                    const [year, month, day] = enrollment.class_session?.session_date.split('-').map(Number);
+                                    const sessionDate = new Date(year, month - 1, day);
+                                    return format(sessionDate, "MMM d, yyyy");
+                                  })()}{" "}
                                   at {enrollment.class_session?.session_time}
                                 </div>
                                 {enrollment.checked_in && (
@@ -347,7 +345,7 @@ export function UserDashboard() {
                                   </span>
                                 )}
                               </div>
-                            </div>
+                            </button>
                           ))}
                         </div>
                       )}
@@ -362,42 +360,17 @@ export function UserDashboard() {
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>{t("user.myClasses")}</CardTitle>
-              <CardDescription>{t("user.myClassesDesc")}</CardDescription>
+              <CardTitle>{t("landing.ourClasses")}</CardTitle>
+              <CardDescription>{t("user.browseClassesDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              {classes.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  {t("user.noClasses")}
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {classes.map((cls) => (
-                    <button
-                      key={cls.id}
-                      onClick={() => handleClassClick(cls)}
-                      className="w-full text-left p-3 border rounded-lg hover:bg-accent transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-semibold">{cls.name}</div>
-                          {cls.description && (
-                            <div className="text-sm text-muted-foreground">
-                              {cls.description}
-                            </div>
-                          )}
-                          {cls.schedule && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {cls.schedule}
-                            </div>
-                          )}
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              <Link to="/classes">
+                <Button className="w-full" variant="outline" size="lg">
+                  <GraduationCap className="w-5 h-5 mr-2" />
+                  {t("landing.viewAllClasses")}
+                  <ChevronRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 

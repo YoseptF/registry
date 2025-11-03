@@ -69,7 +69,8 @@ export function UserDashboard() {
       // Fetch enrollments with class and session details
       const { data: enrollmentData } = await supabase
         .from("class_enrollments")
-        .select(`
+        .select(
+          `
           id,
           checked_in,
           enrolled_at,
@@ -91,7 +92,8 @@ export function UserDashboard() {
               created_at
             )
           )
-        `)
+        `
+        )
         .eq("user_id", profile.id)
         .order("enrolled_at", { ascending: false });
 
@@ -189,7 +191,7 @@ export function UserDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -300,12 +302,15 @@ export function UserDashboard() {
                   return (
                     <div
                       key={pkg.id}
-                      className="p-4 border rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/10 dark:to-purple-900/10"
+                      className="p-4 border rounded-lg bg-gradient-to-r from-pink-50 to-purple-50"
                     >
                       <div className="mb-3">
-                        <h3 className="font-semibold text-lg">{pkg.package_name}</h3>
+                        <h3 className="font-semibold text-lg">
+                          {pkg.package_name}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
-                          {t("user.purchased")} {format(new Date(pkg.purchase_date), "PPP")}
+                          {t("user.purchased")}{" "}
+                          {format(new Date(pkg.purchase_date), "PPP")}
                         </p>
                       </div>
 
@@ -319,10 +324,12 @@ export function UserDashboard() {
                               key={enrollment.id}
                               onClick={() => {
                                 if (enrollment.class_session?.class) {
-                                  handleClassClick(enrollment.class_session.class);
+                                  handleClassClick(
+                                    enrollment.class_session.class
+                                  );
                                 }
                               }}
-                              className="w-full flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                              className="w-full flex items-center justify-between p-2 bg-white rounded text-sm hover:bg-gray-50 transition-colors cursor-pointer"
                             >
                               <div className="flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-muted-foreground" />
@@ -333,14 +340,21 @@ export function UserDashboard() {
                               <div className="text-right">
                                 <div className="text-xs text-muted-foreground">
                                   {(() => {
-                                    const [year, month, day] = enrollment.class_session?.session_date.split('-').map(Number);
-                                    const sessionDate = new Date(year, month - 1, day);
+                                    const [year, month, day] =
+                                      enrollment.class_session?.session_date
+                                        .split("-")
+                                        .map(Number);
+                                    const sessionDate = new Date(
+                                      year,
+                                      month - 1,
+                                      day
+                                    );
                                     return format(sessionDate, "MMM d, yyyy");
                                   })()}{" "}
                                   at {enrollment.class_session?.session_time}
                                 </div>
                                 {enrollment.checked_in && (
-                                  <span className="text-xs text-green-600 dark:text-green-400">
+                                  <span className="text-xs text-green-600">
                                     ✓ {t("user.checkedIn")}
                                   </span>
                                 )}

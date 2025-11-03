@@ -52,6 +52,13 @@ export function Navigation() {
     { path: "/admin/drop-in-credits", label: t("pages.dropInCredits"), icon: Ticket },
   ];
 
+  const userDropdownLinks = [
+    { path: "/user/calendar", label: t("user.myCalendar"), icon: Calendar },
+    { path: "/check-ins-history", label: t("user.checkInHistory"), icon: History },
+    { path: "/classes", label: t("landing.ourClasses"), icon: GraduationCap },
+    { path: "/instructors", label: t("instructor.instructors"), icon: GraduationCap },
+  ];
+
   const navLinks = isAdmin
     ? [
         {
@@ -81,27 +88,6 @@ export function Navigation() {
         { path: "/", label: t("common.home"), icon: Home },
       ]
     : [
-        { path: "/user", label: t("user.dashboard"), icon: User },
-        {
-          path: "/user/calendar",
-          label: t("user.myCalendar"),
-          icon: Calendar,
-        },
-        {
-          path: "/check-ins-history",
-          label: t("user.checkInHistory"),
-          icon: History,
-        },
-        {
-          path: "/classes",
-          label: t("landing.ourClasses"),
-          icon: GraduationCap,
-        },
-        {
-          path: "/instructors",
-          label: t("instructor.instructors"),
-          icon: User,
-        },
         { path: "/", label: t("common.home"), icon: Home },
       ];
 
@@ -128,7 +114,7 @@ export function Navigation() {
         className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
           active
             ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white"
-            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground"
+            : "hover:bg-gray-100 text-gray-700"
         }`}
       >
         <Icon className="w-5 h-5" />
@@ -138,7 +124,7 @@ export function Navigation() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b bg-white dark:bg-gray-900 shadow-md">
+    <nav className="sticky top-0 z-40 w-full border-b bg-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -191,20 +177,57 @@ export function Navigation() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+              {!isAdmin && !isInstructor && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant={location.pathname.startsWith("/user") || location.pathname === "/check-ins-history" || location.pathname === "/classes" || location.pathname === "/instructors" ? "default" : "ghost"}
+                      className="gap-2"
+                    >
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">{t("user.dashboard")}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/user"
+                        className="flex items-center gap-3 cursor-pointer"
+                      >
+                        <User className="w-4 h-4" />
+                        <span>{t("user.dashboard")}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {userDropdownLinks.map((link) => (
+                      <DropdownMenuItem key={link.path} asChild>
+                        <Link
+                          to={link.path}
+                          className="flex items-center gap-3 cursor-pointer"
+                        >
+                          <link.icon className="w-4 h-4" />
+                          <span>{link.label}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {navLinks.map((link) => (
                 <NavLink key={link.path} {...link} />
               ))}
             </div>
 
-            <div className="h-8 w-px bg-gray-200 dark:bg-gray-700" />
+            <div className="h-8 w-px bg-gray-200" />
 
             {/* Profile Section */}
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <p className="text-sm font-semibold text-gray-900">
                   {profile.name || profile.email}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500">
                   {isAdmin
                     ? t("admin.dashboard")
                     : isInstructor
@@ -249,19 +272,19 @@ export function Navigation() {
 
                 <div className="mt-8 space-y-6">
                   {/* User Info */}
-                  <div className="p-4 rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 border border-pink-200 dark:border-pink-800">
+                  <div className="p-4 rounded-lg bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center">
                         <User className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-gray-100">
+                        <p className="font-semibold text-gray-900">
                           {profile.name || profile.email}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {profile.email}
                         </p>
-                        <p className="text-xs text-pink-600 dark:text-pink-400 font-medium mt-1">
+                        <p className="text-xs text-pink-600 font-medium mt-1">
                           {isAdmin
                             ? t("admin.dashboard")
                             : isInstructor
@@ -282,8 +305,27 @@ export function Navigation() {
                           icon={LayoutDashboard}
                           onClick={() => setIsOpen(false)}
                         />
-                        <div className="pl-4 space-y-2 border-l-2 border-pink-200 dark:border-pink-800 ml-4">
+                        <div className="pl-4 space-y-2 border-l-2 border-pink-200 ml-4">
                           {adminDropdownLinks.map((link) => (
+                            <NavLink
+                              key={link.path}
+                              {...link}
+                              onClick={() => setIsOpen(false)}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {!isAdmin && !isInstructor && (
+                      <>
+                        <NavLink
+                          path="/user"
+                          label={t("user.dashboard")}
+                          icon={User}
+                          onClick={() => setIsOpen(false)}
+                        />
+                        <div className="pl-4 space-y-2 border-l-2 border-pink-200 ml-4">
+                          {userDropdownLinks.map((link) => (
                             <NavLink
                               key={link.path}
                               {...link}
@@ -310,7 +352,7 @@ export function Navigation() {
                         handleSignOut();
                       }}
                       variant="outline"
-                      className="w-full gap-2 border-2 border-pink-600 text-pink-600 hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                      className="w-full gap-2 border-2 border-pink-600 text-pink-600 hover:bg-pink-50"
                     >
                       <LogOut className="w-4 h-4" />
                       {t("auth.signOut")}

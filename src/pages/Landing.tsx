@@ -61,7 +61,7 @@ export function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white">
       <LanguageSwitcher />
 
       {/* Hero Section */}
@@ -111,16 +111,16 @@ export function Landing() {
       {/* Classes Section */}
       <div className="container mx-auto px-4 py-24">
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 rounded-full mb-8 shadow-lg">
-            <Sparkles className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-            <span className="text-base font-semibold text-pink-600 dark:text-pink-400">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full mb-8 shadow-lg">
+            <Sparkles className="w-5 h-5 text-pink-600" />
+            <span className="text-base font-semibold text-pink-600">
               {t('landing.discoverClasses')}
             </span>
           </div>
           <h2 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
             {t('landing.ourClasses')}
           </h2>
-          <p className="text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             {t('landing.classesSubtitle')}
           </p>
         </div>
@@ -131,7 +131,7 @@ export function Landing() {
           </div>
         ) : classes.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 dark:text-gray-400 text-xl">
+            <p className="text-gray-500 text-xl">
               {t('landing.noClasses')}
             </p>
           </div>
@@ -140,7 +140,7 @@ export function Landing() {
             {classes.map((cls, index) => (
               <Card
                 key={cls.id}
-                className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-xl hover:-translate-y-3 bg-white dark:bg-gray-800"
+                className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-xl hover:-translate-y-3 bg-white"
                 style={{
                   animation: `fade-in-up 0.6s ease-out ${index * 0.1}s both`
                 }}
@@ -159,7 +159,7 @@ export function Landing() {
                   </div>
                 </div>
                 <CardHeader className="pb-4">
-                  <CardDescription className="text-lg line-clamp-2 text-gray-700 dark:text-gray-300">
+                  <CardDescription className="text-lg line-clamp-2 text-gray-700">
                     {cls.description || t('landing.noDescription')}
                   </CardDescription>
                 </CardHeader>
@@ -168,7 +168,7 @@ export function Landing() {
                     const instructor = getInstructorForClass(cls)
                     if (instructor) {
                       return (
-                        <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
+                        <div className="flex items-center gap-3 text-base text-gray-700">
                           <Avatar
                             src={instructor.avatar_url}
                             alt={instructor.name}
@@ -180,9 +180,9 @@ export function Landing() {
                       )
                     } else if (cls.instructor) {
                       return (
-                        <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
-                          <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                            <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                        <div className="flex items-center gap-3 text-base text-gray-700">
+                          <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                            <User className="w-5 h-5 text-pink-600" />
                           </div>
                           <span className="font-semibold">{cls.instructor}</span>
                         </div>
@@ -191,9 +191,9 @@ export function Landing() {
                     return null
                   })()}
                   {((cls.schedule_days && cls.schedule_days.length > 0) || cls.schedule_time || cls.schedule) && (
-                    <div className="flex items-center gap-3 text-base text-gray-700 dark:text-gray-300">
-                      <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    <div className="flex items-center gap-3 text-base text-gray-700">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-purple-600" />
                       </div>
                       <span className="font-medium">
                         {cls.schedule_days && cls.schedule_days.length > 0 ? (

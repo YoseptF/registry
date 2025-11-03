@@ -280,7 +280,7 @@ export function SalesDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -481,7 +481,7 @@ export function SalesDashboard() {
                                   scheduled: (date) => scheduleDayNumbers.length > 0 && isScheduledDay(date)
                                 }}
                                 modifiersClassNames={{
-                                  scheduled: "bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 font-semibold"
+                                  scheduled: "bg-gradient-to-r from-pink-100 to-purple-100 font-semibold"
                                 }}
                                 className="rounded-md border"
                               />

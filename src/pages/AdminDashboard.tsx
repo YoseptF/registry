@@ -188,7 +188,7 @@ export function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex justify-between items-start">
@@ -286,7 +286,7 @@ export function AdminDashboard() {
                 {rescheduleRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="p-4 border rounded-lg bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/10 dark:to-yellow-900/10"
+                    className="p-4 border rounded-lg bg-gradient-to-r from-orange-50 to-yellow-50"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -298,7 +298,7 @@ export function AdminDashboard() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4 mb-3">
-                      <div className="p-3 bg-white dark:bg-gray-800 rounded">
+                      <div className="p-3 bg-white rounded">
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           {t("reschedule.currentSession")}
                         </p>
@@ -315,7 +315,7 @@ export function AdminDashboard() {
                         </div>
                       </div>
 
-                      <div className="p-3 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 rounded">
+                      <div className="p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded">
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           {t("reschedule.requestedSession")}
                         </p>
@@ -334,7 +334,7 @@ export function AdminDashboard() {
                     </div>
 
                     {request.reason && (
-                      <div className="mb-3 p-3 bg-white dark:bg-gray-800 rounded">
+                      <div className="mb-3 p-3 bg-white rounded">
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           {t("reschedule.reason")}
                         </p>

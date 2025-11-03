@@ -63,7 +63,7 @@ export function InstructorProfile() {
 
   if (!instructor) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <p className="text-center text-muted-foreground">{t('instructor.notFound')}</p>
@@ -73,7 +73,7 @@ export function InstructorProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <Link

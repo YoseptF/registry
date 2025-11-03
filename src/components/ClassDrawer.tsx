@@ -262,8 +262,8 @@ export function ClassDrawer({
                 </div>
               ) : showInstructorProfile && classInfo.instructor ? (
                 <div className="flex items-center gap-3 text-base">
-                  <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                    <User className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                  <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+                    <User className="w-5 h-5 text-pink-600" />
                   </div>
                   <span className="font-semibold">{classInfo.instructor}</span>
                 </div>
@@ -283,8 +283,8 @@ export function ClassDrawer({
               </h3>
               {showInstructorProfile ? (
                 <div className="flex items-center gap-3 text-base">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-purple-600" />
                   </div>
                   <span className="font-medium">
                     {(classInfo.schedule_days && classInfo.schedule_days.length > 0) ||

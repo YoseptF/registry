@@ -9,7 +9,7 @@ export default function UserCalendar() {
   usePageTitle("user.myCalendar");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -21,7 +21,7 @@ export default function UserCalendar() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
               {t("user.myCalendar")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600">
               {t("user.viewSchedule")}
             </p>
           </div>

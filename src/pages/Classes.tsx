@@ -112,7 +112,7 @@ export function Classes() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       <LanguageSwitcher />
 
       <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 py-16">
@@ -184,7 +184,7 @@ export function Classes() {
           </div>
         ) : filteredClasses.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">
+            <p className="text-gray-500 text-lg mb-4">
               {searchQuery ? t('landing.noResultsFound') : t('landing.noClasses')}
             </p>
             {searchQuery && (
@@ -196,7 +196,7 @@ export function Classes() {
         ) : (
           <>
             <div className="text-center mb-8">
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600">
                 {t('landing.showingClasses', { count: filteredClasses.length })}
               </p>
             </div>
@@ -235,7 +235,7 @@ export function Classes() {
                         const instructor = getInstructorForClass(cls)
                         if (instructor) {
                           return (
-                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
                               <Avatar
                                 src={instructor.avatar_url}
                                 alt={instructor.name}
@@ -247,7 +247,7 @@ export function Classes() {
                           )
                         } else if (cls.instructor) {
                           return (
-                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
                               <User className="w-4 h-4 text-pink-600" />
                               <span className="font-medium">{cls.instructor}</span>
                             </div>
@@ -256,7 +256,7 @@ export function Classes() {
                         return null
                       })()}
                       {((cls.schedule_days && cls.schedule_days.length > 0) || cls.schedule_time || cls.schedule) && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4 text-purple-600" />
                           <span>
                             {cls.schedule_days && cls.schedule_days.length > 0 ? (

@@ -157,7 +157,7 @@ export function DropInCredits() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-linear-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex justify-between items-start">
@@ -313,7 +313,7 @@ export function DropInCredits() {
                       <CardTitle className="flex items-center gap-2">
                         {pkg.name}
                         {!pkg.active && (
-                          <span className="text-xs font-normal px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">
+                          <span className="text-xs font-normal px-2 py-1 bg-gray-200 rounded">
                             {t('credits.inactive')}
                           </span>
                         )}

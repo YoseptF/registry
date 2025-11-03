@@ -425,7 +425,7 @@ export function CheckIn() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       <Navigation />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
@@ -442,7 +442,7 @@ export function CheckIn() {
           )}
 
           {currentSession && (
-            <Card className="mb-6 bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-950 dark:to-purple-950 border-pink-200 dark:border-pink-800">
+            <Card className="mb-6 bg-gradient-to-r from-pink-50 to-purple-50 border-pink-200">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center gap-2 text-sm">
                   <AlertCircle className="w-4 h-4" />
@@ -471,8 +471,8 @@ export function CheckIn() {
           <div className="space-y-4">
             <Card>
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-pink-100 dark:bg-pink-900 rounded-full flex items-center justify-center">
-                  <QrCode className="w-8 h-8 text-pink-600 dark:text-pink-400" />
+                <div className="mx-auto mb-4 w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
+                  <QrCode className="w-8 h-8 text-pink-600" />
                 </div>
                 <CardTitle>{t('checkIn.scanQrCode')}</CardTitle>
                 <CardDescription>{t('checkIn.scanDesc')}</CardDescription>
@@ -509,8 +509,8 @@ export function CheckIn() {
 
             <Card>
               <CardHeader className="text-center">
-                <div className="mx-auto mb-4 w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                  <UserPlus className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                <div className="mx-auto mb-4 w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                  <UserPlus className="w-8 h-8 text-purple-600" />
                 </div>
                 <CardTitle>{t('checkIn.guestCheckIn')}</CardTitle>
                 <CardDescription>{t('checkIn.guestDesc')}</CardDescription>

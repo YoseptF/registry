@@ -224,7 +224,7 @@ export function ClassSessionCalendar() {
               {weekDays.map((day) => (
                 <div
                   key={day}
-                  className="text-center text-sm font-semibold text-gray-600 dark:text-gray-400 py-2"
+                  className="text-center text-sm font-semibold text-gray-600 py-2"
                 >
                   {day}
                 </div>
@@ -243,15 +243,15 @@ export function ClassSessionCalendar() {
                     key={index}
                     className={`min-h-[100px] border rounded-lg p-2 ${
                       isCurrentMonth
-                        ? "bg-white dark:bg-gray-800"
-                        : "bg-gray-50 dark:bg-gray-900"
-                    } ${isToday ? "border-pink-600 border-2" : "border-gray-200 dark:border-gray-700"}`}
+                        ? "bg-white"
+                        : "bg-gray-50"
+                    } ${isToday ? "border-pink-600 border-2" : "border-gray-200"}`}
                   >
                     <div
                       className={`text-sm font-medium mb-1 ${
                         isCurrentMonth
-                          ? "text-gray-900 dark:text-gray-100"
-                          : "text-gray-400 dark:text-gray-600"
+                          ? "text-gray-900"
+                          : "text-gray-400"
                       } ${isToday ? "text-pink-600 font-bold" : ""}`}
                     >
                       {format(day, "d")}
@@ -262,8 +262,8 @@ export function ClassSessionCalendar() {
                           key={session.id}
                           className={`text-xs p-1 rounded ${
                             session.isEnrolled
-                              ? "bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 border border-pink-300 dark:border-pink-700"
-                              : "bg-gray-100 dark:bg-gray-700"
+                              ? "bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"
+                              : "bg-gray-100"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-1">
@@ -271,7 +271,7 @@ export function ClassSessionCalendar() {
                               <div className="font-semibold truncate">
                                 {session.class.name}
                               </div>
-                              <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center gap-1 text-gray-600">
                                 <Clock className="w-3 h-3" />
                                 <span>{format(new Date(session.session_date), "HH:mm")}</span>
                               </div>
@@ -279,7 +279,7 @@ export function ClassSessionCalendar() {
                             {session.isEnrolled && !session.checked_in && (
                               <button
                                 onClick={() => handleRescheduleClick(session)}
-                                className="flex-shrink-0 p-1 hover:bg-pink-200 dark:hover:bg-pink-800 rounded transition-colors"
+                                className="flex-shrink-0 p-1 hover:bg-pink-200 rounded transition-colors"
                                 title={t("reschedule.requestReschedule")}
                               >
                                 <RefreshCw className="w-3 h-3" />
@@ -297,14 +297,14 @@ export function ClassSessionCalendar() {
             {/* Legend */}
             <div className="flex items-center gap-4 mt-4 pt-4 border-t">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 border border-pink-300 dark:border-pink-700"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="w-4 h-4 rounded bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"></div>
+                <span className="text-sm text-gray-600">
                   {t("user.myClasses")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700"></div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="w-4 h-4 rounded bg-gray-100"></div>
+                <span className="text-sm text-gray-600">
                   {t("common.available")}
                 </span>
               </div>
@@ -363,7 +363,7 @@ export function ClassSessionCalendar() {
                   )
                 }}
                 modifiersClassNames={{
-                  available: "bg-gradient-to-r from-pink-100 to-purple-100 dark:from-pink-900/30 dark:to-purple-900/30 font-semibold"
+                  available: "bg-gradient-to-r from-pink-100 to-purple-100 font-semibold"
                 }}
                 className="rounded-md border"
               />

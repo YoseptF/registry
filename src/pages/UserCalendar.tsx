@@ -3,10 +3,14 @@ import { ClassSessionCalendar } from "@/components/ClassSessionCalendar";
 import { Navigation } from "@/components/Navigation";
 import { Calendar } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function UserCalendar() {
   const { t } = useTranslation();
+  const { profile } = useAuth();
   usePageTitle("user.myCalendar");
+
+  const isInstructor = profile?.role === 'instructor' || profile?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
@@ -28,7 +32,7 @@ export default function UserCalendar() {
         </div>
       </div>
 
-      <ClassSessionCalendar />
+      <ClassSessionCalendar instructorMode={isInstructor} />
       </div>
     </div>
   );

@@ -21,6 +21,7 @@ import { DropInCredits } from "./pages/DropInCredits";
 import { SalesDashboard } from "./pages/SalesDashboard";
 import { AdminPayments } from "./pages/AdminPayments";
 import { InstructorDashboard } from "./pages/InstructorDashboard";
+import { InstructorPayments } from "./pages/InstructorPayments";
 import { InstructorProfile } from "./pages/InstructorProfile";
 import { Instructors } from "./pages/Instructors";
 import { CheckIn } from "./pages/CheckIn";
@@ -62,6 +63,22 @@ function AppContent() {
           element={
             <ProtectedRoute requireInstructor>
               <InstructorDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instructor/payments"
+          element={
+            <ProtectedRoute requireInstructor>
+              <InstructorPayments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instructor/calendar"
+          element={
+            <ProtectedRoute requireInstructor>
+              <UserCalendar />
             </ProtectedRoute>
           }
         />

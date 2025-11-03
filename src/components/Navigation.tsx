@@ -53,6 +53,12 @@ export function Navigation() {
     { path: "/admin/drop-in-credits", label: t("pages.dropInCredits"), icon: Ticket },
   ];
 
+  const instructorDropdownLinks = [
+    { path: "/instructor/payments", label: t("instructor.myPayments"), icon: DollarSign },
+    { path: "/instructor/calendar", label: t("user.myCalendar"), icon: Calendar },
+    { path: "/check-ins-history", label: t("user.checkInHistory"), icon: History },
+  ];
+
   const userDropdownLinks = [
     { path: "/user/calendar", label: t("user.myCalendar"), icon: Calendar },
     { path: "/check-ins-history", label: t("user.checkInHistory"), icon: History },

@@ -25,9 +25,14 @@ interface ClassSessionWithDetails extends ClassSession {
   isEnrolled?: boolean;
   enrollmentId?: string;
   checked_in?: boolean;
+  enrollmentCount?: number;
 }
 
-export function ClassSessionCalendar() {
+interface ClassSessionCalendarProps {
+  instructorMode?: boolean;
+}
+
+export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCalendarProps) {
   const { t } = useTranslation();
   const { profile } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -52,40 +57,74 @@ export function ClassSessionCalendar() {
       const monthStart = startOfMonth(currentMonth);
       const monthEnd = endOfMonth(currentMonth);
 
-      // Get all class sessions in the current month
-      const { data: sessionsData, error: sessionsError } = await supabase
-        .from("class_sessions")
-        .select("*, class:classes(*)")
-        .gte("session_date", monthStart.toISOString())
-        .lte("session_date", monthEnd.toISOString())
-        .order("session_date", { ascending: true })
-        .returns<Array<ClassSession & { class: Class }>>();
+      if (instructorMode) {
+        // Instructor mode: Get all sessions for their classes
+        const { data: sessionsData, error: sessionsError } = await supabase
+          .from("class_sessions")
+          .select("*, class:classes!inner(*)")
+          .eq("class.instructor_id", profile.id)
+          .gte("session_date", monthStart.toISOString())
+          .lte("session_date", monthEnd.toISOString())
+          .order("session_date", { ascending: true })
+          .returns<Array<ClassSession & { class: Class }>>();
 
-      if (sessionsError) throw sessionsError;
+        if (sessionsError) throw sessionsError;
 
-      // Get user's enrollments
-      const { data: enrollmentsData, error: enrollmentsError } = await supabase
-        .from("class_enrollments")
-        .select("id, class_session_id, checked_in")
-        .eq("user_id", profile.id);
+        // Get enrollment counts for each session
+        const { data: enrollmentCounts, error: enrollmentError } = await supabase
+          .from("class_enrollments")
+          .select("class_session_id, id")
+          .in("class_session_id", (sessionsData || []).map(s => s.id));
 
-      if (enrollmentsError) throw enrollmentsError;
+        if (enrollmentError) throw enrollmentError;
 
-      const enrollmentMap = new Map(
-        enrollmentsData?.map((e) => [e.class_session_id, { id: e.id, checked_in: e.checked_in }]) || []
-      );
+        const countMap = new Map<string, number>();
+        enrollmentCounts?.forEach((e) => {
+          countMap.set(e.class_session_id, (countMap.get(e.class_session_id) || 0) + 1);
+        });
 
-      const sessionsWithEnrollment = (sessionsData || []).map((session) => {
-        const enrollment = enrollmentMap.get(session.id);
-        return {
+        const sessionsWithCounts = (sessionsData || []).map((session) => ({
           ...session,
-          isEnrolled: !!enrollment,
-          enrollmentId: enrollment?.id,
-          checked_in: enrollment?.checked_in,
-        };
-      });
+          enrollmentCount: countMap.get(session.id) || 0,
+        }));
 
-      setSessions(sessionsWithEnrollment);
+        setSessions(sessionsWithCounts);
+      } else {
+        // User mode: Get all class sessions and mark which ones user is enrolled in
+        const { data: sessionsData, error: sessionsError } = await supabase
+          .from("class_sessions")
+          .select("*, class:classes(*)")
+          .gte("session_date", monthStart.toISOString())
+          .lte("session_date", monthEnd.toISOString())
+          .order("session_date", { ascending: true })
+          .returns<Array<ClassSession & { class: Class }>>();
+
+        if (sessionsError) throw sessionsError;
+
+        // Get user's enrollments
+        const { data: enrollmentsData, error: enrollmentsError } = await supabase
+          .from("class_enrollments")
+          .select("id, class_session_id, checked_in")
+          .eq("user_id", profile.id);
+
+        if (enrollmentsError) throw enrollmentsError;
+
+        const enrollmentMap = new Map(
+          enrollmentsData?.map((e) => [e.class_session_id, { id: e.id, checked_in: e.checked_in }]) || []
+        );
+
+        const sessionsWithEnrollment = (sessionsData || []).map((session) => {
+          const enrollment = enrollmentMap.get(session.id);
+          return {
+            ...session,
+            isEnrolled: !!enrollment,
+            enrollmentId: enrollment?.id,
+            checked_in: enrollment?.checked_in,
+          };
+        });
+
+        setSessions(sessionsWithEnrollment);
+      }
     } catch (error) {
       console.error("Error loading sessions:", error);
     } finally {
@@ -260,37 +299,47 @@ export function ClassSessionCalendar() {
                       {format(day, "d")}
                     </div>
                     <div className="space-y-1">
-                      {daySessions.map((session) => (
-                        <div
-                          key={session.id}
-                          className={`text-xs p-1 rounded ${
-                            session.isEnrolled
-                              ? "bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"
-                              : "bg-gray-100"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-1">
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold truncate">
-                                {session.class.name}
+                      {daySessions.map((session) => {
+                        const hasEnrollments = instructorMode && (session.enrollmentCount || 0) > 0;
+                        const isUserEnrolled = !instructorMode && session.isEnrolled;
+
+                        return (
+                          <div
+                            key={session.id}
+                            className={`text-xs p-1 rounded ${
+                              hasEnrollments || isUserEnrolled
+                                ? "bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"
+                                : "bg-gray-100"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-1">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold truncate">
+                                  {session.class.name}
+                                </div>
+                                <div className="flex items-center gap-1 text-gray-600">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{session.session_time}</span>
+                                  {instructorMode && session.enrollmentCount !== undefined && (
+                                    <span className="ml-1 font-medium text-pink-600">
+                                      ({session.enrollmentCount})
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1 text-gray-600">
-                                <Clock className="w-3 h-3" />
-                                <span>{format(new Date(session.session_date), "HH:mm")}</span>
-                              </div>
+                              {!instructorMode && session.isEnrolled && !session.checked_in && (
+                                <button
+                                  onClick={() => handleRescheduleClick(session)}
+                                  className="flex-shrink-0 p-1 hover:bg-pink-200 rounded transition-colors"
+                                  title={t("reschedule.requestReschedule")}
+                                >
+                                  <RefreshCw className="w-3 h-3" />
+                                </button>
+                              )}
                             </div>
-                            {session.isEnrolled && !session.checked_in && (
-                              <button
-                                onClick={() => handleRescheduleClick(session)}
-                                className="flex-shrink-0 p-1 hover:bg-pink-200 rounded transition-colors"
-                                title={t("reschedule.requestReschedule")}
-                              >
-                                <RefreshCw className="w-3 h-3" />
-                              </button>
-                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -302,13 +351,13 @@ export function ClassSessionCalendar() {
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-gradient-to-r from-pink-100 to-purple-100 border border-pink-300"></div>
                 <span className="text-sm text-gray-600">
-                  {t("user.myClasses")}
+                  {instructorMode ? t("instructor.withStudents") : t("user.myClasses")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded bg-gray-100"></div>
                 <span className="text-sm text-gray-600">
-                  {t("common.available")}
+                  {instructorMode ? t("instructor.noStudents") : t("common.available")}
                 </span>
               </div>
             </div>

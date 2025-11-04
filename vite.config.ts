@@ -68,6 +68,136 @@ export default defineConfig({
             }
           },
           {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/classes.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'supabase-classes-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 2
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/profiles.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'supabase-profiles-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/check_ins.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-checkins-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/class_sessions.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-sessions-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 30
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/class_enrollments.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-enrollments-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/reschedule_requests.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-reschedule-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/class_packages.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'supabase-packages-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 12
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/drop_in_credit_packages.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'supabase-credits-cache',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 12
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/payment_settings.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'supabase-settings-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {

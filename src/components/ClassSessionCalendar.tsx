@@ -19,6 +19,7 @@ import { ChevronLeft, ChevronRight, Clock, RefreshCw } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, startOfWeek, endOfWeek, parseISO } from "date-fns";
 import type { ClassSession, Class } from "@/types";
 import { toast } from "sonner";
+import { formatDateLocal } from "@/lib/classSessionUtils";
 
 interface ClassSessionWithDetails extends ClassSession {
   class: Class;
@@ -72,8 +73,8 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
           .from("class_sessions")
           .select("*")
           .in("class_id", (classesData || []).map(c => c.id))
-          .gte("session_date", monthStart.toISOString())
-          .lte("session_date", monthEnd.toISOString());
+          .gte("session_date", formatDateLocal(monthStart))
+          .lte("session_date", formatDateLocal(monthEnd));
 
         if (sessionsError) throw sessionsError;
 
@@ -144,8 +145,8 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
         const { data: sessionsData, error: sessionsError } = await supabase
           .from("class_sessions")
           .select("*, class:classes(*)")
-          .gte("session_date", monthStart.toISOString())
-          .lte("session_date", monthEnd.toISOString())
+          .gte("session_date", formatDateLocal(monthStart))
+          .lte("session_date", formatDateLocal(monthEnd))
           .order("session_date", { ascending: true })
           .returns<Array<ClassSession & { class: Class }>>();
 
@@ -220,7 +221,7 @@ export function ClassSessionCalendar({ instructorMode = false }: ClassSessionCal
       .from("class_sessions")
       .select("*")
       .eq("class_id", session.class_id)
-      .gte("session_date", new Date().toISOString().split('T')[0])
+      .gte("session_date", formatDateLocal(new Date()))
       .neq("id", session.id)
       .order("session_date", { ascending: true })
       .limit(30)

@@ -12,6 +12,7 @@ import { Navigation } from '@/components/Navigation'
 import { QrCode, UserPlus, AlertCircle, WifiOff } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { useOnlineStatus } from '@/contexts/AuthContext'
+import { formatDateLocal } from '@/lib/classSessionUtils'
 import type { Class, ClassSession } from '@/types'
 
 export function CheckIn() {
@@ -80,7 +81,7 @@ export function CheckIn() {
   const getOrCreateTodaySession = async (classData: Class) => {
     try {
       const today = new Date()
-      const sessionDate = today.toISOString().split('T')[0]
+      const sessionDate = formatDateLocal(today)
       let sessionTime = classData.schedule_time || '18:00'
 
       if (sessionTime.split(':').length === 2) {

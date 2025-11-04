@@ -22,6 +22,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Navigation } from '@/components/Navigation'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { ShoppingCart, Package, Ticket, Calendar as CalendarIcon, User as UserIcon, DollarSign } from 'lucide-react'
+import { formatDateLocal } from '@/lib/classSessionUtils'
 import type { User, ClassPackage, DropInCreditPackage, Class, ClassSession } from '@/types'
 
 type SaleType = 'class_package' | 'drop_in_credits' | null
@@ -175,7 +176,7 @@ export function SalesDashboard() {
     if (purchaseError) throw purchaseError
 
     for (const selection of sessionSelections) {
-      const dateStr = selection.date!.toISOString().split('T')[0]
+      const dateStr = formatDateLocal(selection.date!)
       const classData = classes.find((c) => c.id === selection.classId)
       if (!classData) continue
 

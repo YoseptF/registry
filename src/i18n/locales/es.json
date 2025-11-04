@@ -19,7 +19,9 @@
     "instructorDashboard": "Panel de Instructor",
     "instructorProfile": "Perfil de Instructor",
     "instructors": "Instructores",
-    "checkIn": "Escáner de Registro"
+    "checkIn": "Escáner de Registro",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio"
   },
   "auth": {
     "signIn": "Iniciar Sesión",
@@ -516,6 +518,191 @@
     "createdBy": "Creado Por",
     "createdAt": "Creado El",
     "paidAt": "Pagado El"
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización",
+    "date": "3 de noviembre de 2025",
+    "intro": {
+      "title": "1. Introducción",
+      "content": "Bienvenido a Club House. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos su información cuando utiliza nuestro servicio."
+    },
+    "dataCollection": {
+      "title": "2. Información que Recopilamos",
+      "account": {
+        "title": "2.1 Información de Cuenta",
+        "email": "Dirección de correo electrónico",
+        "name": "Nombre (si se proporciona)",
+        "google": "Información de perfil de Google (si inicia sesión con Google)"
+      },
+      "usage": {
+        "title": "2.2 Información de Uso",
+        "ip": "Dirección IP",
+        "browser": "Tipo de navegador",
+        "pages": "Páginas visitadas",
+        "time": "Fecha y hora de acceso"
+      }
+    },
+    "dataUse": {
+      "title": "3. Cómo Utilizamos su Información",
+      "provide": "Proporcionar, mantener y mejorar nuestros servicios",
+      "process": "Procesar transacciones y enviar notificaciones relacionadas",
+      "respond": "Responder a comentarios, preguntas y solicitudes de soporte",
+      "send": "Enviar información técnica, actualizaciones de seguridad y mensajes administrativos",
+      "protect": "Proteger contra, identificar y prevenir fraudes y otras actividades ilegales"
+    },
+    "dataSharing": {
+      "title": "4. Compartir Información",
+      "content": "No vendemos ni alquilamos su información personal a terceros. Podemos compartir su información solo en las siguientes circunstancias:",
+      "providers": {
+        "title": "Proveedores de servicios",
+        "content": "Con proveedores que nos ayudan a operar nuestro servicio (como Supabase para autenticación)"
+      },
+      "legal": {
+        "title": "Requisitos legales",
+        "content": "Cuando sea necesario para cumplir con la ley o proteger nuestros derechos"
+      },
+      "consent": {
+        "title": "Consentimiento",
+        "content": "Con su consentimiento explícito para otros propósitos"
+      }
+    },
+    "security": {
+      "title": "5. Seguridad de Datos",
+      "content": "Implementamos medidas de seguridad técnicas y organizativas apropiadas para proteger su información personal contra el acceso no autorizado, alteración, divulgación o destrucción."
+    },
+    "rights": {
+      "title": "6. Sus Derechos",
+      "access": "Acceder a su información personal",
+      "correct": "Corregir información inexacta",
+      "delete": "Solicitar la eliminación de su información",
+      "object": "Oponerse al procesamiento de su información",
+      "portability": "Solicitar la portabilidad de datos"
+    },
+    "cookies": {
+      "title": "7. Cookies y Tecnologías Similares",
+      "content": "Utilizamos cookies y tecnologías similares para mejorar su experiencia, analizar el uso del servicio y personalizar contenido."
+    },
+    "retention": {
+      "title": "8. Retención de Datos",
+      "content": "Conservamos su información personal solo durante el tiempo necesario para cumplir con los propósitos descritos en esta política, a menos que la ley requiera o permita un período de retención más largo."
+    },
+    "thirdParty": {
+      "title": "9. Servicios de Terceros",
+      "supabase": "Para autenticación y almacenamiento de datos",
+      "google": "Para inicio de sesión con Google"
+    },
+    "changes": {
+      "title": "10. Cambios a esta Política",
+      "content": "Podemos actualizar esta Política de Privacidad periódicamente. Le notificaremos sobre cambios significativos publicando la nueva política en esta página y actualizando la fecha de última actualización."
+    },
+    "contact": {
+      "title": "11. Contáctenos",
+      "content": "Si tiene preguntas sobre esta Política de Privacidad, contáctenos en:"
+    }
+  },
+  "terms": {
+    "title": "Términos de Servicio",
+    "lastUpdated": "Última actualización",
+    "date": "3 de noviembre de 2025",
+    "acceptance": {
+      "title": "1. Aceptación de los Términos",
+      "content": "Al acceder y utilizar Club House, usted acepta estar sujeto a estos Términos de Servicio. Si no está de acuerdo con estos términos, no utilice el Servicio."
+    },
+    "description": {
+      "title": "2. Descripción del Servicio",
+      "content": "Club House es una plataforma de gestión de clases y asistencia. Nos reservamos el derecho de modificar o discontinuar el Servicio en cualquier momento sin previo aviso."
+    },
+    "registration": {
+      "title": "3. Registro de Cuenta",
+      "eligibility": {
+        "title": "3.1 Elegibilidad",
+        "content": "Debe tener al menos 13 años para usar este Servicio. Al crear una cuenta, usted declara que:",
+        "accurate": "Toda la información de registro que proporciona es precisa y actual",
+        "maintain": "Mantendrá la exactitud de dicha información",
+        "legal": "Es legalmente capaz de celebrar contratos vinculantes"
+      },
+      "security": {
+        "title": "3.2 Seguridad de la Cuenta",
+        "content": "Usted es responsable de:",
+        "confidential": "Mantener la confidencialidad de su cuenta y contraseña",
+        "responsible": "Todas las actividades que ocurran bajo su cuenta",
+        "notify": "Notificarnos inmediatamente sobre cualquier uso no autorizado"
+      }
+    },
+    "acceptable": {
+      "title": "4. Uso Aceptable",
+      "content": "Usted acepta NO utilizar el Servicio para:",
+      "laws": "Violar leyes o regulaciones aplicables",
+      "ip": "Infringir los derechos de propiedad intelectual de otros",
+      "illegal": "Transmitir contenido ilegal, ofensivo, amenazante o difamatorio",
+      "virus": "Distribuir virus, malware o código malicioso",
+      "reverse": "Realizar ingeniería inversa o intentar acceder a sistemas no autorizados",
+      "spam": "Realizar spam o actividades comerciales no autorizadas",
+      "impersonate": "Suplantar a otra persona u organización",
+      "important": {
+        "title": "Importante",
+        "content": "El incumplimiento de estas reglas puede resultar en la suspensión o terminación inmediata de su cuenta."
+      }
+    },
+    "ip": {
+      "title": "5. Propiedad Intelectual",
+      "content": "Todo el contenido, características y funcionalidad del Servicio son propiedad de Club House y están protegidos por leyes de derechos de autor, marcas comerciales y otras leyes de propiedad intelectual."
+    },
+    "userContent": {
+      "title": "6. Contenido del Usuario",
+      "responsibility": {
+        "title": "6.1 Responsabilidad",
+        "content": "Usted es el único responsable del contenido que publique o transmita a través del Servicio."
+      },
+      "license": {
+        "title": "6.2 Licencia",
+        "content": "Al publicar contenido, nos otorga una licencia mundial, no exclusiva y libre de regalías para usar, reproducir, modificar y mostrar dicho contenido en relación con el Servicio."
+      }
+    },
+    "privacy": {
+      "title": "7. Privacidad",
+      "content": "Su uso del Servicio también está sujeto a nuestra",
+      "link": "Política de Privacidad"
+    },
+    "termination": {
+      "title": "8. Terminación",
+      "content": "Podemos suspender o terminar su acceso al Servicio:",
+      "violation": "Por violación de estos Términos",
+      "request": "Por solicitud suya",
+      "business": "Por razones comerciales legítimas",
+      "notice": "Sin previo aviso en casos de violaciones graves"
+    },
+    "disclaimer": {
+      "title": "9. Descargo de Responsabilidad",
+      "content": "El Servicio se proporciona 'TAL CUAL' y 'SEGÚN DISPONIBILIDAD'. No garantizamos que:",
+      "uninterrupted": "El Servicio será ininterrumpido o libre de errores",
+      "corrected": "Los defectos serán corregidos",
+      "virus": "El Servicio esté libre de virus u otros componentes dañinos"
+    },
+    "limitation": {
+      "title": "10. Limitación de Responsabilidad",
+      "content": "En la máxima medida permitida por la ley, Club House no será responsable por daños indirectos, incidentales, especiales, consecuentes o punitivos."
+    },
+    "indemnification": {
+      "title": "11. Indemnización",
+      "content": "Usted acepta indemnizar y eximir de responsabilidad a Club House de cualquier reclamo que surja de:",
+      "use": "Su uso del Servicio",
+      "violation": "Su violación de estos Términos",
+      "rights": "Su violación de derechos de terceros"
+    },
+    "modifications": {
+      "title": "12. Modificaciones",
+      "content": "Nos reservamos el derecho de modificar estos Términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación."
+    },
+    "governing": {
+      "title": "13. Ley Aplicable",
+      "content": "Estos Términos se regirán e interpretarán de acuerdo con las leyes aplicables."
+    },
+    "contact": {
+      "title": "14. Contacto",
+      "content": "Si tiene preguntas sobre estos Términos de Servicio, contáctenos en:"
+    }
   },
   "errors": {
     "passwordsDontMatch": "Las contraseñas no coinciden",

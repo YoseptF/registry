@@ -19,7 +19,9 @@
     "instructorDashboard": "Instructor Dashboard",
     "instructorProfile": "Instructor Profile",
     "instructors": "Instructors",
-    "checkIn": "Check-In Scanner"
+    "checkIn": "Check-In Scanner",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
   },
   "auth": {
     "signIn": "Sign In",
@@ -516,6 +518,191 @@
     "createdBy": "Created By",
     "createdAt": "Created At",
     "paidAt": "Paid At"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "date": "November 3, 2025",
+    "intro": {
+      "title": "1. Introduction",
+      "content": "Welcome to Club House. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our service."
+    },
+    "dataCollection": {
+      "title": "2. Information We Collect",
+      "account": {
+        "title": "2.1 Account Information",
+        "email": "Email address",
+        "name": "Name (if provided)",
+        "google": "Google profile information (if you sign in with Google)"
+      },
+      "usage": {
+        "title": "2.2 Usage Information",
+        "ip": "IP address",
+        "browser": "Browser type",
+        "pages": "Pages visited",
+        "time": "Date and time of access"
+      }
+    },
+    "dataUse": {
+      "title": "3. How We Use Your Information",
+      "provide": "Provide, maintain, and improve our services",
+      "process": "Process transactions and send related notifications",
+      "respond": "Respond to comments, questions, and support requests",
+      "send": "Send technical information, security updates, and administrative messages",
+      "protect": "Protect against, identify, and prevent fraud and other illegal activities"
+    },
+    "dataSharing": {
+      "title": "4. Information Sharing",
+      "content": "We do not sell or rent your personal information to third parties. We may share your information only in the following circumstances:",
+      "providers": {
+        "title": "Service providers",
+        "content": "With providers who help us operate our service (such as Supabase for authentication)"
+      },
+      "legal": {
+        "title": "Legal requirements",
+        "content": "When necessary to comply with the law or protect our rights"
+      },
+      "consent": {
+        "title": "Consent",
+        "content": "With your explicit consent for other purposes"
+      }
+    },
+    "security": {
+      "title": "5. Data Security",
+      "content": "We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction."
+    },
+    "rights": {
+      "title": "6. Your Rights",
+      "access": "Access your personal information",
+      "correct": "Correct inaccurate information",
+      "delete": "Request deletion of your information",
+      "object": "Object to processing of your information",
+      "portability": "Request data portability"
+    },
+    "cookies": {
+      "title": "7. Cookies and Similar Technologies",
+      "content": "We use cookies and similar technologies to improve your experience, analyze service usage, and personalize content."
+    },
+    "retention": {
+      "title": "8. Data Retention",
+      "content": "We retain your personal information only as long as necessary to fulfill the purposes described in this policy, unless a longer retention period is required or permitted by law."
+    },
+    "thirdParty": {
+      "title": "9. Third-Party Services",
+      "supabase": "For authentication and data storage",
+      "google": "For Google sign-in"
+    },
+    "changes": {
+      "title": "10. Changes to This Policy",
+      "content": "We may update this Privacy Policy periodically. We will notify you of significant changes by posting the new policy on this page and updating the last updated date."
+    },
+    "contact": {
+      "title": "11. Contact Us",
+      "content": "If you have questions about this Privacy Policy, contact us at:"
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated",
+    "date": "November 3, 2025",
+    "acceptance": {
+      "title": "1. Acceptance of Terms",
+      "content": "By accessing and using Club House, you agree to be bound by these Terms of Service. If you do not agree with these terms, do not use the Service."
+    },
+    "description": {
+      "title": "2. Service Description",
+      "content": "Club House is a class management and attendance platform. We reserve the right to modify or discontinue the Service at any time without prior notice."
+    },
+    "registration": {
+      "title": "3. Account Registration",
+      "eligibility": {
+        "title": "3.1 Eligibility",
+        "content": "You must be at least 13 years old to use this Service. By creating an account, you represent that:",
+        "accurate": "All registration information you provide is accurate and current",
+        "maintain": "You will maintain the accuracy of such information",
+        "legal": "You are legally capable of entering into binding contracts"
+      },
+      "security": {
+        "title": "3.2 Account Security",
+        "content": "You are responsible for:",
+        "confidential": "Maintaining the confidentiality of your account and password",
+        "responsible": "All activities that occur under your account",
+        "notify": "Immediately notifying us of any unauthorized use"
+      }
+    },
+    "acceptable": {
+      "title": "4. Acceptable Use",
+      "content": "You agree NOT to use the Service to:",
+      "laws": "Violate applicable laws or regulations",
+      "ip": "Infringe on others' intellectual property rights",
+      "illegal": "Transmit illegal, offensive, threatening, or defamatory content",
+      "virus": "Distribute viruses, malware, or malicious code",
+      "reverse": "Perform reverse engineering or attempt to access unauthorized systems",
+      "spam": "Conduct spam or unauthorized commercial activities",
+      "impersonate": "Impersonate another person or organization",
+      "important": {
+        "title": "Important",
+        "content": "Violation of these rules may result in immediate suspension or termination of your account."
+      }
+    },
+    "ip": {
+      "title": "5. Intellectual Property",
+      "content": "All content, features, and functionality of the Service are owned by Club House and are protected by copyright, trademark, and other intellectual property laws."
+    },
+    "userContent": {
+      "title": "6. User Content",
+      "responsibility": {
+        "title": "6.1 Responsibility",
+        "content": "You are solely responsible for content you post or transmit through the Service."
+      },
+      "license": {
+        "title": "6.2 License",
+        "content": "By posting content, you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and display such content in connection with the Service."
+      }
+    },
+    "privacy": {
+      "title": "7. Privacy",
+      "content": "Your use of the Service is also subject to our",
+      "link": "Privacy Policy"
+    },
+    "termination": {
+      "title": "8. Termination",
+      "content": "We may suspend or terminate your access to the Service:",
+      "violation": "For violation of these Terms",
+      "request": "Upon your request",
+      "business": "For legitimate business reasons",
+      "notice": "Without prior notice in cases of serious violations"
+    },
+    "disclaimer": {
+      "title": "9. Disclaimer",
+      "content": "The Service is provided 'AS IS' and 'AS AVAILABLE'. We do not warrant that:",
+      "uninterrupted": "The Service will be uninterrupted or error-free",
+      "corrected": "Defects will be corrected",
+      "virus": "The Service is free of viruses or other harmful components"
+    },
+    "limitation": {
+      "title": "10. Limitation of Liability",
+      "content": "To the maximum extent permitted by law, Club House shall not be liable for indirect, incidental, special, consequential, or punitive damages."
+    },
+    "indemnification": {
+      "title": "11. Indemnification",
+      "content": "You agree to indemnify and hold Club House harmless from any claims arising from:",
+      "use": "Your use of the Service",
+      "violation": "Your violation of these Terms",
+      "rights": "Your violation of third-party rights"
+    },
+    "modifications": {
+      "title": "12. Modifications",
+      "content": "We reserve the right to modify these Terms at any time. Changes will take effect immediately upon posting."
+    },
+    "governing": {
+      "title": "13. Governing Law",
+      "content": "These Terms shall be governed and construed in accordance with applicable laws."
+    },
+    "contact": {
+      "title": "14. Contact",
+      "content": "If you have questions about these Terms of Service, contact us at:"
+    }
   },
   "errors": {
     "passwordsDontMatch": "Passwords do not match",

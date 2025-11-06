@@ -11,7 +11,7 @@ interface SessionDate {
   time: string;
 }
 
-const DAY_NAME_TO_ISO_DAY: Record<string, number> = {
+export const DAY_NAME_TO_ISO_DAY: Record<string, number> = {
   sunday: 0,
   monday: 1,
   tuesday: 2,

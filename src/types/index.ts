@@ -198,3 +198,21 @@ export interface UserEnrollmentWithDetails {
   package_name?: string | null
   can_reschedule: boolean
 }
+
+export interface PaymentLineItem {
+  id: string
+  user_name: string
+  user_email: string
+  class_name: string
+  class_id: string
+  instructor_id: string
+  instructor_name: string
+  session_date: string
+  session_time: string
+  amount_paid: number
+  instructor_payment: number
+  admin_earnings: number
+  payment_method: 'package' | 'credit'
+  enrolled_at: string
+  package_name?: string
+}

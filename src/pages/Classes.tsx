@@ -12,6 +12,7 @@ import { Clock, User, ArrowLeft, Search, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import type { Class, User as UserType } from '@/types'
+import { fetchInstructors as fetchInstructorsUtil } from '@/utils/instructorQueries'
 
 export function Classes() {
   const { t } = useTranslation()
@@ -80,14 +81,8 @@ export function Classes() {
 
   const fetchInstructors = async () => {
     try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, name, email, role, avatar_url, created_at')
-        .in('role', ['instructor', 'admin'])
-        .order('name')
-        .returns<UserType[]>()
-
-      setInstructors(data || [])
+      const data = await fetchInstructorsUtil()
+      setInstructors(data)
     } catch (error) {
       console.error('Error fetching instructors:', error)
     }

@@ -9,6 +9,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Upload, X } from 'lucide-react'
 import type { Class, User } from '@/types'
+import { getErrorMessage } from '@/utils/errorHandling'
+import { fetchInstructors as fetchInstructorsUtil } from '@/utils/instructorQueries'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { useFileUpload } from '@/hooks/useFileUpload'
 
 interface ClassFormProps {
   initialData?: Class | null
@@ -49,24 +53,26 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
   const [selectedDays, setSelectedDays] = useState<string[]>(initialData?.schedule_days || [])
   const [selectedTime, setSelectedTime] = useState(initialData?.schedule_time || '18:00')
   const [duration, setDuration] = useState(initialData?.duration_minutes?.toString() || '60')
-  const [bannerFile, setBannerFile] = useState<File | null>(null)
-  const [bannerPreview, setBannerPreview] = useState<string | null>(initialData?.banner_url || null)
+
+  const banner = useFileUpload({
+    bucket: 'class-banners',
+    maxSizeMB: 5,
+  })
 
   useEffect(() => {
-    fetchInstructors()
+    if (initialData?.banner_url) {
+      banner.setInitialPreview(initialData.banner_url)
+    }
+  }, [initialData])
+
+  useEffect(() => {
+    loadInstructors()
   }, [])
 
-  const fetchInstructors = async () => {
+  const loadInstructors = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, name, email, role, created_at')
-        .in('role', ['instructor', 'admin'])
-        .order('name')
-        .returns<User[]>()
-
-      if (error) throw error
-      setInstructors(data || [])
+      const data = await fetchInstructorsUtil()
+      setInstructors(data)
     } catch (err) {
       console.error('Error fetching instructors:', err)
     }
@@ -80,51 +86,6 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
     )
   }
 
-  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Banner image must be less than 5MB')
-        return
-      }
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload an image file')
-        return
-      }
-      setBannerFile(file)
-      setBannerPreview(URL.createObjectURL(file))
-      setError(null)
-    }
-  }
-
-  const removeBanner = () => {
-    setBannerFile(null)
-    setBannerPreview(null)
-  }
-
-  const uploadBanner = async (): Promise<string | null> => {
-    if (!bannerFile) return bannerPreview
-
-    const fileExt = bannerFile.name.split('.').pop()
-    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
-    const filePath = `${fileName}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('class-banners')
-      .upload(filePath, bannerFile)
-
-    if (uploadError) {
-      console.error('Error uploading banner:', uploadError)
-      throw new Error('Failed to upload banner image')
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('class-banners')
-      .getPublicUrl(filePath)
-
-    return publicUrl
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -134,9 +95,9 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      let bannerUrl = bannerPreview
-      if (bannerFile) {
-        bannerUrl = await uploadBanner()
+      let bannerUrl = banner.preview
+      if (banner.file) {
+        bannerUrl = await banner.upload()
       }
 
       const classData = {
@@ -172,7 +133,7 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
       onSuccess()
     } catch (err) {
       console.error('Error saving class:', err)
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -182,10 +143,10 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="banner">{t('admin.classBanner')}</Label>
-        {bannerPreview ? (
+        {banner.preview ? (
           <div className="relative">
             <img
-              src={bannerPreview}
+              src={banner.preview}
               alt="Banner preview"
               className="w-full h-48 object-cover rounded-lg"
             />
@@ -194,7 +155,7 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
               variant="destructive"
               size="icon"
               className="absolute top-2 right-2"
-              onClick={removeBanner}
+              onClick={banner.remove}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -213,7 +174,7 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handleBannerChange}
+              onChange={banner.handleChange}
             />
           </div>
         )}
@@ -354,11 +315,7 @@ export function ClassForm({ initialData, onSuccess, onCancel }: ClassFormProps) 
         </Select>
       </div>
 
-      {error && (
-        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-          {error}
-        </div>
-      )}
+      <ErrorMessage message={error} />
 
       <div className="flex gap-3 pt-4">
         <Button type="submit" className="flex-1" disabled={loading}>

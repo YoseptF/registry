@@ -9,6 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload, X } from 'lucide-react'
 import type { User } from '@/types'
+import { getErrorMessage } from '@/utils/errorHandling'
+import { validatePassword } from '@/utils/passwordValidation'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { useFileUpload } from '@/hooks/useFileUpload'
 
 interface ProfileEditDrawerProps {
   open: boolean
@@ -32,13 +36,15 @@ export function ProfileEditDrawer({
   const [phone, setPhone] = useState(profile?.phone || '')
   const [address, setAddress] = useState(profile?.address || '')
   const [bio, setBio] = useState(profile?.bio || '')
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    profile?.avatar_url || null
-  )
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPasswordSection, setShowPasswordSection] = useState(false)
+
+  const avatar = useFileUpload({
+    bucket: 'avatars',
+    maxSizeMB: 5,
+    userId: profile?.id,
+  })
 
   useEffect(() => {
     if (profile && open) {
@@ -46,57 +52,12 @@ export function ProfileEditDrawer({
       setPhone(profile.phone || '')
       setAddress(profile.address || '')
       setBio(profile.bio || '')
-      setAvatarPreview(profile.avatar_url || null)
+      avatar.setInitialPreview(profile.avatar_url || null)
       setNewPassword('')
       setConfirmPassword('')
       setShowPasswordSection(false)
     }
   }, [profile, open])
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Avatar image must be less than 5MB')
-        return
-      }
-      if (!file.type.startsWith('image/')) {
-        setError('Please upload an image file')
-        return
-      }
-      setAvatarFile(file)
-      setAvatarPreview(URL.createObjectURL(file))
-      setError(null)
-    }
-  }
-
-  const removeAvatar = () => {
-    setAvatarFile(null)
-    setAvatarPreview(null)
-  }
-
-  const uploadAvatar = async (): Promise<string | null> => {
-    if (!avatarFile || !profile) return avatarPreview
-
-    const fileExt = avatarFile.name.split('.').pop()
-    const fileName = `${profile.id}-${Date.now()}.${fileExt}`
-    const filePath = `${fileName}`
-
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, avatarFile, { upsert: true })
-
-    if (uploadError) {
-      console.error('Error uploading avatar:', uploadError)
-      throw new Error('Failed to upload avatar image')
-    }
-
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from('avatars').getPublicUrl(filePath)
-
-    return publicUrl
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -107,21 +68,17 @@ export function ProfileEditDrawer({
 
     try {
       if (newPassword) {
-        if (newPassword !== confirmPassword) {
-          setError(t('errors.passwordsDontMatch'))
-          setLoading(false)
-          return
-        }
-        if (newPassword.length < 6) {
-          setError(t('errors.passwordTooShort'))
+        const validation = validatePassword(newPassword, confirmPassword, t)
+        if (!validation.valid) {
+          setError(validation.error!)
           setLoading(false)
           return
         }
       }
 
-      let avatarUrl = avatarPreview
-      if (avatarFile) {
-        avatarUrl = await uploadAvatar()
+      let avatarUrl = avatar.preview
+      if (avatar.file) {
+        avatarUrl = await avatar.upload()
       }
 
       if (newPassword) {
@@ -148,7 +105,7 @@ export function ProfileEditDrawer({
       onClose()
     } catch (err) {
       console.error('Error updating profile:', err)
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(getErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -161,10 +118,10 @@ export function ProfileEditDrawer({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="avatar">{t('user.profilePicture')}</Label>
-          {avatarPreview ? (
+          {avatar.preview ? (
             <div className="relative w-32 h-32 mx-auto">
               <img
-                src={avatarPreview}
+                src={avatar.preview}
                 alt="Avatar preview"
                 className="w-full h-full object-cover rounded-full"
               />
@@ -173,7 +130,7 @@ export function ProfileEditDrawer({
                 variant="destructive"
                 size="icon"
                 className="absolute -top-2 -right-2"
-                onClick={removeAvatar}
+                onClick={avatar.remove}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -192,7 +149,7 @@ export function ProfileEditDrawer({
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleAvatarChange}
+                onChange={avatar.handleChange}
               />
             </div>
           )}
@@ -283,11 +240,7 @@ export function ProfileEditDrawer({
           )}
         </div>
 
-        {error && (
-          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-            {error}
-          </div>
-        )}
+        <ErrorMessage message={error} />
 
         <div className="flex gap-3 pt-4">
           <Button type="submit" className="flex-1" disabled={loading || !isOnline}>

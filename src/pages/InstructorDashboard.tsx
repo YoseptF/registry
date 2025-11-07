@@ -15,6 +15,7 @@ import type { Class, User } from '@/types'
 import type { Database } from '@/types/database'
 import { format, addDays } from 'date-fns'
 import { Link } from 'react-router-dom'
+import { DAY_NAME_TO_ISO_DAY } from '@/lib/classSessionUtils'
 
 type PaymentSettings = Database["public"]["Tables"]["payment_settings"]["Row"];
 
@@ -180,17 +181,7 @@ export function InstructorDashboard() {
 
   const calculateNextPaymentDate = (settings: PaymentSettings): string => {
     const today = new Date()
-    const dayMap: Record<string, number> = {
-      'sunday': 0,
-      'monday': 1,
-      'tuesday': 2,
-      'wednesday': 3,
-      'thursday': 4,
-      'friday': 5,
-      'saturday': 6
-    }
-
-    const targetDay = dayMap[settings.payment_day]
+    const targetDay = DAY_NAME_TO_ISO_DAY[settings.payment_day]
     const currentDay = today.getDay()
 
     let daysUntilPayment = targetDay - currentDay

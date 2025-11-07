@@ -20,26 +20,8 @@ import {
 import { DollarSign, Filter, X } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { PaymentsTable } from "@/components/PaymentsTable";
-import type { Class } from "@/types";
+import type { Class, PaymentLineItem } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface PaymentLineItem {
-  id: string;
-  user_name: string;
-  user_email: string;
-  class_name: string;
-  class_id: string;
-  instructor_id: string;
-  instructor_name: string;
-  session_date: string;
-  session_time: string;
-  amount_paid: number;
-  instructor_payment: number;
-  admin_earnings: number;
-  payment_method: "package" | "credit";
-  enrolled_at: string;
-  package_name?: string;
-}
 
 export function InstructorPayments() {
   const { t } = useTranslation();

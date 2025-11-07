@@ -21,7 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DollarSign, Filter, X, Eye, EyeOff, ChevronDown, ChevronUp, PlayCircle } from "lucide-react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { PaymentsTable } from "@/components/PaymentsTable";
-import type { Class } from "@/types";
+import type { Class, PaymentLineItem } from "@/types";
 import type { Database } from "@/types/database";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -30,24 +30,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 type PaymentBatch = Database["public"]["Tables"]["instructor_payment_batches"]["Row"];
 type PaymentItem = Database["public"]["Tables"]["instructor_payment_items"]["Row"];
 type PaymentSettings = Database["public"]["Tables"]["payment_settings"]["Row"];
-
-interface PaymentLineItem {
-  id: string;
-  user_name: string;
-  user_email: string;
-  class_name: string;
-  class_id: string;
-  instructor_id: string;
-  instructor_name: string;
-  session_date: string;
-  session_time: string;
-  amount_paid: number;
-  instructor_payment: number;
-  admin_earnings: number;
-  payment_method: "package" | "credit";
-  enrolled_at: string;
-  package_name?: string;
-}
 
 interface BatchWithItems extends PaymentBatch {
   instructor_name: string;

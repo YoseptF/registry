@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Edit } from 'lucide-react'
 import type { User } from '@/types'
@@ -33,12 +33,12 @@ export function ProfileCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
-          <Avatar className="w-20 h-20">
-            <AvatarImage src={profile.avatar_url || undefined} />
-            <AvatarFallback>
-              {profile.name?.charAt(0)?.toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
+          <Avatar
+            src={profile.avatar_url}
+            alt={profile.name || 'User'}
+            fallbackText={profile.name || 'User'}
+            size="lg"
+          />
           <div>
             <h3 className="text-xl font-semibold">{profile.name}</h3>
             <p className="text-muted-foreground">{profile.email}</p>
